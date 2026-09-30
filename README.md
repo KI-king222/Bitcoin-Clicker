@@ -4,44 +4,40 @@ Live: **https://ki-king222.github.io/Bitcoin-Clicker/**
 
 ---
 
-## Struktur
+## Wichtig (Stand jetzt)
 
-```
-Bitcoin-Clicker/
-├── index.html          ← HTML-Gerüst (lädt CSS + JS)
-├── css/
-│   ├── style-1.css … style-5.css   ← Design
-├── js/
-│   ├── game-01.js … game-33.js    ← Spiel-Logik (gemeinsamer Scope)
-├── docs/
-│   ├── CHANGELOG.md
-│   └── TEST_PLAN.md
-├── tools/
-│   └── tester.html
-└── deploy/
-    └── README.md
-```
+| Ort | Was |
+|-----|-----|
+| **Live (GitHub Pages)** | Noch die **eine** komplette Spieldatei (über CDN-Loader) |
+| **Lokal / Entwicklung** | Echte Aufteilung: `index.html` + `css/` + `js/` |
 
-### Warum so viele `game-XX.js`?
-
-Der Code war eine große Datei (~130 KB). Aufgeteilt in kleine Stücke, damit:
-1. man besser navigieren kann
-2. automatische Uploads nicht an Größenlimits scheitern
-
-**Reihenfolge ist wichtig:** `game-01.js` → `game-33.js` (nacheinander laden).
-
-Später können wir logisch umbenennen (`shop.js`, `build3d.js`, …) — funktioniert genauso.
+Die Aufteilung ist **vorbereitet**, aber noch **nicht komplett** auf GitHub hochgeladen (viele kleine Dateien, Upload-Limit pro Schritt).
 
 ---
 
-## Spiel aktualisieren
+## Lokale Struktur (Entwicklung)
 
-- HTML/CSS/JS einzeln committen, oder
-- ganze Ordner `css/` und `js/` ersetzen
+```
+index.html          ← HTML-Gerüst
+css/
+  style-1.css …     ← Design
+js/
+  game-01.js …      ← Logik (gemeinsamer Scope, Reihenfolge wichtig)
+docs/
+tools/
+```
 
-## Links
+---
 
-| Was | URL |
-|-----|-----|
-| Spiel | https://ki-king222.github.io/Bitcoin-Clicker/ |
-| Tester | https://ki-king222.github.io/Bitcoin-Clicker/tools/tester.html |
+## Live spielbar halten
+
+Aktuelle `index.html` im Repo-Root lädt die letzte vollständige Version per CDN.
+
+---
+
+## Aufteilung fertig online bringen
+
+**Schnellster Weg (empfohlen):**  
+Im GitHub-Web: **Add file → Upload files** → Ordner `css/` und `js/` + neue `index.html` (Gerüst) hochziehen.
+
+Dann zeigt die Live-Seite die echte Aufteilung statt CDN.

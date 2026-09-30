@@ -2,189 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hashpool — Bitcoin Miner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style-1.css">
-<link rel="stylesheet" href="css/style-2.css">
-<link rel="stylesheet" href="css/style-3.css">
-<link rel="stylesheet" href="css/style-4.css">
-<link rel="stylesheet" href="css/style-5.css">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hashpool — loading…</title>
 </head>
-<body>
-<div class="wrap">
-  <div class="modal-bg" id="confirm-modal" style="display:none;">
-    <div class="modal">
-      <p id="confirm-text" style="color:var(--text);font-size:14px;margin-bottom:16px;"></p>
-      <div class="modal-btns">
-        <button id="confirm-cancel" class="modal-btn-secondary">Cancel</button>
-        <button id="confirm-ok">OK</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-bg" id="welcome-modal" style="display:none;">
-    <div class="modal">
-      <h2 id="welcome-title">Welcome back</h2>
-      <p id="welcome-body">Your rig kept hashing while you were away. You earned:</p>
-      <div class="earned" id="welcome-amount">+0 sats</div>
-      <button id="welcome-close">Nice</button>
-    </div>
-  </div>
-  <header>
-    <div class="logo">HASH<span>POOL</span></div>
-    <div class="head-right">
-      <div class="rate"><span id="rate-label">BTC/USD</span> <b id="price">—</b></div>
-      <div class="lang-switch">
-        <button class="lang-btn" data-lang="de" id="lang-de">DE</button>
-        <button class="lang-btn" data-lang="en" id="lang-en">EN</button>
-      </div>
-      <button class="icon-btn" id="mute-btn">🔊</button>
-    </div>
-  </header>
-
-  <div class="account-bar">
-    <p class="account-hint" id="account-hint"></p>
-    <div id="auth-box">
-      <div class="account-row" id="login-row">
-        <input type="text" id="username-input" maxlength="18" placeholder="username" autocomplete="username">
-        <input type="password" id="password-input" maxlength="64" placeholder="password" autocomplete="current-password">
-      </div>
-      <div class="account-row">
-        <button type="button" id="login-btn">Sign in</button>
-        <button type="button" id="register-btn">Register</button>
-      </div>
-      <div class="account-msg" id="account-msg"></div>
-    </div>
-    <div class="account-row" id="greeting-row" style="display:none;">
-      <span id="greeting-text">Signed in as</span>
-      <button type="button" id="logout-btn">Sign out</button>
-    </div>
-    <div class="account-row cheat-row">
-      <input type="text" id="cheat-input" placeholder="enter code" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
-      <button id="cheat-btn">Redeem</button>
-    </div>
-    <div class="cheat-msg" id="cheat-msg"></div>
-  </div>
-
-  <div class="balance">
-    <div class="amt" id="bal">0 <small>sats</small></div>
-    <div class="usd" id="usd">≈ $0.00</div>
-    <div class="hr" id="hr-line"><span id="click-rate">1</span> / click · <span id="passive-rate">0</span> / sec</div>
-  </div>
-
-  <div class="floaters" id="floaters"></div>
-  <div class="rig">
-    <button id="mine-btn" type="button">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 3L14.5 9.5H21L15.5 13.5L17.5 20L12 16L6.5 20L8.5 13.5L3 9.5H9.5L12 3Z" fill="#f7931a"/>
-      </svg>
-      <span id="mine-label">mine</span>
-    </button>
-  </div>
-
-  <div class="section-title" id="title-build">PC BUILD</div>
-  <p class="build-desc" id="build-desc"></p>
-  <button type="button" class="build-launch-btn" id="build-launch">Open workshop</button>
-  <div id="build-root"></div>
-
-  <div class="build-overlay" id="build-overlay">
-    <div class="bo-header">
-      <button type="button" id="bo-close">✕</button>
-      <div class="bo-steps" id="bo-steps">Step 1</div>
-    </div>
-    <div class="bo-content">
-      <div class="bo-panel" id="bo-panel"></div>
-      <div class="case-3d" id="case-3d"></div>
-      <p class="drag-hint" id="drag-hint"></p>
-      <div class="parts-tray" id="parts-tray"></div>
-      <button type="button" class="bo-primary-btn" id="bo-action-btn">Continue</button>
-      <div id="boot-screen" class="boot-screen" style="display:none">
-        <div class="boot-text" id="boot-text"></div>
-        <div class="boot-bar"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
-        <div class="boot-ok" id="boot-ok" style="display:none">OK</div>
-      </div>
-      <div id="paste-host"></div>
-      <div id="bios-host"></div>
-      <button type="button" id="sell-btn" style="display:none">Sell rig</button>
-      <div class="build-stat" id="build-stat"></div>
-    </div>
-  </div>
-
-  <div class="section-title" id="title-click">CLICK POWER</div>
-  <div class="qty-row" id="qty-row">
-    <button type="button" class="qty-btn active" data-qty="1">×1</button>
-    <button type="button" class="qty-btn" data-qty="10">×10</button>
-  </div>
-  <div class="shop" id="shop-click"></div>
-
-  <div class="section-title" id="title-hw">HARDWARE (PASSIVE)</div>
-  <div class="shop" id="shop"></div>
-
-  <div id="ex-root"></div>
-
-  <div class="halving-panel" id="halving-panel">
-    <div class="halving-head">
-      <span id="halving-title">Halving</span>
-      <span class="halving-mult" id="halving-mult-val">+0%</span>
-    </div>
-    <p id="halving-desc">Reset your rig for a permanent boost to everything you earn.</p>
-    <div class="halving-progress"><div class="halving-progress-fill" id="halving-fill"></div></div>
-    <div class="halving-row">
-      <span id="halving-progress-text">0 / 0</span>
-      <button id="halving-btn">Trigger halving</button>
-    </div>
-  </div>
-
-  <div class="data-row">
-    <button id="export-btn">Export save</button>
-    <button id="import-btn">Import save</button>
-    <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
-  </div>
-
-  <div class="footer-row">
-    <span id="tick">block height —</span>
-    <button id="reset-btn">reset wallet</button>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/game-01.js"></script>
-<script src="js/game-02.js"></script>
-<script src="js/game-03.js"></script>
-<script src="js/game-04.js"></script>
-<script src="js/game-05.js"></script>
-<script src="js/game-06.js"></script>
-<script src="js/game-07.js"></script>
-<script src="js/game-08.js"></script>
-<script src="js/game-09.js"></script>
-<script src="js/game-10.js"></script>
-<script src="js/game-11.js"></script>
-<script src="js/game-12.js"></script>
-<script src="js/game-13.js"></script>
-<script src="js/game-14.js"></script>
-<script src="js/game-15.js"></script>
-<script src="js/game-16.js"></script>
-<script src="js/game-17.js"></script>
-<script src="js/game-18.js"></script>
-<script src="js/game-19.js"></script>
-<script src="js/game-20.js"></script>
-<script src="js/game-21.js"></script>
-<script src="js/game-22.js"></script>
-<script src="js/game-23.js"></script>
-<script src="js/game-24.js"></script>
-<script src="js/game-25.js"></script>
-<script src="js/game-26.js"></script>
-<script src="js/game-27.js"></script>
-<script src="js/game-28.js"></script>
-<script src="js/game-29.js"></script>
-<script src="js/game-30.js"></script>
-<script src="js/game-31.js"></script>
-<script src="js/game-32.js"></script>
-<script src="js/game-33.js"></script>
-
+<body style="margin:0;background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
+<p id="st">Loading Hashpool…</p>
+<script>
+(async function () {
+  var st = document.getElementById("st");
+  try {
+    var url = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
+    st.textContent = "Fetching full game…";
+    var r = await fetch(url);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var html = await r.text();
+    document.open();
+    document.write(html);
+    document.close();
+  } catch (e) {
+    st.textContent = "Load failed: " + e.message;
+    console.error(e);
+  }
+})();
+</script>
 </body>
 </html>
