@@ -1,0 +1,3107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hashpool — Bitcoin Miner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#12151a; --panel2:#181c22; --line:#242a32;
+    --text:#e7e9ec; --muted:#7c8794;
+    --btc:#f7931a; --btc-dim:#8a5615;
+    --green:#2fd98a; --red:#ff5c5c;
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#0b0d10; --panel:#12151a; --panel2:#181c22; --line:#242a32; --text:#e7e9ec; --muted:#7c8794;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 60px;}
+  header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;gap:10px;flex-wrap:wrap;}
+  .logo{font-weight:800;font-size:18px;letter-spacing:.02em;}
+  .logo span{color:var(--btc);}
+  .rate{color:var(--muted);font-size:13px;}
+  .rate b{color:var(--text);}
+  .head-right{display:flex;align-items:center;gap:12px;}
+  .lang-switch{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .lang-btn{
+    background:var(--panel); color:var(--muted); border:none; font-family:inherit;
+    font-size:12px; font-weight:700; padding:5px 9px; cursor:pointer;
+  }
+  .lang-btn.active{background:var(--btc); color:#1a1206;}
+  .icon-btn{
+    background:var(--panel); color:var(--muted); border:1px solid var(--line); border-radius:8px;
+    font-family:inherit; font-size:12px; font-weight:700; padding:5px 9px; cursor:pointer;
+  }
+
+  .account-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .account-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .account-row input[type="text"]{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; color:var(--text);
+    font-family:inherit; font-size:13px; padding:8px 10px; flex:1; min-width:130px;
+  }
+  .account-row input[type="text"]:focus{outline:none; border-color:var(--btc-dim);}
+  .account-row button{
+    background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px;
+    font-family:inherit; font-size:12px; font-weight:700; padding:8px 14px; cursor:pointer; white-space:nowrap;
+  }
+  .account-row button:hover{border-color:var(--btc-dim);}
+  #greeting-text{font-size:13px;color:var(--muted);}
+  #greeting-text b{color:var(--btc);}
+  .cheat-row input{color:var(--text); text-transform:uppercase;}
+  .cheat-row button{background:var(--btc); color:#1a1206; border-color:var(--btc);}
+  .cheat-msg{font-size:12px; min-height:14px;}
+  .cheat-msg.ok{color:var(--green);}
+  .cheat-msg.err{color:var(--red);}
+
+  .halving-panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--btc-dim);
+    border-radius:12px; padding:14px 16px; margin-top:24px;
+  }
+  .halving-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:14px;}
+  .halving-mult{color:var(--green);}
+  #halving-desc{color:var(--muted);font-size:12px;margin:6px 0 10px;line-height:1.4;}
+  .halving-progress{background:var(--bg);border:1px solid var(--line);border-radius:6px;height:8px;overflow:hidden;margin-bottom:8px;}
+  .halving-progress-fill{background:linear-gradient(90deg,var(--btc-dim),var(--btc));height:100%;width:0%;transition:width .3s ease;}
+  .halving-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .halving-row span{font-size:11px;color:var(--muted);}
+  #halving-btn{
+    background:var(--btc); color:#1a1206; border:none; border-radius:8px; font-family:inherit;
+    font-weight:700; font-size:12px; padding:8px 14px; cursor:pointer;
+  }
+  #halving-btn[disabled]{background:var(--panel2); color:var(--muted); cursor:default;}
+
+  .data-row{display:flex;gap:8px;justify-content:center;margin-top:14px;}
+  .data-row button{
+    background:none; border:1px solid var(--line); color:var(--muted); border-radius:8px;
+    font-family:inherit; font-size:12px; padding:6px 12px; cursor:pointer;
+  }
+  .data-row button:hover{border-color:var(--btc-dim); color:var(--text);}
+
+  .build-desc{color:var(--muted);font-size:12px;margin:-4px 0 10px;line-height:1.4;}
+  .case-3d{
+    width:100%; max-width:280px; height:250px; margin:0 auto; border-radius:14px; overflow:hidden;
+    background:var(--panel); border:1px solid var(--line); touch-action:none; cursor:grab; position:relative;
+  }
+  .case-3d:active{cursor:grabbing;}
+  .case-3d canvas{display:block; position:relative; z-index:1;}
+  .case-3d.expanded{
+    max-width:none; width:100%; height:min(62vh, 520px);
+  }
+  .case-expand-btn{
+    position:absolute; top:8px; right:8px; z-index:5; background:rgba(10,12,14,.6); border:1px solid #3a3f47;
+    color:#fff; border-radius:8px; width:32px; height:32px; font-size:15px; cursor:pointer; line-height:1;
+  }
+  .drag-hint{text-align:center;color:var(--muted);font-size:11px;margin:6px 0 10px;}
+  .bo-mode-toggle{display:flex;gap:6px;margin:8px auto 0;justify-content:center;}
+  .bo-mode-btn{background:#1a1d22;border:1px solid #2c3038;color:#8a919c;font-size:11px;font-weight:700;
+    padding:6px 10px;border-radius:20px;cursor:pointer;transition:all .15s ease;}
+  .bo-mode-btn.active{background:var(--btc,#f7931a);border-color:var(--btc,#f7931a);color:#111;}
+  .drag-ghost{position:fixed;z-index:9999;pointer-events:none;font-size:22px;text-align:center;
+    background:rgba(20,22,26,.9);border:1px solid #3a3f47;border-radius:12px;padding:6px 8px;
+    transform:translate(-50%,-50%);box-shadow:0 6px 18px rgba(0,0,0,.4);}
+  .drag-ghost .gname{display:block;font-size:9px;font-weight:700;color:#fff;margin-top:2px;}
+  .tray-part.pending{opacity:.3;filter:grayscale(.6);}
+  @keyframes shakeDrop{0%,100%{transform:translate(-50%,-50%) rotate(0);}25%{transform:translate(-50%,-50%) rotate(-8deg);}75%{transform:translate(-50%,-50%) rotate(8deg);}}
+  .drag-ghost.shake{animation:shakeDrop .25s ease;}
+  .parts-tray{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px;}
+  .tray-part{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px;
+    text-align:center; cursor:pointer; font-family:inherit; min-width:64px; touch-action:none;
+  }
+  .tray-part .picon{font-size:20px;display:block;}
+  .tray-part .pname{font-size:10px;font-weight:700;color:var(--text);display:block;margin-top:2px;}
+  .tray-part .pcost{font-size:10px;color:var(--btc);margin-top:2px;display:block;}
+  .tray-part[disabled]{opacity:.4;cursor:default;}
+  #sell-btn{
+    width:100%; background:linear-gradient(180deg,#caff88,#78d505); color:#0f2000; border:none;
+    border-radius:10px; font-family:inherit; font-weight:800; font-size:15px; padding:12px; cursor:pointer;
+    margin-bottom:8px;
+  }
+  .build-stat{color:var(--muted);font-size:11px;text-align:center;margin-bottom:22px;}
+
+  .build-launch-btn[disabled]{cursor:default;filter:grayscale(.4);}
+  .build-launch-btn{
+    width:100%; background:linear-gradient(180deg,#3a2308,#241605); color:var(--btc);
+    border:1px solid var(--btc-dim); border-radius:12px; font-family:inherit; font-weight:800;
+    font-size:15px; padding:14px; cursor:pointer; margin-bottom:8px;
+  }
+
+  .build-overlay{
+    position:fixed; inset:0; z-index:200; background:var(--bg); display:none; flex-direction:column;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    overflow-y:auto;
+  }
+  .bo-header{position:relative; text-align:center; padding:14px 50px 6px;}
+  #bo-close{
+    position:absolute; right:12px; top:10px; background:var(--panel); border:1px solid var(--line);
+    color:var(--text); border-radius:50%; width:32px; height:32px; font-family:inherit; font-size:14px; cursor:pointer;
+  }
+  .bo-steps{color:var(--btc); font-weight:800; font-size:13px;}
+  .bo-content{max-width:400px; margin:0 auto; width:100%; padding:10px 18px 30px;}
+  .bo-panel{display:flex; flex-direction:column; gap:12px;}
+  .bo-hint{color:var(--muted); font-size:12px; text-align:center; margin:0;}
+  .bo-shop-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .bo-primary-btn{
+    width:100%; background:linear-gradient(180deg,#caff88,#78d505); color:#0f2000; border:none;
+    border-radius:10px; font-family:inherit; font-weight:800; font-size:15px; padding:13px; cursor:pointer;
+  }
+  .bo-primary-btn[disabled]{background:var(--panel2); color:var(--muted); cursor:default;}
+  .boot-screen{
+    background:#050706; border:1px solid var(--line); border-radius:12px; padding:16px;
+    font-family:"JetBrains Mono",monospace; color:var(--green); font-size:12px; min-height:110px;
+  }
+  .boot-text{white-space:pre-line; line-height:1.6; margin-bottom:10px;}
+  .boot-bar{background:#111; border:1px solid var(--line); border-radius:5px; height:8px; overflow:hidden;}
+  .boot-bar-fill{background:var(--green); height:100%; width:0%; transition:width 1.4s linear;}
+  .boot-ok{color:var(--green); text-align:center; font-size:13px; margin-top:8px; font-weight:700;}
+
+  .balance{
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line); border-radius:14px;
+    padding:22px 20px; text-align:center; margin-bottom:16px;
+  }
+  .balance .amt{font-size:38px;font-weight:800;color:var(--btc);word-break:break-all;}
+  .balance .amt small{font-size:16px;color:var(--muted);font-weight:500;}
+  .balance .usd{color:var(--muted);font-size:14px;margin-top:4px;}
+  .balance .hr{color:var(--green);font-size:13px;margin-top:10px;}
+
+  .rig{
+    display:flex; justify-content:center; margin:20px 0 22px;
+  }
+  #mine-btn{
+    width:150px;height:150px;border-radius:20px;cursor:pointer;
+    border:1px solid var(--btc-dim);
+    background:radial-gradient(120% 120% at 30% 20%, #2a1d0c, #17130a 60%);
+    color:var(--btc); font-family:inherit; font-weight:700; font-size:14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    transition:transform .06s ease, box-shadow .15s ease;
+    box-shadow:0 0 0 rgba(247,147,26,0);
+  }
+  #mine-btn:hover{box-shadow:0 0 26px rgba(247,147,26,.18);}
+  #mine-btn:active{transform:scale(.94);}
+  #mine-btn svg{width:52px;height:52px;}
+
+  .floaters{position:relative;height:0;}
+  .float{
+    position:absolute; left:50%; top:-160px; transform:translateX(-50%);
+    color:var(--btc); font-weight:700; font-size:15px; pointer-events:none;
+    animation:rise .9s ease-out forwards;
+  }
+  @keyframes rise{ to{ transform:translate(-50%,-46px); opacity:0; } }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @keyframes flashCredit{ 0%{ color:var(--green); transform:scale(1.08);} 100%{ color:var(--btc); transform:scale(1);} }
+  .amt.flash{ animation:flashCredit .8s ease-out; }
+  .fan-blades{transform-origin:150px 82px; animation:spin 2.4s linear infinite;}
+  .fan-blades.idle{animation-play-state:paused;}
+
+  .section-title{font-size:12px;color:var(--muted);text-transform:none;margin:22px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+
+  .rig-scene{display:flex;justify-content:center;padding:10px 0 4px;}
+  .rig-scene svg{width:100%;max-width:340px;height:auto;}
+  .bay-label{font-size:9px;fill:var(--muted);font-family:"JetBrains Mono",monospace;}
+  .bay-count{font-size:13px;font-weight:800;fill:#1a1206;font-family:"JetBrains Mono",monospace;}
+
+  .shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;}
+  .item{
+    display:grid; grid-template-columns:1fr auto; align-items:center; gap:4px 14px;
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+    cursor:pointer; text-align:left; color:var(--text); font-family:inherit;
+  }
+  .item[disabled]{opacity:.45; cursor:default;}
+  .item:not([disabled]):hover{border-color:var(--btc-dim);}
+  .item .name{font-weight:700;font-size:14px;}
+  .item .desc{grid-column:1;color:var(--muted);font-size:12px;margin-top:2px;}
+  .item .cost{grid-row:1 / span 2;text-align:right;color:var(--btc);font-weight:700;font-size:14px;white-space:nowrap;}
+  .item .owned{grid-row:1 / span 2;grid-column:1;justify-self:start;display:none;}
+
+  .footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:26px;color:var(--muted);font-size:12px;}
+  #reset-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;font-family:inherit;cursor:pointer;font-size:12px;}
+  #reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+  .qty-switch{display:flex;gap:6px;margin:-2px 0 10px;}
+  .qty-btn{
+    background:var(--panel); color:var(--muted); border:1px solid var(--line); border-radius:7px;
+    font-family:inherit; font-size:12px; font-weight:700; padding:5px 10px; cursor:pointer;
+  }
+  .qty-btn.active{background:var(--btc); color:#1a1206; border-color:var(--btc);}
+
+  .crit{color:#ffd447 !important; font-size:19px !important;}
+
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .modal{
+    background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line);
+    border-radius:14px; padding:24px; max-width:340px; text-align:center;
+  }
+  .modal h2{font-size:18px;margin:0 0 8px;color:var(--btc);}
+  .modal p{font-size:13px;color:var(--muted);margin:0 0 6px;line-height:1.4;}
+  .modal .earned{font-size:24px;font-weight:800;color:var(--green);margin:10px 0 16px;}
+  .modal button{
+    background:var(--btc); color:#1a1206; border:none; border-radius:9px; font-family:inherit;
+    font-weight:700; font-size:14px; padding:9px 22px; cursor:pointer;
+  }
+  .modal-btns{display:flex;gap:10px;justify-content:center;}
+  .modal-btn-secondary{background:var(--panel2) !important;color:var(--text) !important;border:1px solid var(--line) !important;}
+
+  .buy-toast{
+    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 24px);
+    transform:translateX(-50%) translateY(20px); opacity:0;
+    background:var(--panel2); border:1px solid var(--btc-dim); color:var(--green);
+    font-weight:700; font-size:13px; padding:10px 16px; border-radius:10px;
+    z-index:300; pointer-events:none; transition:opacity .2s ease, transform .2s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+  }
+  .buy-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .paste-stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:8px 0 12px;}
+  .paste-stage h3{margin:0 0 6px;font-size:14px;color:var(--btc);}
+  .paste-stage p{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.4;}
+  .paste-canvas-wrap{position:relative;width:100%;max-width:260px;margin:0 auto 10px;aspect-ratio:1;background:#0c1116;border-radius:10px;border:1px solid var(--line);overflow:hidden;touch-action:none;}
+  .paste-canvas-wrap canvas{width:100%;height:100%;display:block;cursor:crosshair;}
+  .paste-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;}
+  .paste-meta b{color:var(--green);}
+  .paste-actions{display:flex;gap:8px;}
+  .paste-actions button{flex:1;font-family:inherit;font-weight:700;font-size:12px;padding:10px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);}
+  .paste-actions button.primary{background:var(--btc);color:#1a1206;border-color:var(--btc);}
+  .bios-stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:8px 0 12px;}
+  .bios-stage h3{margin:0 0 6px;font-size:14px;color:var(--btc);}
+  .bios-stage p{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.4;}
+  .bios-seq{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap;}
+  .bios-key{
+    width:48px;height:48px;border-radius:10px;border:1px solid var(--line);
+    background:#0c1116;color:var(--text);font-family:inherit;font-weight:800;font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bios-key.done{background:var(--green);color:#04120a;border-color:var(--green);}
+  .bios-key.next{border-color:var(--btc);box-shadow:0 0 0 2px rgba(247,147,26,.35);}
+  .bios-keys{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 12px;}
+  .bios-target{
+    text-align:center;font-size:42px;font-weight:800;color:var(--btc);
+    letter-spacing:1px;margin:8px 0 4px;line-height:1.1;
+    text-shadow:0 0 18px rgba(247,147,26,.35);
+  }
+  .bios-keys{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    max-width:320px;margin:10px auto 12px;
+  }
+  .bios-keys button{
+    min-height:56px;height:56px;border-radius:12px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--text);font-family:inherit;font-weight:800;font-size:18px;
+    cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  .bios-keys button:active{transform:scale(.96);background:var(--btc);color:#1a1206;}
+  @media (max-width:480px){
+    .bios-keys button{min-height:64px;height:64px;font-size:20px;}
+    .bios-target{font-size:48px;}
+    .bios-key{width:40px;height:40px;font-size:13px;}
+    .paste-canvas-wrap{max-width:100%;}
+  }
+  .bios-bar{height:6px;background:#1a1d22;border-radius:4px;overflow:hidden;margin-bottom:10px;}
+  .bios-bar > div{height:100%;width:100%;background:var(--btc);transform-origin:left center;}
+  .bios-msg{text-align:center;font-size:12px;min-height:18px;color:var(--muted);}
+  .account-hint{ font-size:11px; color:var(--muted); margin:-4px 0 4px; line-height:1.3; }
+  @media (max-width:600px){
+    .shop{ grid-template-columns:1fr; }
+    .item{ padding:12px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="modal-bg" id="confirm-modal" style="display:none;">
+    <div class="modal">
+      <p id="confirm-text" style="color:var(--text);font-size:14px;margin-bottom:16px;"></p>
+      <div class="modal-btns">
+        <button id="confirm-cancel" class="modal-btn-secondary">Cancel</button>
+        <button id="confirm-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="welcome-modal" style="display:none;">
+    <div class="modal">
+      <h2 id="welcome-title">Welcome back</h2>
+      <p id="welcome-body">Your rig kept hashing while you were away. You earned:</p>
+      <div class="earned" id="welcome-amount">+0 sats</div>
+      <button id="welcome-close">Nice</button>
+    </div>
+  </div>
+  <header>
+    <div class="logo">HASH<span>POOL</span></div>
+    <div class="head-right">
+      <div class="rate"><span id="rate-label">BTC/USD</span> <b id="price">—</b></div>
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="de" id="lang-de">DE</button>
+        <button class="lang-btn" data-lang="en" id="lang-en">EN</button>
+      </div>
+      <button class="icon-btn" id="mute-btn">🔊</button>
+    </div>
+  </header>
+
+  <div class="account-bar">
+    <p class="account-hint" id="account-hint"></p>
+    <div class="account-row" id="login-row">
+      <input type="text" id="username-input" maxlength="18" placeholder="your name">
+      <button id="login-btn">Sign in</button>
+    </div>
+    <div class="account-row" id="greeting-row" style="display:none;">
+      <span id="greeting-text">Signed in as</span>
+      <button id="logout-btn">Sign out</button>
+    </div>
+    <div class="account-row cheat-row">
+      <input type="text" id="cheat-input" placeholder="enter code" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
+      <button id="cheat-btn">Redeem</button>
+    </div>
+    <div class="cheat-msg" id="cheat-msg"></div>
+  </div>
+
+  <div class="balance">
+    <div class="amt" id="balance">0<small> sats</small></div>
+    <div class="usd" id="usd-val">≈ $0.00</div>
+    <div class="hr" id="hashrate">0 sats/s passive</div>
+  </div>
+
+  <div class="rig">
+    <div class="floaters" id="floaters"></div>
+    <button id="mine-btn">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M9.2 6.8h4.1c1.5 0 2.6.9 2.6 2.3 0 .9-.5 1.6-1.2 1.9.9.3 1.5 1.1 1.5 2.1 0 1.5-1.2 2.5-2.8 2.5H9.2V6.8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M11 6.8V5.4M13.2 6.8V5.4M11 17.2v1.4M13.2 17.2v1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span id="mine-label">TAP TO MINE</span>
+    </button>
+  </div>
+
+  <div class="section-title" id="title-rig">YOUR RIG</div>
+  <div class="rig-scene" id="rig-scene"></div>
+
+  <div class="section-title" id="title-build">BUILD & SELL</div>
+  <p class="build-desc" id="build-desc">Buy every part, assemble the rig, then sell it for a profit.</p>
+  <button id="open-build-btn" class="build-launch-btn">🖥️ Build a PC</button>
+  <div class="build-stat" id="build-stat">Rigs sold: 0</div>
+
+  <div class="build-overlay" id="build-overlay" style="display:none;">
+    <div class="bo-header">
+      <button id="bo-close">✕</button>
+      <div class="bo-steps" id="bo-steps"></div>
+      <div class="bo-mode-toggle" id="bo-mode-toggle">
+        <button class="bo-mode-btn" id="mode-quick" data-mode="quick">⚡ <span id="mode-quick-label">Quick</span></button>
+        <button class="bo-mode-btn" id="mode-detailed" data-mode="detailed">🔧 <span id="mode-detailed-label">Detailed</span></button>
+      </div>
+    </div>
+    <div class="bo-content">
+      <div class="bo-panel" id="bo-shop">
+        <p class="bo-hint" id="bo-shop-hint">Buy every part first.</p>
+        <div class="bo-shop-grid" id="bo-shop-grid"></div>
+        <button id="bo-to-assemble" class="bo-primary-btn" disabled>Start assembly →</button>
+      </div>
+      <div class="bo-panel" id="bo-rig-area" style="display:none;">
+        <div class="case-3d" id="case-3d">
+          <button class="case-expand-btn" id="case-expand-btn" title="Zoom">⤢</button>
+        </div>
+        <div class="drag-hint" id="drag-hint">↺ drag to rotate · scroll/pinch to zoom</div>
+        <div class="parts-tray" id="parts-tray"></div>
+        <div class="boot-screen" id="boot-screen" style="display:none;">
+          <div class="boot-text" id="boot-text">BOOTING…</div>
+          <div class="boot-bar"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
+        </div>
+        <button id="bo-action-btn" class="bo-primary-btn" style="display:none;">Power on →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" id="title-click">CLICK POWER</div>
+  <div class="qty-switch" id="qty-switch">
+    <button class="qty-btn" data-qty="1">×1</button>
+    <button class="qty-btn" data-qty="10">×10</button>
+  </div>
+  <div class="shop" id="shop-click"></div>
+
+  <div class="section-title" id="title-hw">HARDWARE (PASSIVE)</div>
+  <div class="shop" id="shop"></div>
+
+  <div id="ex-root"></div>
+
+  <div class="halving-panel" id="halving-panel">
+    <div class="halving-head">
+      <span id="halving-title">Halving</span>
+      <span class="halving-mult" id="halving-mult-val">+0%</span>
+    </div>
+    <p id="halving-desc">Reset your rig for a permanent boost to everything you earn.</p>
+    <div class="halving-progress"><div class="halving-progress-fill" id="halving-fill"></div></div>
+    <div class="halving-row">
+      <span id="halving-progress-text">0 / 0</span>
+      <button id="halving-btn">Trigger halving</button>
+    </div>
+  </div>
+
+  <div class="data-row">
+    <button id="export-btn">Export save</button>
+    <button id="import-btn">Import save</button>
+    <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
+  </div>
+
+  <div class="footer-row">
+    <span id="tick">block height —</span>
+    <button id="reset-btn">reset wallet</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var KEY = "hashpool-save-v2";
+
+  var UPGRADES = [
+    {id:"usb", base:15,  hr:0.08, icon:"🔌",
+      name:{en:"USB Miner", de:"USB-Miner"},
+      desc:{en:"A novelty stick that gets warm.", de:"Ein Spielzeug-Stick, der warm wird."}},
+    {id:"gpu", base:160, hr:0.55, icon:"🖥️",
+      name:{en:"GPU Rig", de:"GPU-Rig"},
+      desc:{en:"One graphics card, six fans.", de:"Eine Grafikkarte, sechs Lüfter."}},
+    {id:"fpga",base:1400, hr:3.5, icon:"🧩",
+      name:{en:"FPGA Board", de:"FPGA-Board"},
+      desc:{en:"Purpose-built silicon, quiet and cold.", de:"Speziell gebauter Chip, leise und kühl."}},
+    {id:"asic",base:11000, hr:22, icon:"📦",
+      name:{en:"ASIC Unit", de:"ASIC-Einheit"},
+      desc:{en:"Sounds like a jet engine. Mines like one too.", de:"Klingt wie ein Düsentriebwerk. Mint auch wie eins."}},
+    {id:"farm",base:85000, hr:140, icon:"🏭",
+      name:{en:"Container Farm", de:"Container-Farm"},
+      desc:{en:"A shipping container full of ASICs.", de:"Ein Schiffscontainer voller ASICs."}},
+    {id:"plant",base:650000, hr:900, icon:"☀️",
+      name:{en:"Solar Mining Plant", de:"Solar-Miningpark"},
+      desc:{en:"Your own power grid, dedicated to hashes.", de:"Dein eigenes Stromnetz, nur für Hashes."}}
+  ];
+
+  var CLICK_UPGRADES = [
+    {id:"pick", base:35, mult:1.35, icon:"⛏️",
+      name:{en:"Sharper Pickaxe", de:"Schärfere Spitzhacke"},
+      desc:{en:"Cuts through hashes a bit faster.", de:"Schneidet etwas schneller durch Hashes."}},
+    {id:"cool", base:480, mult:1.5, icon:"❄️",
+      name:{en:"Liquid Cooling", de:"Wasserkühlung"},
+      desc:{en:"Overclock without melting anything.", de:"Übertakten, ohne dass etwas schmilzt."}},
+    {id:"asicpen", base:5500, mult:1.75, icon:"🖊️",
+      name:{en:"ASIC Pen", de:"ASIC-Stift"},
+      desc:{en:"A handheld chip, just for tapping.", de:"Ein Handheld-Chip, nur zum Tippen."}},
+    {id:"quantum", base:75000, mult:2.1, icon:"✨",
+      name:{en:"Quantum Tap", de:"Quanten-Tap"},
+      desc:{en:"Mines a little bit of tomorrow too.", de:"Mint ein bisschen von morgen mit."}}
+  ];
+
+  var I18N = {
+    en:{
+      mine:"TAP TO MINE", titleRig:"YOUR RIG", titleClick:"CLICK POWER", titleHw:"HARDWARE (PASSIVE)",
+      passive:"sats/s passive", perClick:"sats/click", owned:"owned", perClickSuffix:"per click",
+      blockHeight:"block height", reset:"reset wallet",
+      resetConfirm:"Reset your wallet and hardware? This can't be undone.",
+      critical:"CRITICAL!", buy:"buy", welcomeTitle:"Welcome back",
+      welcomeBody:"Your rig kept hashing while you were away. You earned:",
+      close:"Nice",
+      loginPlaceholder:"your name", loginBtn:"Sign in", signedInAs:"Signed in as",
+      logout:"Sign out", cheatPlaceholder:"enter code", cheatBtn:"Redeem",
+      accountHint:"Optional: save a name locally. Codes unlock bonus sats.",
+      startAssembly:"Start assembly →",
+      bought:"Bought!",
+      starterTitle:"Welcome to Hashpool",
+      starterBody:"Here's a small starter pack so you can buy your first miner right away.",
+      buildLocked:"Mine a bit first — unlocks at 40 lifetime sats",
+      buildProgress:"Parts {bought}/7 bought · {installed}/7 installed",
+      buildProfitHint:"Est. sale ≈ {profit} (cost {cost})",
+      buildSoldTitle:"Rig sold!",
+      buildSoldBody:"Profit landed in your wallet.",
+      buildNextHint:"Next build costs more. Keep mining.",
+      partsProgress:"{n}/7 parts",
+      pasteTitle:"Thermal paste",
+      pasteHint:"Drag to spread a thin even layer. Too little or too much hurts the sale price.",
+      pasteBtn:"Apply paste",
+      pasteDone:"Paste applied",
+      pasteSkip:"Skip",
+      biosTitle:"BIOS flash",
+      biosHint:"Tap the keys in order before the timer runs out.",
+      biosOk:"Flash OK",
+      biosFail:"Checksum error — try again",
+      biosSkip:"Skip",
+
+      cheatOk:"Code redeemed:", cheatUsed:"Code already redeemed.", cheatInvalid:"Invalid code.",
+      halvingTitle:"Halving", halvingDesc:"Reset your rig for a permanent boost to everything you earn.",
+      halvingMult:"current boost", halvingNeed:"lifetime sats needed", halvingBtn:"Trigger halving",
+      halvingLocked:"Keep mining to unlock", halvingConfirm:"Trigger a halving? Your balance and hardware reset, but you keep a permanent +50% boost forever.",
+      exportBtn:"Export save", importBtn:"Import save",
+      exportedMsg:"Save file downloaded.", importedMsg:"Save imported successfully.",
+      importError:"That file doesn't look like a valid save.",
+      cancel:"Cancel", confirmOk:"Confirm",
+      titleBuild:"BUILD & SELL", buildDesc:"Buy parts, assemble the PC, power it on, then sell for a profit. Each sold rig makes the next one more expensive.",
+      sellBtn:"Sell rig for", rigsSold:"Rigs sold:", installed:"installed", dragHint:"↺ drag rotate · Shift/right-drag pan · scroll zoom",
+      launchBtn:"🖥️ Build a PC", stepShop:"Step 1 · Shop parts", stepAssemble:"Step 2 · Assemble",
+      stepBoot:"Step 3 · Power on", stepComplete:"Complete!", shopHint:"Buy every part first.",
+      tapToInstall:"Tap to install", powerOnBtn:"Power on →",
+      bootLines:["Loading BIOS...","Detecting hardware...","Initializing miner...","Boot OK ✓"],
+      modeQuick:"Quick", modeDetailed:"Detailed", dragToInstall:"Drag onto the rig",
+      dragToConnect:"Drag to connector", cableDone:"connected",
+      cableMain:"24-Pin Cable", cableCpu:"CPU Cable", cableGpu:"GPU Cable",
+      cableFan:"Fan Cable", cableFront:"Front Panel Cable",
+      lockedHintPrefix:"Install first:"
+    },
+    de:{
+      mine:"TIPPEN ZUM MINEN", titleRig:"DEIN RIG", titleClick:"KLICK-KRAFT", titleHw:"HARDWARE (PASSIV)",
+      passive:"Sats/s passiv", perClick:"Sats/Klick", owned:"vorhanden", perClickSuffix:"pro Klick",
+      blockHeight:"Blockhöhe", reset:"Wallet zurücksetzen",
+      resetConfirm:"Wallet und Hardware zurücksetzen? Das kann nicht rückgängig gemacht werden.",
+      critical:"KRITISCH!", buy:"kaufen", welcomeTitle:"Willkommen zurück",
+      welcomeBody:"Dein Rig hat weitergehasht, während du weg warst. Du hast verdient:",
+      close:"Nice",
+      loginPlaceholder:"dein Name", loginBtn:"Anmelden", signedInAs:"Angemeldet als",
+      logout:"Abmelden", cheatPlaceholder:"Code eingeben", cheatBtn:"Einlösen",
+      accountHint:"Optional: Name lokal speichern. Codes geben Bonus-Sats.",
+      startAssembly:"Zusammenbau starten →",
+      bought:"Gekauft!",
+      starterTitle:"Willkommen bei Hashpool",
+      starterBody:"Hier ist ein kleines Starter-Paket, damit du sofort deinen ersten Miner kaufen kannst.",
+      buildLocked:"Erst etwas minen — freischalten ab 40 Lifetime-Sats",
+      buildProgress:"Teile {bought}/7 gekauft · {installed}/7 eingebaut",
+      buildProfitHint:"Verkauf ca. ≈ {profit} (Kosten {cost})",
+      buildSoldTitle:"Rig verkauft!",
+      buildSoldBody:"Gewinn ist auf dem Wallet.",
+      buildNextHint:"Der nächste Build wird teurer. Weiter minen.",
+      partsProgress:"{n}/7 Teile",
+      pasteTitle:"Wärmeleitpaste",
+      pasteHint:"Zieh, um eine dünne gleichmäßige Schicht zu verteilen. Zu wenig oder zu viel senkt den Verkaufspreis.",
+      pasteBtn:"Paste auftragen",
+      pasteDone:"Paste aufgetragen",
+      pasteSkip:"Überspringen",
+      biosTitle:"BIOS-Flash",
+      biosHint:"Tippe die Tasten in der richtigen Reihenfolge, bevor die Zeit abläuft.",
+      biosOk:"Flash OK",
+      biosFail:"Checksum-Fehler — nochmal",
+      biosSkip:"Überspringen", cheatOk:"Code eingelöst:", cheatUsed:"Code wurde bereits eingelöst.", cheatInvalid:"Ungültiger Code.",
+      halvingTitle:"Halving", halvingDesc:"Setze dein Rig zurück für einen dauerhaften Bonus auf alles, was du verdienst.",
+      halvingMult:"aktueller Bonus", halvingNeed:"benötigte Lifetime-Sats", halvingBtn:"Halving auslösen",
+      halvingLocked:"Weiter minen zum Freischalten", halvingConfirm:"Halving auslösen? Guthaben und Hardware werden zurückgesetzt, aber du behältst dauerhaft +50% Bonus.",
+      exportBtn:"Speicherstand exportieren", importBtn:"Speicherstand importieren",
+      exportedMsg:"Speicherdatei heruntergeladen.", importedMsg:"Speicherstand erfolgreich importiert.",
+      importError:"Diese Datei sieht nicht wie ein gültiger Speicherstand aus.",
+      cancel:"Abbrechen", confirmOk:"Bestätigen",
+      titleBuild:"BAUEN & VERKAUFEN", buildDesc:"Teile kaufen, PC zusammenbauen, einschalten, mit Gewinn verkaufen. Jeder Verkauf macht den nächsten Build teurer.",
+      sellBtn:"Rig verkaufen für", rigsSold:"Verkaufte Rigs:", installed:"eingebaut", dragHint:"↺ drehen · Shift/Rechts-ziehen verschieben · Scroll zoom",
+      launchBtn:"🖥️ PC bauen", stepShop:"Schritt 1 · Teile kaufen", stepAssemble:"Schritt 2 · Zusammenbauen",
+      stepBoot:"Schritt 3 · Einschalten", stepComplete:"Fertig!", shopHint:"Kauf zuerst alle Teile.",
+      tapToInstall:"Zum Einbauen tippen", powerOnBtn:"Einschalten →",
+      bootLines:["Lade BIOS...","Erkenne Hardware...","Initialisiere Miner...","Boot OK ✓"],
+      modeQuick:"Schnell", modeDetailed:"Ausführlich", dragToInstall:"Auf das Rig ziehen",
+      dragToConnect:"Zum Anschluss ziehen", cableDone:"verbunden",
+      cableMain:"24-Pin-Kabel", cableCpu:"CPU-Kabel", cableGpu:"GPU-Kabel",
+      cableFan:"Lüfterkabel", cableFront:"Front-Panel-Kabel",
+      lockedHintPrefix:"Erst einbauen:"
+    }
+  };
+
+  var PARTS = [
+    {id:"psu", icon:"🔋", base:280, name:{en:"Power Supply", de:"Netzteil"}},
+    {id:"mobo", icon:"🧩", base:420, name:{en:"Motherboard", de:"Mainboard"}},
+    {id:"cooler", icon:"❄️", base:320, name:{en:"Cooler", de:"Kühler"}},
+    {id:"ram", icon:"💾", base:260, name:{en:"RAM", de:"RAM"}},
+    {id:"ssd", icon:"💽", base:200, name:{en:"SSD", de:"SSD"}},
+    {id:"cpu", icon:"⚙️", base:680, name:{en:"CPU", de:"CPU"}},
+    {id:"gpu", icon:"🎮", base:1100, name:{en:"Graphics Card", de:"Grafikkarte"}}
+  ];
+
+  var PARTS_BY_ID = {};
+  PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });
+
+  var PART3D = {
+    mobo:   { pos:[-0.3, 0,   -0.62] },
+    cpu:    { pos:[-0.75, 0.85,-0.42] },
+    ram:    { pos:[ 0.05, 0.85,-0.42] },
+    ssd:    { pos:[-0.85,-0.55,-0.4] },
+    cooler: { pos:[-0.75, 0.15,-0.3] },
+    gpu:    { pos:[-0.45,-0.95,-0.35] },
+    psu:    { pos:[ 1.0, -0.7,  0.0] }
+  };
+  var BENCH = { mobo: [2.6, -0.93, 0.2] };
+  var camTarget = { x:0.95, y:0, z:12.5 };
+  var framingDone = false, framingDoneCase = false;
+  var moboCaseAnim = null;
+  var autoRotate = true;
+
+  var COL = {
+    pcb:0x0c1116, chip:0x111417, gold:0xc9a227, silver:0xb8bec5,
+    shroud:0x2b2f35, fanBlack:0x111417, psuMetal:0x4a4f57,
+    frame:0x2a2e34, screw:0x585d63, ram1:0x1b3a4a, ram2:0x3a1b4a,
+    rgb1:0x22d3ee, rgb2:0xa855f7
+  };
+
+  var scene3d, camera3d, renderer3d, rigGroup, partMeshes = {};
+  var animQueue = {}, installedAnimated = {};
+  var screwMeshes = {}, screwQueue = [];
+  var cableMeshes = {}, rgbMeshes = [];
+  var moboTexture = null;
+
+  function mat(color, opts){
+    opts = opts || {};
+    var params = { color:color, roughness:opts.rough!==undefined?opts.rough:0.55, metalness:opts.metal!==undefined?opts.metal:0.2 };
+    if(opts.map) params.map = opts.map;
+    return new THREE.MeshStandardMaterial(params);
+  }
+  function glowMat(color, intensity){
+    return new THREE.MeshStandardMaterial({ color:color, emissive:color, emissiveIntensity: intensity||1.1, roughness:0.4, metalness:0.1 });
+  }
+
+  function getMoboTexture(){
+    if(moboTexture) return moboTexture;
+    var c = document.createElement("canvas");
+    c.width = 256; c.height = 480;
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = "#0c1116"; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = "#1f6b52"; ctx.globalAlpha = 0.55; ctx.lineWidth = 2;
+    for(var i=0;i<55;i++){
+      var x = Math.random()*c.width, y = Math.random()*c.height;
+      ctx.beginPath(); ctx.moveTo(x, y);
+      var segs = 2 + Math.floor(Math.random()*3);
+      for(var s=0;s<segs;s++){
+        if(Math.random()<0.5) x += (Math.random()<0.5?1:-1) * (10 + Math.random()*36);
+        else y += (Math.random()<0.5?1:-1) * (10 + Math.random()*36);
+        x = Math.max(4, Math.min(c.width-4, x));
+        y = Math.max(4, Math.min(c.height-4, y));
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    for(var j=0;j<10;j++){
+      ctx.fillStyle = "#c9a227";
+      var px = 12 + Math.random()*(c.width-24), py = 12 + Math.random()*(c.height-24);
+      ctx.beginPath(); ctx.arc(px, py, 2.2, 0, Math.PI*2); ctx.fill();
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    moboTexture = tex;
+    return tex;
+  }
+
+  function buildMobo(){
+    var g = new THREE.Group();
+    var base = new THREE.Mesh(new THREE.BoxGeometry(1.6, 3.0, 0.05), mat(0xffffff, {rough:0.65, metal:0.05, map:getMoboTexture()}));
+    g.add(base);
+    var socket = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.03), mat(COL.chip, {rough:0.4}));
+    socket.position.set(-0.45, 0.85, 0.04); g.add(socket);
+    // socket ILM frame
+    var ilm = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.56, 0.02), mat(COL.silver, {metal:0.7, rough:0.3}));
+    ilm.position.set(-0.45, 0.85, 0.03); g.add(ilm);
+    [0.12, 0.22, 0.32, 0.42].forEach(function(x){
+      var slot = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.88, 0.035), mat(0x1a1d22));
+      slot.position.set(x, 0.85, 0.04); g.add(slot);
+      var latch = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.04), mat(COL.silver, {metal:0.5}));
+      latch.position.set(x, 1.28, 0.05); g.add(latch);
+    });
+    var chipset = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 0.05), mat(COL.silver, {metal:0.65, rough:0.28}));
+    chipset.position.set(-0.45, -0.3, 0.05); g.add(chipset);
+    // VRM heatsinks near CPU
+    for(var v=0;v<3;v++){
+      var vrm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.08), mat(0x2a2e34, {metal:0.4, rough:0.4}));
+      vrm.position.set(-0.85, 0.55 + v*0.05, 0.06); g.add(vrm);
+    }
+    var pcie = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.08, 0.03), mat(COL.chip));
+    pcie.position.set(-0.15, -0.95, 0.04); g.add(pcie);
+    var pcie2 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 0.025), mat(0x1a1d22));
+    pcie2.position.set(-0.1, -1.15, 0.035); g.add(pcie2);
+    for(var i=0;i<5;i++){
+      var cap = new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.028,0.07,8), mat(COL.silver, {metal:0.75}));
+      cap.position.set(-0.72 + i*0.1, 0.35, 0.06); cap.rotation.x = Math.PI/2; g.add(cap);
+    }
+    // 24-pin header visual
+    var hdr = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, 0.04), mat(0x1a1206));
+    hdr.position.set(0.55, 1.2, 0.05); g.add(hdr);
+    for(var h=0;h<6;h++){
+      var pin = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, 0.02), mat(COL.gold, {metal:0.8}));
+      pin.position.set(0.4 + h*0.05, 1.2, 0.07); g.add(pin);
+    }
+    // M.2 slot outline (where the SSD sits)
+    var m2 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.62, 0.01), mat(0x05070a, {rough:0.8}));
+    m2.position.set(-0.55, -0.55, 0.035); g.add(m2);
+    // gaming RGB accent strip along the bottom edge
+    var accent = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.035, 0.02), glowMat(COL.rgb1, 1.1));
+    accent.position.set(0, -1.35, 0.05); g.add(accent);
+    rgbMeshes.push(accent);
+    return g;
+  }
+  function buildSsd(){
+    var g = new THREE.Group();
+    var stick = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.58, 0.012), mat(0x0d1a14, {rough:0.45}));
+    g.add(stick);
+    // controller + NAND chips
+    var ctrl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.01), mat(COL.chip, {rough:0.35}));
+    ctrl.position.set(0, 0.18, 0.012); g.add(ctrl);
+    for(var i=0;i<2;i++){
+      var nand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.14, 0.01), mat(0x1a2030, {rough:0.4}));
+      nand.position.set(0, 0.02 - i*0.16, 0.012); g.add(nand);
+    }
+    var label = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.2, 0.005), mat(0x3a4048, {rough:0.55}));
+    label.position.set(0, -0.2, 0.01); g.add(label);
+    // gold edge
+    var gold = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.08, 0.004), mat(COL.gold, {metal:0.9, rough:0.2}));
+    gold.position.set(0, 0.28, 0.002); g.add(gold);
+    return g;
+  }
+  function buildCpu(){
+    var g = new THREE.Group();
+    var sub = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.44, 0.018), mat(COL.pcb, {rough:0.65}));
+    sub.position.z = 0.009; g.add(sub);
+    // corner notches
+    [[-0.2,-0.2],[0.2,-0.2],[-0.2,0.2],[0.2,0.2]].forEach(function(c){
+      var n = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.02), mat(0x080a0c));
+      n.position.set(c[0], c[1], 0.01); g.add(n);
+    });
+    var ihs = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.05), mat(COL.silver, {metal:0.8, rough:0.18}));
+    ihs.position.z = 0.04; g.add(ihs);
+    // etched die outline on IHS
+    var die = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.004), mat(0x8a9098, {metal:0.5, rough:0.3}));
+    die.position.z = 0.067; g.add(die);
+    var logo = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.03, 0.003), mat(0x111417, {rough:0.45}));
+    logo.position.set(0, -0.1, 0.067); g.add(logo);
+    return g;
+  }
+  function buildRamStick(color){
+    var g = new THREE.Group();
+    // Upright DIMM: thin in X, long in Y, tall in +Z (out of the board)
+    var pcb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.72, 0.28), mat(COL.pcb, {rough:0.7}));
+    pcb.position.z = 0.14; g.add(pcb);
+    // gold contacts at the bottom edge (into the slot)
+    for(var i=0;i<6;i++){
+      var contact = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.05, 0.012), mat(COL.gold, {metal:0.9, rough:0.2}));
+      contact.position.set(0, -0.28 + i*0.1, 0.02); g.add(contact);
+    }
+    var heatsink = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.22), mat(color, {metal:0.45, rough:0.35}));
+    heatsink.position.z = 0.16; g.add(heatsink);
+    var rgbBar = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.55, 0.2), glowMat(color === COL.ram1 ? COL.rgb1 : COL.rgb2, 1.0));
+    rgbBar.position.set(0.03, 0, 0.16); g.add(rgbBar);
+    rgbMeshes.push(rgbBar);
+    return g;
+  }
+  function buildRam(){
+    var g = new THREE.Group();
+    var s1 = buildRamStick(COL.ram1); s1.position.x = -0.08; g.add(s1);
+    var s2 = buildRamStick(COL.ram2); s2.position.x = 0.08; g.add(s2);
+    return g;
+  }
+  function buildCooler(){
+    var g = new THREE.Group();
+    // base plate bottom at z=0 so group.position.z = CPU top seats it correctly
+    var basePlate = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.36, 0.035), mat(0xb87333, {metal:0.75, rough:0.3}));
+    basePlate.position.z = 0.018; g.add(basePlate);
+    // heatpipes
+    for(var h=0;h<4;h++){
+      var pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.32, 8), mat(0xc0a060, {metal:0.8, rough:0.25}));
+      pipe.position.set(-0.1 + h*0.07, 0, 0.2);
+      g.add(pipe);
+    }
+    for(var f=0;f<10;f++){
+      var fin = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.34, 0.01), mat(COL.silver, {metal:0.7, rough:0.28}));
+      fin.position.z = 0.06 + f*0.028; g.add(fin);
+    }
+    var fanGroup = new THREE.Group();
+    fanGroup.position.z = 0.36;
+    var fanRing = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.028, 20), mat(COL.fanBlack, {rough:0.55}));
+    fanRing.rotation.x = Math.PI/2; fanGroup.add(fanRing);
+    var hub = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.03, 12), mat(COL.silver, {metal:0.5}));
+    hub.rotation.x = Math.PI/2; fanGroup.add(hub);
+    for(var i=0;i<7;i++){
+      var blade = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.2, 0.01), mat(0x15181c));
+      blade.rotation.z = (i / 7) * Math.PI * 2;
+      fanGroup.add(blade);
+    }
+    g.add(fanGroup);
+    g.userData.spin = fanGroup;
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.01, 8, 24), glowMat(COL.rgb1, 1.2));
+    ring.position.z = 0.38; g.add(ring);
+    rgbMeshes.push(ring);
+    return g;
+  }
+  function buildGpu(){
+    var g = new THREE.Group();
+    // Orientation: board face is +Z. Card sticks OUT along +Z, length along X, dual-slot height along Y.
+    // Gold PCIe fingers at z≈0 (into the slot on the board surface).
+
+    // PCB (green) — thin plate standing off the board
+    var pcb = new THREE.Mesh(new THREE.BoxGeometry(1.28, 0.11, 0.03), mat(0x0a3d1a, {rough:0.5}));
+    pcb.position.set(0, 0, 0.02); g.add(pcb);
+
+    // backplate (outside, further +Z)
+    var back = new THREE.Mesh(new THREE.BoxGeometry(1.22, 0.2, 0.02), mat(0x2a2e34, {metal:0.45, rough:0.35}));
+    back.position.set(0, -0.02, 0.42); g.add(back);
+
+    // main shroud body
+    var shroud = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.28, 0.36), mat(COL.shroud, {rough:0.32, metal:0.28}));
+    shroud.position.set(0.02, 0.02, 0.22); g.add(shroud);
+
+    // three fans on the TOP face of the card (+Y) so you see the rotors clearly
+    [-0.36, 0.0, 0.36].forEach(function(x){
+      var fanG = new THREE.Group();
+      fanG.position.set(x, 0.16, 0.22);
+      // ring in XZ plane (facing +Y)
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.012, 8, 22), mat(0x1a1d22, {rough:0.4}));
+      ring.rotation.x = Math.PI/2; // torus default in XY → rotate to XZ... wait torus is in XY, rot X puts in XZ facing Y
+      fanG.add(ring);
+      var hub = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.02, 12), mat(COL.silver, {metal:0.65}));
+      // cylinder default axis Y — already faces +Y, perfect for top-facing fan
+      fanG.add(hub);
+      for(var i=0;i<7;i++){
+        var blade = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.008, 0.09), mat(0x12151a));
+        blade.rotation.y = (i/7)*Math.PI*2;
+        fanG.add(blade);
+      }
+      g.add(fanG);
+    });
+
+    // RGB strip along the outer long edge (visible along +Y top edge)
+    var rgbEdge = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.02, 0.02), glowMat(COL.rgb2, 1.6));
+    rgbEdge.position.set(0.02, 0.17, 0.40); g.add(rgbEdge);
+    rgbMeshes.push(rgbEdge);
+    // second RGB accent on the side
+    var rgbSide = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.06, 0.3), glowMat(COL.rgb1, 1.2));
+    rgbSide.position.set(0.6, 0.05, 0.22); g.add(rgbSide);
+    rgbMeshes.push(rgbSide);
+
+    // IO bracket at -X (rear of case)
+    var bracket = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.28), mat(COL.silver, {metal:0.8, rough:0.25}));
+    bracket.position.set(-0.68, 0, 0.16); g.add(bracket);
+    for(var p=0;p<3;p++){
+      var port = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.04), mat(0x0a0c0e));
+      port.position.set(-0.72, -0.06+p*0.06, 0.08); g.add(port);
+    }
+
+    // 8-pin power connector on top
+    var pwr = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.08), mat(0x111417));
+    pwr.position.set(0.45, 0.14, 0.1); g.add(pwr);
+
+    // gold fingers into the PCIe slot (at board surface)
+    for(var f=0;f<12;f++){
+      var finger = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.015, 0.02), mat(COL.gold, {metal:0.9, rough:0.2}));
+      finger.position.set(-0.5 + f*0.1, 0, 0.005); g.add(finger);
+    }
+    return g;
+  }
+  function buildPsu(){
+    var g = new THREE.Group();
+    var box = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.95, 1.15), mat(COL.psuMetal, {metal:0.55, rough:0.35}));
+    g.add(box);
+    // warning label
+    var label = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.2, 0.01), mat(0x1a1d22, {rough:0.6}));
+    label.position.set(0, 0.2, 0.58); g.add(label);
+    var grille = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.02, 20), mat(COL.fanBlack));
+    grille.rotation.x = Math.PI/2; grille.position.z = 0.58; g.add(grille);
+    for(var i=0;i<6;i++){
+      var blade = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.16, 0.01), mat(0x1a1d20));
+      blade.position.z = 0.585;
+      blade.rotation.z = (i/6) * Math.PI * 2;
+      g.add(blade);
+    }
+    // modular cable ports
+    for(var p=0;p<3;p++){
+      var port = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.04), mat(0x0a0c0e));
+      port.position.set(-0.15+p*0.15, -0.35, 0.58); g.add(port);
+    }
+    return g;
+  }
+  var BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };
+
+  function makeCable(p1, p2, sag, color, radius){
+    var mid = new THREE.Vector3(
+      (p1[0]+p2[0])/2 + (sag?sag[0]:0),
+      (p1[1]+p2[1])/2 + (sag?sag[1]:0.15),
+      (p1[2]+p2[2])/2 + (sag?sag[2]:0.3)
+    );
+    var curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(p1[0],p1[1],p1[2]), mid, new THREE.Vector3(p2[0],p2[1],p2[2])
+    ]);
+    var geo = new THREE.TubeGeometry(curve, 20, radius||0.028, 6, false);
+    return new THREE.Mesh(geo, mat(color, {rough:0.55, metal:0.1}));
+  }
+
+  var CABLES = {
+    mainPower: { needs:["psu","moboCase"], from:[0.75,-0.5,0.2], to:[0.35,1.35,-0.58], sag:[0.25,0.1,0.5], color:0x17181a, r:0.032, icon:"🔌", labelKey:"cableMain" },
+    cpuPower:  { needs:["psu","cpu"],  from:[0.75,-0.35,-0.15], to:[-0.7,1.55,-0.55], sag:[0.05,0.55,0.3], color:0x17181a, r:0.026, icon:"🔌", labelKey:"cableCpu" },
+    gpuPower:  { needs:["psu","gpu"],  from:[0.7,-0.6,0.15], to:[-0.1,-0.75,-0.25], sag:[0.2,-0.15,0.4], color:0x111214, r:0.026, icon:"🔌", labelKey:"cableGpu" },
+    fanCable:  { needs:["cooler","moboCase"], from:[-0.75,0.42,0.0], to:[-0.55,0.55,-0.58], sag:[0.05,0.2,0.1], color:0x0d0f11, r:0.016, icon:"🧷", labelKey:"cableFan" },
+    frontPanel:{ needs:["moboCase"], from:[-1.3,-1.5,0.75], to:[-0.9,-0.9,-0.58], sag:[-0.1,-0.3,0.3], color:0x0d0f11, r:0.016, icon:"🔘", labelKey:"cableFront" }
+  };
+
+  function recomputeCables(){
+    if(!rigGroup) return;
+    Object.keys(CABLES).forEach(function(key){
+      var cfg = CABLES[key];
+      var partsReady = cfg.needs.every(function(id){ return id === "moboCase" ? !!state.moboCased : !!state.buildInstalled[id]; });
+      var want = state.buildMode === "detailed" ? (partsReady && !!state.buildCablesDone[key]) : partsReady;
+      if(want && !cableMeshes[key]){
+        var m = makeCable(cfg.from, cfg.to, cfg.sag, cfg.color, cfg.r);
+        rigGroup.add(m);
+        cableMeshes[key] = m;
+      } else if(!want && cableMeshes[key]){
+        rigGroup.remove(cableMeshes[key]);
+        delete cableMeshes[key];
+      }
+    });
+    updateSockets();
+  }
+  var socketMeshes = {};
+  function buildSockets(){
+    Object.keys(CABLES).forEach(function(key){
+      var cfg = CABLES[key];
+      var g = new THREE.Group();
+      var base = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.05), mat(0x0a0c0e, {rough:0.5}));
+      g.add(base);
+      for(var i=0;i<4;i++){
+        var pin = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.03), mat(COL.gold, {metal:0.8, rough:0.3}));
+        pin.position.set(-0.066 + i*0.044, 0, 0.03); g.add(pin);
+      }
+      var halo = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.014, 8, 28), glowMat(0xf7931a, 1.2));
+      halo.position.z = 0.04; g.add(halo);
+      g.userData.halo = halo;
+      g.position.set(cfg.to[0], cfg.to[1], cfg.to[2] + 0.03);
+      g.visible = false;
+      rigGroup.add(g);
+      socketMeshes[key] = g;
+    });
+  }
+  function updateSockets(){
+    Object.keys(socketMeshes).forEach(function(key){
+      var cfg = CABLES[key];
+      var ready = cfg.needs.every(function(id){ return id === "moboCase" ? !!state.moboCased : !!state.buildInstalled[id]; });
+      socketMeshes[key].visible = state.buildMode === "detailed" && ready && !state.buildCablesDone[key] && allInstalled();
+    });
+  }
+  function removeAllCables(){
+    Object.keys(cableMeshes).forEach(function(key){ rigGroup.remove(cableMeshes[key]); });
+    cableMeshes = {};
+  }
+
+  function buildFrame(){
+    var g = new THREE.Group();
+    var fmat = mat(COL.frame, {metal:0.6, rough:0.4});
+    var xs = [-1.5, 1.5], zs = [-0.8, 0.8];
+    xs.forEach(function(x){ zs.forEach(function(z){
+      var post = new THREE.Mesh(new THREE.BoxGeometry(0.06, 3.4, 0.06), fmat);
+      post.position.set(x, 0, z); g.add(post);
+    }); });
+    [1.7, -1.7].forEach(function(y){
+      xs.forEach(function(x){
+        var rail = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 1.6), fmat);
+        rail.position.set(x, y, 0); g.add(rail);
+      });
+      zs.forEach(function(z){
+        var rail = new THREE.Mesh(new THREE.BoxGeometry(3, 0.06, 0.06), fmat);
+        rail.position.set(0, y, z); g.add(rail);
+      });
+    });
+    var back = new THREE.Mesh(new THREE.BoxGeometry(2.9, 3.3, 0.03), mat(0x1c1f24, {rough:0.8}));
+    back.position.z = -0.79; g.add(back);
+    return g;
+  }
+
+  function buildTable(){
+    var g = new THREE.Group();
+    var wood = mat(0x6b4428, {rough:0.8, metal:0.04});
+    var dark = mat(0x3d2918, {rough:0.85, metal:0.04});
+    var top = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.09, 3.5), wood);
+    top.position.set(2.6, -1.0, 0.2); g.add(top);
+    // anti-static mat
+    var pad = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.008, 3.3), mat(0x1e242c, {rough:0.95, metal:0}));
+    pad.position.set(2.6, -0.95, 0.2); g.add(pad);
+    // subtle grid lines on mat
+    for(var gi=0; gi<6; gi++){
+      var line = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.002, 0.008), mat(0x2c343e, {rough:1}));
+      line.position.set(2.6, -0.944, -1.2 + gi*0.5); g.add(line);
+    }
+    [[1.7,-1.4],[3.5,-1.4],[1.7,1.8],[3.5,1.8]].forEach(function(c){
+      var leg = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.78, 0.09), dark);
+      leg.position.set(c[0], -1.39, c[1]); g.add(leg);
+    });
+    return g;
+  }
+
+  function initCase3D(){
+    if(typeof THREE === "undefined") return; // graceful no-op if the CDN script failed to load
+    var el = document.getElementById("case-3d");
+    var w = el.clientWidth || 280, h = el.clientHeight || 250;
+
+    scene3d = new THREE.Scene();
+    camera3d = new THREE.PerspectiveCamera(40, w / h, 0.1, 60);
+    camera3d.position.set(0.95, 0, 12.5);
+
+    renderer3d = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    renderer3d.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer3d.setSize(w, h);
+    el.appendChild(renderer3d.domElement);
+
+    scene3d.add(new THREE.AmbientLight(0x7a8494, 0.75));
+    var hemi = new THREE.HemisphereLight(0xc8d4e8, 0x2a2018, 0.55);
+    scene3d.add(hemi);
+    var dl = new THREE.DirectionalLight(0xffffff, 1.05);
+    dl.position.set(3.2, 5.5, 4.5);
+    scene3d.add(dl);
+    var fill = new THREE.DirectionalLight(0x88a0c0, 0.35);
+    fill.position.set(-3, 2, -2);
+    scene3d.add(fill);
+    // soft floor shadow disc under the workbench
+    var shadow = new THREE.Mesh(
+      new THREE.CircleGeometry(2.4, 32),
+      new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:0.28 })
+    );
+    shadow.rotation.x = -Math.PI/2;
+    shadow.position.set(2.6, -1.74, 0.2);
+    scene3d.add(shadow);
+
+    rigGroup = new THREE.Group();
+    scene3d.add(rigGroup);
+    rigGroup.add(buildFrame());
+    rigGroup.add(buildTable());
+    buildSockets();
+
+    // Local offsets on the motherboard model (XY board, +Z is the component side).
+    // These stay correct when the board lies flat on the bench OR stands in the case.
+    var MOBO_LOCAL = {
+      cpu:    [-0.45,  0.85, 0.042],
+      ram:    [ 0.22,  0.85, 0.03],
+      ssd:    [-0.55, -0.55, 0.032],
+      // CPU IHS top ~0.10 — cooler base plate bottom sits there
+      cooler: [-0.45,  0.85, 0.10]
+    };
+    PARTS.forEach(function(p){
+      var cfg = PART3D[p.id];
+      var group = BUILDERS[p.id]();
+      group.visible = false;
+      if(MOBO_LOCAL[p.id]){
+        var loc = MOBO_LOCAL[p.id];
+        group.position.set(loc[0], loc[1], loc[2]);
+        // cooler is only available after casing in the dep chain, but keep parented to mobo
+        // so it rides with the board animation if ever shown early
+        if(p.id === "cooler"){
+          // still parent to mobo for consistent seating on the CPU
+          // (will be re-parented check below after mobo exists)
+        }
+        // mobo must exist first — build order in PARTS puts mobo before cpu/ram/ssd
+        if(p.id !== "mobo" && partMeshes.mobo){
+          partMeshes.mobo.add(group);
+        } else {
+          group.position.set(cfg.pos[0], cfg.pos[1], cfg.pos[2]);
+          rigGroup.add(group);
+        }
+      } else {
+        group.position.set(cfg.pos[0], cfg.pos[1], cfg.pos[2]);
+        rigGroup.add(group);
+      }
+      partMeshes[p.id] = group;
+    });
+    // Parent cooler to mobo if both exist
+    if(partMeshes.cooler && partMeshes.mobo && partMeshes.cooler.parent !== partMeshes.mobo){
+      var cl = MOBO_LOCAL.cooler;
+      partMeshes.cooler.position.set(cl[0], cl[1], cl[2]);
+      partMeshes.mobo.add(partMeshes.cooler);
+    }
+
+    rigGroup.rotation.y = 0.35;
+    rigGroup.rotation.x = -0.1;
+
+    var isDragging = false, isPanning = false, lastX = 0, lastY = 0, multiTouch = false;
+    el.addEventListener("pointerdown", function(e){
+      if(multiTouch) return;
+      // right-click, middle-click, or Shift+left = pan; else rotate
+      isPanning = (e.button === 1 || e.button === 2 || e.shiftKey);
+      isDragging = true; lastX = e.clientX; lastY = e.clientY;
+      try{ el.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    el.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+    el.addEventListener("pointermove", function(e){
+      if(!isDragging || multiTouch) return;
+      var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      if(isPanning || e.shiftKey){
+        camTarget.x = Math.max(-4, Math.min(6, camTarget.x - dx * 0.012));
+        camTarget.y = Math.max(-3, Math.min(3, camTarget.y + dy * 0.012));
+      } else {
+        rigGroup.rotation.y += dx * 0.01;
+        rigGroup.rotation.x = Math.max(-0.6, Math.min(0.6, rigGroup.rotation.x + dy * 0.008));
+      }
+    });
+    window.addEventListener("pointerup", function(){ isDragging = false; isPanning = false; });
+
+    var camZmin = 2.4, camZmax = 18;
+    el.addEventListener("wheel", function(e){
+      e.preventDefault();
+      camTarget.z = Math.max(camZmin, Math.min(camZmax, camTarget.z + e.deltaY * 0.006));
+    }, { passive:false });
+    var pinchDist = null;
+    el.addEventListener("touchstart", function(e){
+      if(e.touches.length >= 2){ multiTouch = true; isDragging = false; pinchDist = null; }
+    }, { passive:true });
+    var pinchMid = null;
+    el.addEventListener("touchmove", function(e){
+      if(e.touches.length === 2){
+        e.preventDefault();
+        multiTouch = true; isDragging = false;
+        var dx = e.touches[0].clientX - e.touches[1].clientX;
+        var dy = e.touches[0].clientY - e.touches[1].clientY;
+        var dist = Math.hypot(dx, dy);
+        var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        if(pinchDist != null){
+          camTarget.z = Math.max(camZmin, Math.min(camZmax, camTarget.z - (dist - pinchDist) * 0.025));
+        }
+        if(pinchMid != null){
+          camTarget.x = Math.max(-4, Math.min(6, camTarget.x - (midX - pinchMid.x) * 0.01));
+          camTarget.y = Math.max(-3, Math.min(3, camTarget.y + (midY - pinchMid.y) * 0.01));
+        }
+        pinchDist = dist;
+        pinchMid = { x: midX, y: midY };
+      }
+    }, { passive:false });
+    el.addEventListener("touchend", function(e){
+      if(e.touches.length < 2){ pinchDist = null; }
+      if(e.touches.length === 0){ setTimeout(function(){ multiTouch = false; }, 60); }
+    });
+
+    var expandBtn = document.getElementById("case-expand-btn");
+    if(expandBtn){
+      // stop the rig-rotation drag handler on `el` from hijacking the button's pointer events
+      expandBtn.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
+      expandBtn.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        el.classList.toggle("expanded");
+        expandBtn.textContent = el.classList.contains("expanded") ? "⤡" : "⤢";
+        setTimeout(function(){ window.dispatchEvent(new Event("resize")); }, 30);
+      });
+    }
+
+    function resize3d(){
+      var ww = el.clientWidth || 280, hh = el.clientHeight || 250;
+      camera3d.aspect = ww / hh;
+      camera3d.updateProjectionMatrix();
+      renderer3d.setSize(ww, hh);
+    }
+    window.addEventListener("resize", resize3d);
+
+    function tick(){
+      requestAnimationFrame(tick);
+      var now = performance.now();
+      Object.keys(animQueue).forEach(function(id){
+        var a = animQueue[id];
+        var pr = Math.min(1, (now - a.start) / a.duration);
+        var eased = 1 - Math.pow(1 - pr, 3);
+        var s = 0.25 + eased * 0.75;
+        partMeshes[id].scale.set(s, s, s);
+        if(pr >= 1) delete animQueue[id];
+      });
+      screwQueue = screwQueue.filter(function(sc){
+        var pr = Math.min(1, (now - sc.start) / sc.duration);
+        var s = Math.min(1, pr * 1.3);
+        sc.mesh.scale.set(s, s, s);
+        sc.mesh.rotation.y += 0.9; // rapid spin while driving in
+        return pr < 1;
+      });
+      if(moboCaseAnim){
+        var mp = Math.min(1, (now - moboCaseAnim.start) / moboCaseAnim.duration);
+        var me = 1 - Math.pow(1 - mp, 3);
+        moboCaseAnim.mesh.position.lerpVectors(moboCaseAnim.from, moboCaseAnim.to, me);
+        moboCaseAnim.mesh.position.y += Math.sin(Math.PI * me) * 0.8;
+        moboCaseAnim.mesh.rotation.x = -Math.PI/2 * (1 - me);
+        if(mp >= 1){
+          moboCaseAnim.mesh.rotation.x = 0;
+          spawnScrews("mobo", moboCaseAnim.to);
+          moboCaseAnim = null;
+        }
+      }
+      camera3d.position.x += (camTarget.x - camera3d.position.x) * 0.07;
+      camera3d.position.y += (camTarget.y - camera3d.position.y) * 0.07;
+      camera3d.position.z += (camTarget.z - camera3d.position.z) * 0.07;
+      camera3d.lookAt(camera3d.position.x, camTarget.y * 0.3, 0);
+      if(autoRotate && !isDragging && !dragActive) rigGroup.rotation.y += 0.0025;
+      var pulse = 0.9 + Math.sin(now * 0.003) * 0.4;
+      rgbMeshes.forEach(function(m){ if(m.material && m.material.emissiveIntensity!==undefined) m.material.emissiveIntensity = pulse; });
+      // spin cooler fan after successful boot
+      if(bootPlayed && partMeshes.cooler && partMeshes.cooler.userData.spin){
+        partMeshes.cooler.userData.spin.rotation.z += 0.18;
+      }
+      Object.keys(socketMeshes).forEach(function(key){
+        var sm = socketMeshes[key];
+        if(!sm.visible) return;
+        var active = dragState && dragState.type === "cable" && dragState.id === key;
+        var k = active ? 1.5 + Math.sin(now*0.012)*0.2 : 1;
+        sm.scale.set(k, k, k);
+        sm.userData.halo.material.emissiveIntensity = active ? 2.6 : 0.7 + Math.sin(now*0.004)*0.4;
+      });
+      renderer3d.render(scene3d, camera3d);
+    }
+    tick();
+  }
+
+  function spawnScrews(id, posOverride){
+    var mesh = partMeshes[id];
+    var parent = (mesh && mesh.parent) || rigGroup;
+    var base = posOverride || (mesh ? mesh.position : PART3D[id].pos);
+    var bx = base.x!==undefined ? base.x : base[0];
+    var by = base.y!==undefined ? base.y : base[1];
+    var bz = base.z!==undefined ? base.z : base[2];
+    // Keep screws tight to the part surface (local +Z = component side of the board)
+    var offsets = [[-0.12, 0.1, 0.018], [0.12, -0.1, 0.018]];
+    var smat = mat(COL.screw, { metal:0.7, rough:0.3 });
+    var arr = [];
+    offsets.forEach(function(off){
+      var m = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.09, 8), smat);
+      m.position.set(bx + off[0], by + off[1], bz + off[2]);
+      m.scale.set(0.01, 0.01, 0.01);
+      parent.add(m);
+      arr.push(m);
+      screwQueue.push({ mesh:m, start: performance.now(), duration: 400 });
+    });
+    screwMeshes[id] = arr;
+  }
+  function removeScrews(id){
+    var mesh = partMeshes[id];
+    var parent = (mesh && mesh.parent) || rigGroup;
+    if(!parent) { screwMeshes[id] = []; return; }
+    (screwMeshes[id] || []).forEach(function(m){ parent.remove(m); });
+    screwMeshes[id] = [];
+  }
+
+  function setPartVisual(id, installed){
+    var mesh = partMeshes[id];
+    if(!mesh) return;
+    if(installed){
+      mesh.visible = true;
+      if(id === "mobo" && !moboCaseAnim){
+        var mb = state.moboCased ? PART3D.mobo.pos : BENCH.mobo;
+        mesh.position.set(mb[0], mb[1], mb[2]);
+        mesh.rotation.x = state.moboCased ? 0 : -Math.PI/2;
+      }
+      if(!installedAnimated[id]){
+        installedAnimated[id] = true;
+        mesh.scale.set(0.2, 0.2, 0.2);
+        animQueue[id] = { start: performance.now(), duration: 450 };
+        if(id !== "mobo") spawnScrews(id);
+      }
+    } else {
+      mesh.visible = false;
+      mesh.scale.set(1, 1, 1);
+      delete installedAnimated[id];
+      delete animQueue[id];
+      removeScrews(id);
+    }
+    recomputeCables();
+  }
+
+  var CHEATS = {
+    "SATOSHI": { sats: 100000000 },
+    "HODLGANG": { sats: 25000000 }
+  };
+
+  var state = {
+    balance: 0,
+    perClick: 1,
+    owned: {},
+    clickOwned: {},
+    price: 68000,
+    lang: (navigator.language||"en").slice(0,2) === "de" ? "de" : "en",
+    buyQty: 1,
+    username: "",
+    redeemed: {},
+    lifetime: 0,
+    halvings: 0,
+    muted: false,
+    buildBought: {},
+    buildInstalled: {},
+    buildCablesDone: {},
+    buildMode: "quick",
+    moboCased: false,
+    pasteQuality: 0.75,
+    pasteDone: false,
+    biosDone: false,
+    biosQuality: 0.8,
+    ex: null,
+    rigsSold: 0
+  };
+
+  PARTS.forEach(function(p){ state.buildBought[p.id] = false; state.buildInstalled[p.id] = false; });
+  Object.keys(CABLES).forEach(function(k){ state.buildCablesDone[k] = false; });
+
+  UPGRADES.forEach(function(u){ state.owned[u.id] = 0; });
+  CLICK_UPGRADES.forEach(function(u){ state.clickOwned[u.id] = 0; });
+
+  function t(key){ return I18N[state.lang][key]; }
+
+  function showConfirm(message, onYes){
+    var modal = document.getElementById("confirm-modal");
+    document.getElementById("confirm-text").textContent = message;
+    document.getElementById("confirm-cancel").textContent = t("cancel");
+    document.getElementById("confirm-ok").textContent = t("confirmOk");
+    modal.style.display = "flex";
+    var okBtn = document.getElementById("confirm-ok");
+    var cancelBtn = document.getElementById("confirm-cancel");
+    function cleanup(){
+      modal.style.display = "none";
+      okBtn.removeEventListener("click", onOk);
+      cancelBtn.removeEventListener("click", onCancel);
+    }
+    function onOk(){ cleanup(); onYes(); }
+    function onCancel(){ cleanup(); }
+    okBtn.addEventListener("click", onOk);
+    cancelBtn.addEventListener("click", onCancel);
+  }
+
+  var audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+    }
+    if(audioCtx && audioCtx.state === "suspended"){ audioCtx.resume(); }
+    return audioCtx;
+  }
+  function beep(freq, dur, type, vol){
+    if(state.muted) return;
+    var ctx = ensureAudio();
+    if(!ctx) return;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  }
+  function sfxClick(){ beep(520, 0.05, "sine", 0.10); }
+  function sfxCrit(){ beep(880, 0.05, "triangle", 0.16); setTimeout(function(){ beep(1320, 0.09, "triangle", 0.14); }, 40); }
+  function sfxBuy(){ beep(320, 0.05, "square", 0.08); setTimeout(function(){ beep(480, 0.08, "square", 0.08); }, 45); }
+  function sfxInstall(){ [0,60,120,180].forEach(function(t,i){ setTimeout(function(){ beep(720 - i*40, 0.03, "square", 0.06); }, t); }); }
+  function sfxHalving(){ [300,450,650,900].forEach(function(f,i){ setTimeout(function(){ beep(f, 0.14, "triangle", 0.15); }, i*90); }); }
+
+  var offlineEarnings = 0;
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(!raw){
+        state.balance = 12;
+        state.lifetime = 12;
+        state._starter = true;
+      }
+      if(raw){
+        var saved = JSON.parse(raw);
+        state.balance = saved.balance || 0;
+        state.owned = saved.owned || state.owned;
+        state.clickOwned = saved.clickOwned || state.clickOwned;
+        state.lang = saved.lang || state.lang;
+        state.username = saved.username || "";
+        state.redeemed = saved.redeemed || {};
+        state.lifetime = saved.lifetime || 0;
+        state.halvings = saved.halvings || 0;
+        state.muted = !!saved.muted;
+        if(saved.buildBought){
+          state.buildBought = saved.buildBought;
+          state.buildInstalled = saved.buildInstalled || saved.buildBought;
+        } else if(saved.buildParts){
+          PARTS.forEach(function(p){
+            var v = !!saved.buildParts[p.id];
+            state.buildBought[p.id] = v;
+            state.buildInstalled[p.id] = v;
+          });
+        }
+        state.rigsSold = saved.rigsSold || 0;
+        state.buildMode = saved.buildMode === "detailed" ? "detailed" : "quick";
+        state.moboCased = !!saved.moboCased;
+        if(typeof saved.pasteQuality === "number") state.pasteQuality = saved.pasteQuality;
+        state.pasteDone = !!saved.pasteDone;
+        state.biosDone = !!saved.biosDone;
+        if(typeof saved.biosQuality === "number") state.biosQuality = saved.biosQuality;
+        state.buildCablesDone = saved.buildCablesDone || state.buildCablesDone;
+        if(saved.ex){ state.ex = Object.assign(exDefaults(), saved.ex); }
+        if(saved.lastSeen){
+          var elapsed = Math.min((Date.now() - saved.lastSeen) / 1000, 4 * 3600); // cap at 4h
+          var rate = 0;
+          UPGRADES.forEach(function(u){ rate += u.hr * state.owned[u.id]; });
+          var gain = Math.floor(rate * elapsed);
+          if(gain > 30){
+            state.balance += gain;
+            offlineEarnings = gain;
+          }
+        }
+      }
+    }catch(e){}
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify({balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang, username:state.username, redeemed:state.redeemed, lifetime:state.lifetime, halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, buildCablesDone:state.buildCablesDone, buildMode:state.buildMode, moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone, biosDone:state.biosDone, biosQuality:state.biosQuality, ex:state.ex, rigsSold:state.rigsSold, lastSeen:Date.now()})); }catch(e){}
+  }
+
+  function cost(u, n){
+    return u.base * Math.pow(1.19, n);
+  }
+  function bulkCost(u, n, qty){
+    var total = 0;
+    for(var i = 0; i < qty; i++) total += cost(u, n + i);
+    return total;
+  }
+  function globalMult(){
+    return 1 + state.halvings * 0.5;
+  }
+  function passiveRate(){
+    var r = 0;
+    UPGRADES.forEach(function(u){ r += u.hr * state.owned[u.id]; });
+    return (r * globalMult() + exFarmBase()) * exMult();
+  }
+  function currentPerClick(){
+    var v = 1;
+    CLICK_UPGRADES.forEach(function(u){ v *= Math.pow(u.mult, state.clickOwned[u.id]); });
+    return Math.round(v * globalMult());
+  }
+  function halvingThreshold(){
+    return 28000 * Math.pow(5.5, state.halvings);
+  }
+  function locale(){ return state.lang === "de" ? "de-DE" : "en-US"; }
+  function fmtSats(n){
+    n = Number(n) || 0;
+    if(n === 0) return "0";
+    var abs = Math.abs(n);
+    if(abs < 1) return n.toLocaleString(locale(), {minimumFractionDigits:1, maximumFractionDigits:2});
+    if(abs < 10 && n % 1 !== 0) return n.toLocaleString(locale(), {minimumFractionDigits:1, maximumFractionDigits:2});
+    if(abs < 100000) return Math.floor(n).toLocaleString(locale());
+    return n.toLocaleString(locale(), {notation:"compact", maximumFractionDigits:2});
+  }
+  function fmtUSD(n){
+    var v = (n / 100000000) * state.price;
+    return "$" + v.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function fmtCost(n){
+    n = Math.ceil(n);
+    var s = n < 100000 ? n.toLocaleString(locale()) : n.toLocaleString(locale(), {notation:"compact", maximumFractionDigits:2});
+    return s + " sats";
+  }
+
+  var balanceEl = document.getElementById("balance");
+  var usdEl = document.getElementById("usd-val");
+  var hrEl = document.getElementById("hashrate");
+  var priceEl = document.getElementById("price");
+  var shopEl = document.getElementById("shop");
+  var tickEl = document.getElementById("tick");
+  var floaters = document.getElementById("floaters");
+
+  var shopClickEl = document.getElementById("shop-click");
+  var rigEl = document.getElementById("rig-scene");
+
+  var rigSig = "";
+  function renderRig(){
+    var fanOn = passiveRate() > 0;
+    var sig = state.lang + "|" + fanOn + "|" +
+      CLICK_UPGRADES.map(function(u){ return state.clickOwned[u.id]; }).join(",") + "|" +
+      UPGRADES.map(function(u){ return state.owned[u.id]; }).join(",");
+    if(sig === rigSig) return;
+    rigSig = sig;
+    var toolsHTML = "";
+    CLICK_UPGRADES.forEach(function(u, i){
+      var n = state.clickOwned[u.id];
+      var cx = 60 + i * 60;
+      toolsHTML +=
+        '<circle cx="'+cx+'" cy="18" r="14" fill="'+(n>0?"#1c3b2e":"#171a1f")+'" stroke="'+(n>0?"var(--green)":"var(--line)")+'" stroke-width="1.5"/>' +
+        '<text x="'+cx+'" y="23" font-size="13" text-anchor="middle">'+u.icon+'</text>' +
+        (n>0 ? '<text x="'+cx+'" y="42" text-anchor="middle" class="bay-label" fill="var(--green)">×'+n+'</text>' : '');
+    });
+
+    var bayHTML = "";
+    UPGRADES.forEach(function(u, i){
+      var n = state.owned[u.id];
+      var lit = n > 0;
+      var y = 108 + i * 32;
+      bayHTML +=
+        '<rect x="35" y="'+y+'" width="230" height="26" rx="6" ' +
+          'fill="'+(lit?"url(#bayLit)":"#14171c")+'" stroke="'+(lit?"var(--btc-dim)":"var(--line)")+'"/>' +
+        '<text x="48" y="'+(y+18)+'" font-size="14">'+u.icon+'</text>' +
+        '<text x="70" y="'+(y+17)+'" class="bay-label" fill="'+(lit?"var(--text)":"var(--muted)")+'">'+u.name[state.lang]+'</text>' +
+        (lit ? '<circle cx="248" cy="'+(y+13)+'" r="11" fill="var(--btc)"/><text x="248" y="'+(y+17)+'" text-anchor="middle" class="bay-count">'+n+'</text>' : '');
+    });
+
+    var fanClass = passiveRate() > 0 ? "fan-blades" : "fan-blades idle";
+    var fanSpeed = Math.max(0.35, 2.4 - Math.min(2, passiveRate() / 50));
+
+    rigEl.innerHTML =
+      '<svg viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs><linearGradient id="bayLit" x1="0" y1="0" x2="1" y2="0">' +
+          '<stop offset="0%" stop-color="#3a2308"/><stop offset="100%" stop-color="#241605"/>' +
+        '</linearGradient></defs>' +
+        toolsHTML +
+        '<rect x="20" y="52" width="260" height="252" rx="14" fill="var(--panel)" stroke="var(--line)"/>' +
+        '<line x1="34" y1="52" x2="34" y2="304" stroke="var(--line)"/>' +
+        '<circle cx="150" cy="82" r="20" fill="#0d0f13" stroke="var(--line)"/>' +
+        '<g class="'+fanClass+'" style="animation-duration:'+fanSpeed+'s">' +
+          '<line x1="150" y1="82" x2="150" y2="66" stroke="var(--btc-dim)" stroke-width="4" stroke-linecap="round"/>' +
+          '<line x1="150" y1="82" x2="134" y2="90" stroke="var(--btc-dim)" stroke-width="4" stroke-linecap="round"/>' +
+          '<line x1="150" y1="82" x2="166" y2="90" stroke="var(--btc-dim)" stroke-width="4" stroke-linecap="round"/>' +
+        '</g>' +
+        '<circle cx="150" cy="82" r="4" fill="var(--btc)"/>' +
+        bayHTML +
+      '</svg>';
+  }
+
+  function applyStaticText(){
+    document.getElementById("mine-label").textContent = t("mine");
+    document.getElementById("title-rig").textContent = t("titleRig");
+    document.getElementById("title-click").textContent = t("titleClick");
+    document.getElementById("title-hw").textContent = t("titleHw");
+    document.getElementById("reset-btn").textContent = t("reset");
+    document.getElementById("lang-de").classList.toggle("active", state.lang === "de");
+    document.getElementById("lang-en").classList.toggle("active", state.lang === "en");
+    document.getElementById("mute-btn").textContent = state.muted ? "🔇" : "🔊";
+    document.getElementById("export-btn").textContent = t("exportBtn");
+    document.getElementById("import-btn").textContent = t("importBtn");
+    document.querySelectorAll(".qty-btn").forEach(function(b){
+      b.classList.toggle("active", Number(b.getAttribute("data-qty")) === state.buyQty);
+    });
+    document.getElementById("username-input").placeholder = t("loginPlaceholder");
+    document.getElementById("login-btn").textContent = t("loginBtn");
+    document.getElementById("logout-btn").textContent = t("logout");
+    document.getElementById("cheat-input").placeholder = t("cheatPlaceholder");
+    var ah = document.getElementById("account-hint"); if(ah) ah.textContent = t("accountHint");
+    document.getElementById("cheat-btn").textContent = t("cheatBtn");
+    var hasName = !!state.username;
+    document.getElementById("login-row").style.display = hasName ? "none" : "flex";
+    document.getElementById("greeting-row").style.display = hasName ? "flex" : "none";
+    if(hasName){
+      document.getElementById("greeting-text").innerHTML = t("signedInAs") + " <b>" + state.username.replace(/</g,"&lt;") + "</b>";
+    }
+    document.documentElement.lang = state.lang;
+  }
+
+  var shopClickSig = "", shopSig2 = "";
+  function render(){
+    applyStaticText();
+    state.perClick = currentPerClick();
+    balanceEl.innerHTML = fmtSats(state.balance) + "<small> sats</small>";
+    usdEl.textContent = "≈ " + fmtUSD(state.balance);
+    hrEl.textContent = fmtSats(passiveRate()) + " " + t("passive") + " · " + fmtSats(state.perClick) + " " + t("perClick");
+    priceEl.textContent = "$" + state.price.toLocaleString();
+
+    var clickSig = state.lang + "|" + state.buyQty + "|" + CLICK_UPGRADES.map(function(u){ return state.clickOwned[u.id]; }).join(",");
+    if(clickSig !== shopClickSig){
+      shopClickSig = clickSig;
+      shopClickEl.innerHTML = "";
+      CLICK_UPGRADES.forEach(function(u){
+        var n = state.clickOwned[u.id];
+        var qty = state.buyQty;
+        var c = bulkCost(u, n, qty);
+        var row = document.createElement("button");
+        row.className = "item";
+        row.dataset.cost = c;
+        var ownedTxt = n > 0 ? " · " + t("owned") + " " + n : "";
+        row.innerHTML =
+          '<div class="name">'+u.name[state.lang]+ownedTxt+'</div>' +
+          '<div class="desc">'+u.desc[state.lang]+' · ×'+u.mult+' '+t("perClickSuffix")+'</div>' +
+          '<div class="cost">'+(qty>1 ? t("buy")+" "+qty+"<br>" : "")+fmtCost(c)+'</div>';
+        row.addEventListener("click", function(){ buyClick(u); });
+        shopClickEl.appendChild(row);
+      });
+    }
+    Array.prototype.forEach.call(shopClickEl.children, function(row){ row.disabled = state.balance < Number(row.dataset.cost); });
+
+    var shopSig = state.lang + "|" + state.buyQty + "|" + UPGRADES.map(function(u){ return state.owned[u.id]; }).join(",");
+    if(shopSig !== shopSig2){
+      shopSig2 = shopSig;
+      shopEl.innerHTML = "";
+      UPGRADES.forEach(function(u){
+        var n = state.owned[u.id];
+        var qty = state.buyQty;
+        var c = bulkCost(u, n, qty);
+        var row = document.createElement("button");
+        row.className = "item";
+        row.dataset.cost = c;
+        var ownedTxt = n > 0 ? " · " + t("owned") + " " + n : "";
+        row.innerHTML =
+          '<div class="name">'+u.name[state.lang]+ownedTxt+'</div>' +
+          '<div class="desc">'+u.desc[state.lang]+' · +'+u.hr+' H/s</div>' +
+          '<div class="cost">'+(qty>1 ? t("buy")+" "+qty+"<br>" : "")+fmtCost(c)+'</div>';
+        row.addEventListener("click", function(){ buy(u); });
+        shopEl.appendChild(row);
+      });
+    }
+    Array.prototype.forEach.call(shopEl.children, function(row){ row.disabled = state.balance < Number(row.dataset.cost); });
+
+    renderRig();
+    renderHalving();
+    renderBuild();
+  }
+
+  function buildPartCost(p){
+    return Math.round(p.base * Math.pow(1.55, state.rigsSold) * exDealFactor(p.id));
+  }
+  function buildTotalCost(){
+    var total = 0;
+    PARTS.forEach(function(p){ total += buildPartCost(p); });
+    return total;
+  }
+  function renderBuild(){
+    document.getElementById("title-build").textContent = t("titleBuild");
+    document.getElementById("build-desc").textContent = t("buildDesc");
+    var boughtN = PARTS.filter(function(p){ return state.buildBought[p.id]; }).length;
+    var installedN = PARTS.filter(function(p){ return state.buildInstalled[p.id]; }).length;
+    var costNow = buildTotalCost();
+    var profitNow = Math.round(costNow * 1.38);
+    var progressLine = t("buildProgress").replace("{bought}", boughtN).replace("{installed}", installedN);
+    var profitLine = t("buildProfitHint").replace("{profit}", fmtCost(profitNow)).replace("{cost}", fmtCost(costNow));
+    document.getElementById("build-stat").textContent = t("rigsSold") + " " + state.rigsSold + " · " + progressLine;
+    var openBtn = document.getElementById("open-build-btn");
+    var unlocked = state.lifetime >= 40 || state.rigsSold > 0;
+    openBtn.disabled = !unlocked;
+    openBtn.textContent = unlocked ? t("launchBtn") : t("buildLocked");
+    openBtn.style.opacity = unlocked ? "1" : "0.55";
+    openBtn.title = unlocked ? profitLine : t("buildLocked");
+    document.getElementById("drag-hint").textContent = t("dragHint");
+
+    if(buildOverlayOpen()) renderBuildOverlay();
+  }
+
+  function buildOverlayOpen(){
+    return document.getElementById("build-overlay").style.display !== "none";
+  }
+  var PART_DEPENDS = {
+    cpu:["mobo"], ram:["cpu"], ssd:["ram"],
+    gpu:["ssd","moboCase"], cooler:["gpu"], psu:["cooler"]
+  };
+  var PSEUDO_NAMES = { moboCase: { en:"motherboard in case", de:"Mainboard im Gehäuse" } };
+  function moboReadyForCase(){
+    return !!(state.buildInstalled.cpu && state.buildInstalled.ram && state.buildInstalled.ssd);
+  }
+  function partAvailable(id){
+    var deps = PART_DEPENDS[id];
+    if(!deps) return true;
+    return deps.every(function(d){ return d === "moboCase" ? !!state.moboCased : !!state.buildInstalled[d]; });
+  }
+  function missingDepsLabel(id){
+    var deps = PART_DEPENDS[id] || [];
+    var missing = deps.filter(function(d){ return d === "moboCase" ? !state.moboCased : !state.buildInstalled[d]; });
+    var names = missing.map(function(d){ return d === "moboCase" ? PSEUDO_NAMES.moboCase[state.lang] : PARTS_BY_ID[d].name[state.lang]; });
+    return t("lockedHintPrefix") + " " + names.join(", ");
+  }
+  function caseTheMobo(){
+    var mesh = partMeshes.mobo;
+    if(!mesh || state.moboCased) return;
+    var from = mesh.position.clone();
+    var to = new THREE.Vector3(PART3D.mobo.pos[0], PART3D.mobo.pos[1], PART3D.mobo.pos[2]);
+    moboCaseAnim = { mesh:mesh, from:from, to:to, start: performance.now(), duration: 1100 };
+    state.moboCased = true;
+    camTarget.x = 0; camTarget.y = 0; camTarget.z = 8;
+    sfxInstall();
+    save();
+    render();
+  }
+  function allBought(){ return PARTS.every(function(p){ return state.buildBought[p.id]; }); }
+  function allInstalled(){ return PARTS.every(function(p){ return state.buildInstalled[p.id]; }); }
+  function allCablesReady(){
+    if(state.buildMode !== "detailed") return true;
+    return Object.keys(CABLES).every(function(k){ return !!state.buildCablesDone[k]; });
+  }
+
+  var dragState = null, dragActive = false;
+
+  function startDrag(e, type, id, icon, label){
+    if(e.cancelable) e.preventDefault();
+    var ghost = document.createElement("div");
+    ghost.className = "drag-ghost";
+    ghost.innerHTML = "<span>"+icon+"</span><span class=\"gname\">"+label+"</span>";
+    document.body.appendChild(ghost);
+    dragState = { type:type, id:id, ghost:ghost };
+    dragActive = true;
+    moveGhost(e.clientX, e.clientY);
+    if(type === "cable"){
+      var cfg = CABLES[id];
+      var fromPos = screenPosOfLocal(new THREE.Vector3(cfg.from[0], cfg.from[1], cfg.from[2]));
+      if(fromPos){
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.id = "cable-drag-svg";
+        svg.setAttribute("style", "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:9998;");
+        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", fromPos.x); line.setAttribute("y1", fromPos.y);
+        line.setAttribute("x2", fromPos.x); line.setAttribute("y2", fromPos.y);
+        line.setAttribute("stroke", "#f7931a"); line.setAttribute("stroke-width", "4"); line.setAttribute("stroke-linecap", "round");
+        svg.appendChild(line);
+        document.body.appendChild(svg);
+        dragState.cableLine = line;
+      }
+    }
+    window.addEventListener("pointermove", onDragMove);
+    window.addEventListener("pointerup", onDragEnd);
+  }
+  function moveGhost(x, y){
+    if(!dragState) return;
+    dragState.ghost.style.left = x + "px";
+    dragState.ghost.style.top = y + "px";
+    if(dragState.cableLine){
+      dragState.cableLine.setAttribute("x2", x);
+      dragState.cableLine.setAttribute("y2", y);
+    }
+  }
+  function onDragMove(e){ moveGhost(e.clientX, e.clientY); }
+  function onDragEnd(e){
+    if(!dragState) return;
+    var ds = dragState;
+    var ok = tryDrop(ds.type, ds.id, e.clientX, e.clientY);
+    window.removeEventListener("pointermove", onDragMove);
+    window.removeEventListener("pointerup", onDragEnd);
+    dragActive = false;
+    var svgEl = document.getElementById("cable-drag-svg");
+    if(svgEl) svgEl.remove();
+    if(!ok){
+      ds.ghost.classList.add("shake");
+      setTimeout(function(){ ds.ghost.remove(); }, 260);
+    } else {
+      ds.ghost.remove();
+    }
+    dragState = null;
+  }
+  function screenPosOfLocal(vec3local){
+    if(!rigGroup || !camera3d) return null;
+    var el = document.getElementById("case-3d");
+    if(!el) return null;
+    var rect = el.getBoundingClientRect();
+    rigGroup.updateMatrixWorld(true);
+    var v = vec3local.clone().applyMatrix4(rigGroup.matrixWorld);
+    v.project(camera3d);
+    return { x: rect.left + (v.x*0.5+0.5)*rect.width, y: rect.top + (-v.y*0.5+0.5)*rect.height };
+  }
+  function tryDrop(type, id, x, y){
+    var el = document.getElementById("case-3d");
+    if(!el) return false;
+    var rect = el.getBoundingClientRect();
+    if(x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return false;
+    var THRESH = 95;
+    if(type === "part"){
+      var mesh = partMeshes[id];
+      if(!mesh || !camera3d || !partAvailable(id)) return false;
+      var wp = new THREE.Vector3();
+      if(id === "mobo"){
+        rigGroup.updateMatrixWorld(true);
+        wp.set(BENCH.mobo[0], BENCH.mobo[1], BENCH.mobo[2]).applyMatrix4(rigGroup.matrixWorld);
+      } else {
+        mesh.getWorldPosition(wp);
+      }
+      wp.project(camera3d);
+      var pos = { x: rect.left + (wp.x*0.5+0.5)*rect.width, y: rect.top + (-wp.y*0.5+0.5)*rect.height };
+      if(Math.hypot(pos.x-x, pos.y-y) > THRESH) return false;
+      state.buildInstalled[id] = true;
+      sfxInstall(); save(); render();
+      return true;
+    } else if(type === "cable"){
+      var cfg = CABLES[id];
+      if(!cfg) return false;
+      var pos2 = screenPosOfLocal(new THREE.Vector3(cfg.to[0], cfg.to[1], cfg.to[2]));
+      if(!pos2) return false;
+      if(Math.hypot(pos2.x-x, pos2.y-y) > THRESH) return false;
+      state.buildCablesDone[id] = true;
+      sfxInstall(); save(); render();
+      return true;
+    } else if(type === "moboCase"){
+      if(!moboReadyForCase() || state.moboCased) return false;
+      var pos3 = screenPosOfLocal(new THREE.Vector3(PART3D.mobo.pos[0], PART3D.mobo.pos[1], PART3D.mobo.pos[2]));
+      if(!pos3) return false;
+      if(Math.hypot(pos3.x-x, pos3.y-y) > THRESH) return false;
+      caseTheMobo();
+      return true;
+    }
+    return false;
+  }
+
+  var bootPlayed = false, bootPlaying = false;
+
+  function openBuildOverlay(){
+    document.getElementById("build-overlay").style.display = "flex";
+    ensureCase3D();
+    if(allInstalled()) bootPlayed = true; // resuming a session where it was already assembled: skip replaying boot
+    renderBuildOverlay();
+  }
+  function closeBuildOverlay(){
+    document.getElementById("build-overlay").style.display = "none";
+  }
+  function ensureCase3D(){
+    if(!renderer3d) initCase3D();
+  }
+
+  function renderBuildOverlay(){
+    var shopPanel = document.getElementById("bo-shop");
+    var rigPanel = document.getElementById("bo-rig-area");
+    var stepsEl = document.getElementById("bo-steps");
+    var actionBtn = document.getElementById("bo-action-btn");
+    var bootScreen = document.getElementById("boot-screen");
+
+    document.getElementById("mode-quick-label").textContent = t("modeQuick");
+    document.getElementById("mode-detailed-label").textContent = t("modeDetailed");
+    document.getElementById("mode-quick").className = "bo-mode-btn" + (state.buildMode === "quick" ? " active" : "");
+    document.getElementById("mode-detailed").className = "bo-mode-btn" + (state.buildMode === "detailed" ? " active" : "");
+    document.getElementById("mode-quick").onclick = function(){ if(state.buildMode!=="quick"){ state.buildMode="quick"; save(); render(); } };
+    document.getElementById("mode-detailed").onclick = function(){ if(state.buildMode!=="detailed"){ state.buildMode="detailed"; save(); render(); } };
+
+    if(!allBought()){
+      shopPanel.style.display = "flex";
+      rigPanel.style.display = "none";
+      autoRotate = true;
+      var bn = PARTS.filter(function(p){ return state.buildBought[p.id]; }).length;
+      stepsEl.textContent = t("stepShop") + " · " + t("partsProgress").replace("{n}", bn);
+      document.getElementById("bo-shop-hint").textContent = t("shopHint");
+      var assBtn = document.getElementById("bo-to-assemble");
+      if(assBtn) assBtn.textContent = t("startAssembly");
+
+      var grid = document.getElementById("bo-shop-grid");
+      grid.innerHTML = "";
+      PARTS.forEach(function(p){
+        var bought = !!state.buildBought[p.id];
+        var c = buildPartCost(p);
+        var affordable = state.balance >= c;
+        var btn = document.createElement("button");
+        btn.className = "tray-part";
+        btn.disabled = bought || !affordable;
+        btn.innerHTML =
+          '<span class="picon">'+p.icon+'</span>' +
+          '<span class="pname">'+p.name[state.lang]+'</span>' +
+          '<span class="pcost">'+(bought ? "✓" : fmtCost(c))+'</span>';
+        if(!bought){
+          btn.addEventListener("click", function(){
+            if(state.balance < c) return;
+            state.balance -= c;
+            state.buildBought[p.id] = true;
+            if(state.ex.deals[p.id]) state.ex.used[p.id] = true;
+            sfxBuy();
+            save();
+            render();
+          });
+        }
+        grid.appendChild(btn);
+      });
+      document.getElementById("bo-to-assemble").disabled = !allBought();
+    } else {
+      shopPanel.style.display = "none";
+      rigPanel.style.display = "flex";
+      autoRotate = false;
+      exHideFarmBtn();
+      if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }
+      if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }
+
+      PARTS.forEach(function(p){ setPartVisual(p.id, !!state.buildInstalled[p.id]); });
+
+      var tableEl = document.getElementById("parts-tray");
+      tableEl.innerHTML = "";
+      var partsDone = allInstalled();
+      var cablesDone = allCablesReady();
+      var done = partsDone && cablesDone;
+      if(!partsDone){
+        stepsEl.textContent = t("stepAssemble");
+        if(moboReadyForCase() && !state.moboCased){
+          var caseCard = document.createElement("button");
+          caseCard.className = "tray-part";
+          caseCard.innerHTML =
+            '<span class="picon">🧩➡️🖥️</span>' +
+            '<span class="pname">'+PSEUDO_NAMES.moboCase[state.lang]+'</span>' +
+            '<span class="pcost">'+(state.buildMode === "detailed" ? t("dragToInstall") : t("tapToInstall"))+'</span>';
+          if(state.buildMode === "detailed"){
+            caseCard.addEventListener("pointerdown", function(e){
+              startDrag(e, "moboCase", "mobo", "🧩➡️🖥️", PSEUDO_NAMES.moboCase[state.lang]);
+            });
+          } else {
+            caseCard.addEventListener("click", function(){ caseTheMobo(); });
+          }
+          tableEl.appendChild(caseCard);
+        }
+        PARTS.slice().sort(function(a,b){ return (partAvailable(b.id)?1:0) - (partAvailable(a.id)?1:0); }).forEach(function(p){
+          if(state.buildInstalled[p.id]) return;
+          var available = partAvailable(p.id);
+          var card = document.createElement("button");
+          card.className = "tray-part" + (available ? "" : " pending");
+          card.disabled = !available;
+          card.innerHTML =
+            '<span class="picon">'+p.icon+'</span>' +
+            '<span class="pname">'+p.name[state.lang]+'</span>' +
+            '<span class="pcost">'+(!available ? missingDepsLabel(p.id) : (state.buildMode === "detailed" ? t("dragToInstall") : t("tapToInstall")))+'</span>';
+          if(available){
+            if(state.buildMode === "detailed"){
+              card.addEventListener("pointerdown", function(e){
+                startDrag(e, "part", p.id, p.icon, p.name[state.lang]);
+              });
+            } else {
+              card.addEventListener("click", function(){
+                state.buildInstalled[p.id] = true;
+                sfxInstall();
+                save();
+                render();
+              });
+            }
+          }
+          tableEl.appendChild(card);
+        });
+        actionBtn.style.display = "none";
+        bootScreen.style.display = "none";
+      } else if(!cablesDone){
+        stepsEl.textContent = t("stepAssemble");
+        Object.keys(CABLES).forEach(function(key){
+          if(state.buildCablesDone[key]) return;
+          var cfg = CABLES[key];
+          var card = document.createElement("button");
+          card.className = "tray-part";
+          card.innerHTML =
+            '<span class="picon">'+cfg.icon+'</span>' +
+            '<span class="pname">'+t(cfg.labelKey)+'</span>' +
+            '<span class="pcost">'+t("dragToConnect")+'</span>';
+          card.addEventListener("pointerdown", function(e){
+            startDrag(e, "cable", key, cfg.icon, t(cfg.labelKey));
+          });
+          tableEl.appendChild(card);
+        });
+        actionBtn.style.display = "none";
+        bootScreen.style.display = "none";
+      } else if(!bootPlayed){
+        autoRotate = true;
+        stepsEl.textContent = t("stepBoot");
+        actionBtn.style.display = "block";
+        actionBtn.disabled = bootPlaying;
+        actionBtn.textContent = t("powerOnBtn");
+        actionBtn.onclick = function(){
+          // Paste optional; no BIOS, no boot sequence
+          openPasteStage(function(){
+            bootPlayed = true;
+            bootPlaying = false;
+            state.biosDone = true;
+            var bs = document.getElementById("boot-screen");
+            if(bs) bs.style.display = "none";
+            save();
+            render();
+          });
+        };
+        bootScreen.style.display = bootPlaying ? "block" : "none";
+      } else {
+        stepsEl.textContent = t("stepComplete");
+        bootScreen.style.display = "none";
+        actionBtn.style.display = "block";
+        actionBtn.disabled = false;
+        var pasteMul = 0.85 + 0.25 * (state.pasteQuality || 0.75);
+        var biosMul = 0.9 + 0.15 * (state.biosQuality || 0.8);
+        var reward = Math.round(buildTotalCost() * 1.38 * pasteMul * biosMul * exMarketMult() * exSpeedBonus());
+        actionBtn.textContent = t("sellBtn") + " " + fmtCost(reward);
+        actionBtn.onclick = function(){ sellRig(reward); };
+        exFarmBtn(reward);
+      }
+    }
+  }
+
+
+  function pasteScoreFromCoverage(cov, overspread){
+    // ideal: coverage 0.55-0.85, low overspread
+    var c = Math.max(0, Math.min(1, cov));
+    var ideal = 1 - Math.abs(c - 0.7) / 0.7;
+    var penalty = Math.min(1, overspread * 1.2);
+    return Math.max(0.15, Math.min(1, ideal * (1 - penalty * 0.5)));
+  }
+  function openPasteStage(onDone){
+    if(state.pasteDone){ if(onDone) onDone(); return; }
+    var host = document.getElementById("bo-rig-area");
+    if(!host){ if(onDone) onDone(); return; }
+    var existing = document.getElementById("paste-stage");
+    if(existing) existing.remove();
+    var box = document.createElement("div");
+    box.className = "paste-stage"; box.id = "paste-stage";
+    box.innerHTML = '<h3>'+t("pasteTitle")+'</h3><p>'+t("pasteHint")+'</p>' +
+      '<div class="paste-canvas-wrap"><canvas id="paste-canvas" width="260" height="260"></canvas></div>' +
+      '<div class="paste-meta"><span>'+t("pasteTitle")+'</span><b id="paste-score">—</b></div>' +
+      '<div class="paste-actions"><button type="button" id="paste-skip">'+t("pasteSkip")+'</button>' +
+      '<button type="button" class="primary" id="paste-apply">'+t("pasteBtn")+'</button></div>';
+    host.insertBefore(box, host.firstChild);
+    var canvas = document.getElementById("paste-canvas");
+    var ctx = canvas.getContext("2d");
+    var grid = 32, cells = grid*grid, painted = new Uint8Array(cells);
+    var painting = false, strokes = 0;
+    function draw(){
+      ctx.fillStyle = "#0c1116"; ctx.fillRect(0,0,260,260);
+      // CPU square
+      ctx.fillStyle = "#3a4048"; ctx.fillRect(70,70,120,120);
+      ctx.fillStyle = "#b8bec5"; ctx.fillRect(90,90,80,80);
+      var cell = 120/grid;
+      for(var i=0;i<cells;i++){
+        if(!painted[i]) continue;
+        var x = i % grid, y = (i/grid)|0;
+        ctx.fillStyle = "rgba(247,147,26,0.85)";
+        ctx.fillRect(70 + x*cell, 70 + y*cell, cell+0.5, cell+0.5);
+      }
+      var cov = 0; for(var k=0;k<cells;k++) if(painted[k]) cov++;
+      cov /= cells;
+      var over = Math.max(0, strokes/cells - cov);
+      var score = pasteScoreFromCoverage(cov, over);
+      var el = document.getElementById("paste-score");
+      if(el) el.textContent = Math.round(score*100) + "%";
+      box.dataset.score = String(score);
+    }
+    function paintAt(cx, cy){
+      var rect = canvas.getBoundingClientRect();
+      var x = (cx - rect.left) / rect.width * 260;
+      var y = (cy - rect.top) / rect.height * 260;
+      if(x<70||y<70||x>190||y>190) return;
+      var gx = Math.min(grid-1, Math.max(0, ((x-70)/120*grid)|0));
+      var gy = Math.min(grid-1, Math.max(0, ((y-70)/120*grid)|0));
+      var brush = 2;
+      for(var dy=-brush; dy<=brush; dy++) for(var dx=-brush; dx<=brush; dx++){
+        var nx = gx+dx, ny = gy+dy;
+        if(nx<0||ny<0||nx>=grid||ny>=grid) continue;
+        painted[ny*grid+nx] = 1; strokes++;
+      }
+      draw();
+    }
+    function ptrDown(e){ painting = true; paintAt(e.clientX, e.clientY); e.preventDefault(); }
+    function ptrMove(e){ if(!painting) return; paintAt(e.clientX, e.clientY); e.preventDefault(); }
+    function ptrUp(){ painting = false; }
+    canvas.style.touchAction = "none";
+    canvas.addEventListener("pointerdown", ptrDown);
+    canvas.addEventListener("pointermove", ptrMove);
+    window.addEventListener("pointerup", ptrUp);
+    canvas.addEventListener("touchstart", function(e){ e.preventDefault(); }, {passive:false});
+    canvas.addEventListener("touchmove", function(e){ e.preventDefault(); }, {passive:false});
+    draw();
+    document.getElementById("paste-apply").addEventListener("pointerdown", function(e){
+      e.preventDefault();
+      state.pasteQuality = parseFloat(box.dataset.score || "0.5");
+      state.pasteDone = true;
+      window.removeEventListener("pointerup", ptrUp);
+      box.remove();
+      save();
+      if(onDone) onDone();
+    });
+    document.getElementById("paste-skip").addEventListener("pointerdown", function(e){
+      e.preventDefault();
+      state.pasteQuality = 0.55;
+      state.pasteDone = true;
+      window.removeEventListener("pointerup", ptrUp);
+      box.remove();
+      save();
+      if(onDone) onDone();
+    });
+  }
+
+
+  function openBiosStage(onDone){
+    if(state.biosDone){ if(onDone) onDone(); return; }
+    var host = document.getElementById("bo-rig-area");
+    if(!host){ if(onDone) onDone(); return; }
+    var old = document.getElementById("bios-stage");
+    if(old) old.remove();
+    var keys = ["Del","F2","F10","Esc"];
+    var seq = [];
+    for(var i=0;i<4;i++) seq.push(keys[Math.floor(Math.random()*keys.length)]);
+    var step = 0;
+    var box = document.createElement("div");
+    box.className = "bios-stage"; box.id = "bios-stage";
+    box.innerHTML =
+      '<h3>'+t("biosTitle")+'</h3>' +
+      '<p>'+t("biosHint")+'</p>' +
+      '<div class="bios-bar"><div id="bios-timer"></div></div>' +
+      '<div class="bios-target" id="bios-target">'+seq[0]+'</div>' +
+      '<div class="bios-seq" id="bios-seq"></div>' +
+      '<div class="bios-keys" id="bios-keys"></div>' +
+      '<div class="bios-msg" id="bios-msg"></div>' +
+      '<div class="paste-actions"><button type="button" id="bios-skip">'+t("biosSkip")+'</button></div>';
+    host.insertBefore(box, host.firstChild);
+    try{ box.scrollIntoView({ behavior:"smooth", block:"nearest" }); }catch(e){}
+
+    var seqEl = document.getElementById("bios-seq");
+    seq.forEach(function(k, idx){
+      var d = document.createElement("div");
+      d.className = "bios-key" + (idx===0 ? " next" : "");
+      d.textContent = k;
+      seqEl.appendChild(d);
+    });
+
+    var totalTime = (window.innerWidth < 600) ? 18000 : 14000;
+    var timeLeft = totalTime, t0 = performance.now();
+    var bar = document.getElementById("bios-timer");
+    var targetEl = document.getElementById("bios-target");
+    var msgEl = document.getElementById("bios-msg");
+    var finished = false;
+
+    function refreshTarget(){
+      if(targetEl) targetEl.textContent = step < seq.length ? seq[step] : "OK";
+    }
+
+    function onKey(k){
+      if(finished) return;
+      if(k === seq[step]){
+        var nodes = seqEl.querySelectorAll(".bios-key");
+        if(nodes[step]){ nodes[step].classList.add("done"); nodes[step].classList.remove("next"); }
+        step++;
+        if(nodes[step]) nodes[step].classList.add("next");
+        refreshTarget();
+        if(step >= seq.length){
+          finished = true;
+          clearInterval(timer);
+          state.biosDone = true;
+          state.biosQuality = Math.max(0.7, 1 - (1 - timeLeft/totalTime) * 0.3);
+          msgEl.textContent = t("biosOk");
+          msgEl.style.color = "var(--green)";
+          setTimeout(function(){ box.remove(); save(); if(onDone) onDone(); }, 400);
+        }
+      } else {
+        msgEl.textContent = t("biosFail");
+        msgEl.style.color = "var(--red)";
+        step = 0;
+        seqEl.querySelectorAll(".bios-key").forEach(function(n, idx){
+          n.classList.remove("done", "next");
+          if(idx===0) n.classList.add("next");
+        });
+        refreshTarget();
+      }
+    }
+
+    var keysEl = document.getElementById("bios-keys");
+    keys.forEach(function(k){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = k;
+      // pointerdown is more reliable on mobile than click
+      b.addEventListener("pointerdown", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        onKey(k);
+      });
+      keysEl.appendChild(b);
+    });
+
+    var timer = setInterval(function(){
+      if(finished) return;
+      timeLeft = Math.max(0, totalTime - (performance.now() - t0));
+      if(bar) bar.style.transform = "scaleX(" + (timeLeft/totalTime) + ")";
+      if(timeLeft <= 0){
+        msgEl.textContent = t("biosFail");
+        msgEl.style.color = "var(--red)";
+        step = 0;
+        seqEl.querySelectorAll(".bios-key").forEach(function(n, idx){
+          n.classList.remove("done", "next");
+          if(idx===0) n.classList.add("next");
+        });
+        refreshTarget();
+        t0 = performance.now();
+      }
+    }, 50);
+
+    document.getElementById("bios-skip").addEventListener("pointerdown", function(e){
+      e.preventDefault();
+      finished = true;
+      clearInterval(timer);
+      state.biosDone = true;
+      state.biosQuality = 0.6;
+      box.remove();
+      save();
+      if(onDone) onDone();
+    });
+  }
+
+  function playBootSequence(){
+    if(bootPlaying) return;
+    bootPlaying = true;
+    var bootScreen = document.getElementById("boot-screen");
+    var bootText = document.getElementById("boot-text");
+    var bar = document.getElementById("boot-bar-fill");
+    bootScreen.style.display = "block";
+    bootText.textContent = "";
+    bar.style.width = "0%";
+    document.getElementById("bo-action-btn").disabled = true;
+
+    var lines = t("bootLines");
+    lines.forEach(function(line, i){
+      setTimeout(function(){
+        bootText.textContent += (i>0 ? "\n" : "") + line;
+      }, i * 380);
+    });
+    setTimeout(function(){ bar.style.width = "100%"; }, 50);
+    sfxInstall();
+
+    setTimeout(function(){
+      bootPlaying = false;
+      if(exBootFault()){ render(); return; }
+      bootPlayed = true;
+      exAfterBoot();
+      render();
+    }, lines.length * 380 + 500);
+  }
+
+  function sellRig(reward){
+    state.balance += reward;
+    state.lifetime += reward;
+    state.rigsSold += 1;
+    PARTS.forEach(function(p){
+      state.buildBought[p.id] = false;
+      state.buildInstalled[p.id] = false;
+      removeScrews(p.id);
+    });
+    Object.keys(CABLES).forEach(function(k){ state.buildCablesDone[k] = false; });
+    removeAllCables();
+    state.moboCased = false;
+    state.pasteQuality = 0.75;
+    state.pasteDone = false;
+    state.biosDone = false;
+    state.biosQuality = 0.8;
+    exOnSell();
+    framingDone = false; framingDoneCase = false;
+    bootPlayed = false;
+    sfxHalving();
+    save();
+    render();
+    if(reward > 0){
+      try {
+        document.getElementById("build-overlay").style.display = "none";
+        document.getElementById("welcome-title").textContent = t("buildSoldTitle");
+        document.getElementById("welcome-body").textContent = t("buildSoldBody") + " " + t("buildNextHint");
+        document.getElementById("welcome-amount").textContent = "+" + fmtSats(reward) + " sats";
+        document.getElementById("welcome-close").textContent = t("close");
+        document.getElementById("welcome-modal").style.display = "flex";
+      } catch (e) {}
+    }
+  }
+
+  function renderHalving(){
+    var mult = state.halvings * 50;
+    document.getElementById("halving-title").textContent = t("halvingTitle");
+    document.getElementById("halving-desc").textContent = t("halvingDesc");
+    document.getElementById("halving-mult-val").textContent = "+" + mult + "%";
+    var need = halvingThreshold();
+    var pct = Math.min(100, (state.lifetime / need) * 100);
+    document.getElementById("halving-fill").style.width = pct + "%";
+    document.getElementById("halving-progress-text").textContent = fmtSats(state.lifetime) + " / " + fmtSats(need) + " " + t("halvingNeed");
+    var btn = document.getElementById("halving-btn");
+    var unlocked = state.lifetime >= need;
+    btn.disabled = !unlocked;
+    btn.textContent = unlocked ? t("halvingBtn") : t("halvingLocked");
+  }
+
+  function showBuyToast(msg){
+    var el = document.getElementById("buy-toast");
+    if(!el){
+      el = document.createElement("div");
+      el.id = "buy-toast";
+      el.className = "buy-toast";
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(showBuyToast._t);
+    showBuyToast._t = setTimeout(function(){ el.classList.remove("show"); }, 1400);
+  }
+
+  function buy(u){
+    var c = bulkCost(u, state.owned[u.id], state.buyQty);
+    if(state.balance < c) return;
+    state.balance -= c;
+    state.owned[u.id] += state.buyQty;
+    showBuyToast(t("bought") + " " + u.name[state.lang] + " ×" + state.buyQty);
+    sfxBuy();
+    save();
+    render();
+  }
+
+  function buyClick(u){
+    var c = bulkCost(u, state.clickOwned[u.id], state.buyQty);
+    if(state.balance < c) return;
+    state.balance -= c;
+    state.clickOwned[u.id] += state.buyQty;
+    showBuyToast(t("bought") + " " + u.name[state.lang] + " ×" + state.buyQty);
+    sfxBuy();
+    save();
+    render();
+  }
+
+  function spawnFloat(amount, x, crit){
+    var f = document.createElement("div");
+    f.className = "float" + (crit ? " crit" : "");
+    f.style.left = (50 + x) + "%";
+    f.textContent = (crit ? t("critical") + " " : "") + "+" + fmtSats(amount);
+    floaters.appendChild(f);
+    setTimeout(function(){ f.remove(); }, 950);
+  }
+
+  var mineBtn = document.getElementById("mine-btn");
+  mineBtn.addEventListener("click", function(e){
+    var crit = Math.random() < 0.08;
+    var gain = crit ? state.perClick * 8 : state.perClick;
+    state.balance += gain;
+    state.lifetime += gain;
+    if(crit){ sfxCrit(); } else { sfxClick(); }
+    spawnFloat(gain, (Math.random()*20-10), crit);
+    save();
+    render();
+  });
+
+  // passive income tick
+  var lastTick = Date.now();
+  setInterval(function(){
+    var now = Date.now();
+    var dt = (now - lastTick) / 1000;
+    lastTick = now;
+    var gain = passiveRate() * dt;
+    if(gain > 0){
+      state.balance += gain;
+      state.lifetime += gain;
+      render();
+    }
+  }, 1000);
+
+  // faux price drift + block height, cosmetic only
+  var block = 863000 + Math.floor(Math.random()*500);
+  setInterval(function(){
+    state.price = Math.max(20000, state.price + (Math.random()*400 - 200));
+    block += 1;
+    tickEl.textContent = t("blockHeight") + " " + block.toLocaleString();
+    priceEl.textContent = "$" + Math.round(state.price).toLocaleString();
+    usdEl.textContent = "≈ " + fmtUSD(state.balance);
+  }, 4000);
+
+  document.getElementById("halving-btn").addEventListener("click", function(){
+    if(state.lifetime < halvingThreshold()) return;
+    showConfirm(t("halvingConfirm"), function(){
+      state.balance = 0;
+      UPGRADES.forEach(function(u){ state.owned[u.id] = 0; });
+      CLICK_UPGRADES.forEach(function(u){ state.clickOwned[u.id] = 0; });
+      state.halvings += 1;
+      sfxHalving();
+      save();
+      render();
+    });
+  });
+
+  document.getElementById("reset-btn").addEventListener("click", function(){
+    showConfirm(t("resetConfirm"), function(){
+      state.balance = 0;
+      UPGRADES.forEach(function(u){ state.owned[u.id] = 0; });
+      CLICK_UPGRADES.forEach(function(u){ state.clickOwned[u.id] = 0; });
+      state.lifetime = 0;
+      state.halvings = 0;
+      PARTS.forEach(function(p){
+        state.buildBought[p.id] = false;
+        state.buildInstalled[p.id] = false;
+        removeScrews(p.id);
+      });
+      bootPlayed = false;
+      save();
+      render();
+    });
+  });
+
+  document.querySelectorAll(".lang-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.lang = btn.getAttribute("data-lang");
+      save();
+      render();
+    });
+  });
+
+  document.querySelectorAll(".qty-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.buyQty = Number(btn.getAttribute("data-qty"));
+      render();
+    });
+  });
+
+  document.getElementById("login-btn").addEventListener("click", doLogin);
+  document.getElementById("username-input").addEventListener("keydown", function(e){
+    if(e.key === "Enter") doLogin();
+  });
+  function doLogin(){
+    var name = document.getElementById("username-input").value.trim().slice(0,18);
+    if(!name) return;
+    state.username = name;
+    save();
+    applyStaticText();
+  }
+  document.getElementById("logout-btn").addEventListener("click", function(){
+    state.username = "";
+    document.getElementById("username-input").value = "";
+    save();
+    applyStaticText();
+  });
+
+  var cheatMsgEl = document.getElementById("cheat-msg");
+  var cheatMsgTimer = null;
+  function showCheatMsg(text, ok){
+    cheatMsgEl.textContent = text;
+    cheatMsgEl.className = "cheat-msg " + (ok ? "ok" : "err");
+    clearTimeout(cheatMsgTimer);
+    cheatMsgTimer = setTimeout(function(){ cheatMsgEl.textContent = ""; cheatMsgEl.className = "cheat-msg"; }, 4000);
+  }
+  function redeemCheat(){
+    var input = document.getElementById("cheat-input");
+    var code = input.value.trim().toUpperCase();
+    if(!code) return;
+    if(state.redeemed[code]){
+      showCheatMsg(t("cheatUsed"), false);
+      return;
+    }
+    var reward = CHEATS[code];
+    if(!reward){
+      showCheatMsg(t("cheatInvalid"), false);
+      return;
+    }
+    state.redeemed[code] = true;
+    state.balance += reward.sats;
+    state.lifetime += reward.sats;
+    save();
+    render();
+    input.value = "";
+    balanceEl.classList.remove("flash");
+    void balanceEl.offsetWidth;
+    balanceEl.classList.add("flash");
+    showCheatMsg(t("cheatOk") + " +" + fmtSats(reward.sats) + " sats", true);
+  }
+  document.getElementById("cheat-btn").addEventListener("click", redeemCheat);
+  document.getElementById("cheat-input").addEventListener("keydown", function(e){
+    if(e.key === "Enter") redeemCheat();
+  });
+
+  document.getElementById("mute-btn").addEventListener("click", function(){
+    state.muted = !state.muted;
+    save();
+    applyStaticText();
+    if(!state.muted) sfxClick();
+  });
+
+  function currentSaveData(){
+    return {
+      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,
+      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,
+      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, rigsSold:state.rigsSold, lastSeen:Date.now()
+    };
+  }
+
+  document.getElementById("export-btn").addEventListener("click", async function(){
+    var data = JSON.stringify(currentSaveData(), null, 2);
+    try{
+      var downloads = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+      if(downloads){
+        await downloads.save({ filename: "hashpool-save.json", data: data });
+        showCheatMsg(t("exportedMsg"), true);
+        return;
+      }
+    }catch(e){}
+    // fallback: plain browser download
+    try{
+      var blob = new Blob([data], {type:"application/json"});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = "hashpool-save.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      showCheatMsg(t("exportedMsg"), true);
+    }catch(e){}
+  });
+
+  document.getElementById("import-btn").addEventListener("click", function(){
+    document.getElementById("import-file").click();
+  });
+  document.getElementById("import-file").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var data = JSON.parse(reader.result);
+        if(typeof data.balance !== "number" || typeof data.owned !== "object"){
+          throw new Error("invalid");
+        }
+        state.balance = data.balance || 0;
+        state.owned = data.owned || state.owned;
+        state.clickOwned = data.clickOwned || state.clickOwned;
+        state.lang = data.lang || state.lang;
+        state.username = data.username || "";
+        state.redeemed = data.redeemed || {};
+        state.lifetime = data.lifetime || 0;
+        state.halvings = data.halvings || 0;
+        state.muted = !!data.muted;
+        state.buildBought = data.buildBought || state.buildBought;
+        state.buildInstalled = data.buildInstalled || state.buildInstalled;
+        state.rigsSold = data.rigsSold || 0;
+        save();
+        render();
+        showCheatMsg(t("importedMsg"), true);
+      }catch(err){
+        showCheatMsg(t("importError"), false);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("open-build-btn").addEventListener("click", openBuildOverlay);
+  document.getElementById("bo-close").addEventListener("click", closeBuildOverlay);
+  document.getElementById("bo-to-assemble").addEventListener("click", function(){ renderBuildOverlay(); });
+
+  document.getElementById("welcome-close").addEventListener("click", function(){
+    document.getElementById("welcome-modal").style.display = "none";
+  });
+
+  // save lastSeen periodically so offline progress is tracked even without clicking
+  /* ================= EXTRAS: Markt, Hitze, Events, Farm, Missionen, Marktplatz, Fehlersuche, Speedbau ================= */
+  var exActive = null;
+  function exL(en, de){ return state.lang === "de" ? de : en; }
+  function exEl(id){ return document.getElementById(id); }
+  var EX_STYLES = [
+    {n:["Cyan","Cyan"], c:0x22d3ee, cost:0}, {n:["Red","Rot"], c:0xff3b3b, cost:5000},
+    {n:["Green","Grün"], c:0x2fd98a, cost:5000}, {n:["Purple","Lila"], c:0xa855f7, cost:5000}
+  ];
+  var EX_ELEC = [0.30, 0.20, 0.10, 0.04];
+  var EX_SYMPTOM = {
+    cpu:["No POST, board stays black","Kein POST, Board bleibt schwarz"],
+    ram:["Three long beeps","Dreimal langes Piepen"],
+    ssd:["No boot device found","Kein Startlaufwerk gefunden"],
+    mobo:["Random restarts, dead USB","Zufällige Neustarts, USB tot"],
+    gpu:["No display signal","Kein Bildsignal"],
+    cooler:["CPU at 100°C, shuts down","CPU bei 100°C, schaltet ab"],
+    psu:["Clicks and turns itself off","Klickt und schaltet sich ab"]
+  };
+  function exDefaults(){
+    return {mkt:1, hist:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], heat:20, throttle:1, cool:0, tariff:0, pool:0, oc:false,
+      farm:[], slots:4, style:0, styles:[true,false,false,false], speed:false, tStart:0, best:[], bonus:1,
+      deals:{}, dealDay:"", used:{}, ach:{}, ev:0, fixes:0, blackout:0, trend:0, faultPart:""};
+  }
+  function exDiff(){ return 1 + 0.03 * state.rigsSold + 0.05 * state.ex.farm.length; }
+  function exMult(){
+    var ex = state.ex; if(!ex) return 1;
+    if(Date.now() < ex.blackout) return 0;
+    return ex.mkt * ex.throttle * (ex.oc ? 1.3 : 1) * (1 + 0.12 * ex.pool) / exDiff() * (1 - EX_ELEC[ex.tariff]);
+  }
+  function exFarmBase(){
+    var ex = state.ex; if(!ex) return 0; var s = 0;
+    ex.farm.forEach(function(f){ s += f.cost * 0.005 * (1 - f.dust / 160); });
+    return s;
+  }
+  function exMarketMult(){ return state.ex ? state.ex.mkt : 1; }
+  function exSpeedBonus(){ return state.ex && state.ex.speed ? state.ex.bonus : 1; }
+  function exDealFactor(id){ var d = state.ex && state.ex.deals[id]; return d ? (1 - d) : 1; }
+  function exToast(msg){
+    var d = document.createElement("div"); d.className = "ex-note"; d.textContent = msg;
+    document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 3200);
+  }
+
+  /* --- panel --- */
+  var exStyleTag = document.createElement("style");
+  exStyleTag.textContent =
+    "#ex-root{margin-top:22px}.ex-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto}.ex-tab{flex:1;min-width:max-content;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:12px;font-weight:800;padding:10px 12px;cursor:pointer}.ex-tab.on{background:var(--btc);color:#1a1206;border-color:var(--btc)}.ex-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;align-items:start}#ex-root[data-tab=\"m\"] .ex-card:not([data-t=\"m\"]),#ex-root[data-tab=\"f\"] .ex-card:not([data-t=\"f\"]),#ex-root[data-tab=\"s\"] .ex-card:not([data-t=\"s\"]),#ex-root[data-tab=\"a\"] .ex-card:not([data-t=\"a\"]){display:none}.ex-card{margin-bottom:0;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}" +
+    ".ex-h{font-weight:800;font-size:13px;margin-bottom:8px;color:var(--btc);letter-spacing:.03em}.ex-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}" +
+    ".ex-big{font-size:22px;font-weight:800}.ex-small{font-size:11px;color:var(--muted)}.ex-bar{height:8px;background:#0b0d10;border-radius:6px;overflow:hidden;margin-top:6px}.ex-bar>div{height:100%;transition:width .5s}" +
+    ".ex-btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;padding:7px 10px;cursor:pointer}.ex-btn:disabled{opacity:.4}.ex-btn.on{background:var(--btc);color:#1a1206;border-color:var(--btc)}" +
+    ".ex-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}.ex-slot{border:1px dashed var(--line);border-radius:10px;padding:8px;text-align:center;font-size:11px;min-height:64px}.ex-slot.full{border-style:solid;border-color:var(--btc-dim)}" +
+    ".ex-note{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:50%;transform:translateX(-50%);background:#161a20;border:1px solid var(--btc);color:var(--text);padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;z-index:9999;max-width:88vw;text-align:center}" +
+    "#ex-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);width:min(92vw,340px);background:#1b1416;border:2px solid var(--red);border-radius:14px;padding:12px 14px;z-index:9998;text-align:center}" +
+    "#ex-toast b{display:block;font-size:15px;margin-bottom:6px}#ex-toast .ex-btn{width:100%;font-size:14px;padding:12px}#ex-fault{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9997;display:flex;align-items:center;justify-content:center;padding:18px}" +
+    "#ex-fault .box{background:var(--panel);border:1px solid var(--red);border-radius:14px;padding:16px;max-width:360px;width:100%}#ex-timer{font-size:12px;color:var(--btc);font-weight:800;margin-top:4px}";
+  document.head.appendChild(exStyleTag);
+
+  var exSigs = {};
+  function exSet(id, sig, build){
+    if(exSigs[id] === sig) return; exSigs[id] = sig; var e = exEl(id); if(e) build(e);
+  }
+  function exBtn(txt, fn, disabled, cls){
+    var b = document.createElement("button"); b.className = "ex-btn" + (cls ? " " + cls : ""); b.innerHTML = txt; b.disabled = !!disabled;
+    b.addEventListener("click", fn); return b;
+  }
+  function exBuildRoot(){
+    var root = exEl("ex-root"); if(!root) return;
+    root.setAttribute("data-tab", exTab);
+    root.innerHTML =
+      '<div class="ex-tabs" id="ex-tabs"></div><div class="ex-cards">' +
+      '<div class="ex-card" data-t="m"><div class="ex-h" id="ex-h-mkt"></div><div class="ex-row"><span class="ex-big" id="ex-mkt"></span><span class="ex-small" id="ex-mkt-sub"></span></div><canvas id="ex-spark" width="300" height="46" style="width:100%;height:46px;margin-top:8px"></canvas><div class="ex-small" id="ex-mkt-hint"></div></div>' +
+      '<div class="ex-card" data-t="m"><div class="ex-h" id="ex-h-ops"></div><div class="ex-small" id="ex-heat-txt"></div><div class="ex-bar"><div id="ex-heat-bar"></div></div><div class="ex-small" id="ex-ops-info" style="margin-top:6px"></div><div class="ex-row" id="ex-ups"></div></div>' +
+      '<div class="ex-card" data-t="f"><div class="ex-h" id="ex-h-farm"></div><div class="ex-grid" id="ex-farm"></div><div class="ex-row" id="ex-farm-ctl"></div></div>' +
+      '<div class="ex-card" data-t="f"><div class="ex-h" id="ex-h-speed"></div><div class="ex-row" id="ex-speed"></div></div>' +
+      '<div class="ex-card" data-t="s"><div class="ex-h" id="ex-h-deals"></div><div id="ex-deals"></div></div>' +
+      '<div class="ex-card" data-t="s"><div class="ex-h" id="ex-h-look"></div><div class="ex-row" id="ex-look"></div></div>' +
+      '<div class="ex-card" data-t="a"><div class="ex-h" id="ex-h-ach"></div><div id="ex-ach"></div></div></div>';
+    exRenderTabs();
+  }
+  var exTab = "m";
+  function exRenderTabs(){
+    var bar = exEl("ex-tabs"); if(!bar) return; bar.innerHTML = "";
+    [["m","📈 " + exL("Market","Markt")],["f","🏭 Farm"],["s","🛒 Shop"],["a","🏆 " + exL("Missions","Missionen")]].forEach(function(t2){
+      var b = document.createElement("button"); b.className = "ex-tab" + (exTab === t2[0] ? " on" : ""); b.textContent = t2[1];
+      b.addEventListener("click", function(){ exTab = t2[0]; exEl("ex-root").setAttribute("data-tab", exTab); exRenderTabs(); if(exTab === "m") exSpark(); });
+      bar.appendChild(b);
+    });
+  }
+  function exSpark(){
+    var c = exEl("ex-spark"); if(!c) return; var g = c.getContext("2d"); var h = state.ex.hist; g.clearRect(0,0,c.width,c.height);
+    g.strokeStyle = state.ex.mkt >= 1 ? "#2fd98a" : "#ff5c5c"; g.lineWidth = 2; g.beginPath();
+    h.forEach(function(v, i){ var x = i / (h.length - 1) * (c.width - 4) + 2, y = c.height - 4 - (v - 0.5) / 1.7 * (c.height - 8); if(i) g.lineTo(x, y); else g.moveTo(x, y); }); g.stroke();
+  }
+  function exRenderPanel(){
+    var ex = state.ex; if(!ex || !exEl("ex-root")) return;
+    if(!exEl("ex-mkt")) exBuildRoot();
+    exEl("ex-h-mkt").textContent = "📈 " + exL("BITCOIN MARKET", "BITCOIN-MARKT");
+    exEl("ex-mkt").textContent = "×" + ex.mkt.toFixed(2);
+    exEl("ex-mkt").style.color = ex.mkt >= 1 ? "var(--green)" : "var(--red)";
+    exEl("ex-mkt-sub").textContent = exL("multiplies mining income and rig sale prices", "wirkt auf Mining-Einnahmen und Rig-Verkaufspreise");
+    exEl("ex-mkt-hint").textContent = ex.mkt > 1.35 ? exL("Bull market — good time to sell rigs!", "Bullenmarkt – gute Zeit, Rigs zu verkaufen!") : ex.mkt < 0.8 ? exL("Crash — hold your rigs, don't sell.", "Crash – Rigs behalten, nicht verkaufen.") : exL("Sideways market.", "Seitwärtsmarkt.");
+    exSpark();
+    exEl("ex-h-ops").textContent = "🔥 " + exL("POWER & HEAT", "STROM & HITZE");
+    exEl("ex-heat-txt").textContent = exL("Heat", "Hitze") + " " + Math.round(ex.heat) + "% · " + (ex.throttle < 1 ? exL("throttled ×", "gedrosselt ×") + ex.throttle : exL("stable", "stabil"));
+    var hb = exEl("ex-heat-bar"); hb.style.width = ex.heat + "%"; hb.style.background = ex.heat > 90 ? "var(--red)" : ex.heat > 75 ? "var(--btc)" : "var(--green)";
+    exEl("ex-ops-info").textContent = exL("Electricity cost ", "Stromkosten ") + Math.round(EX_ELEC[ex.tariff] * 100) + "% · " + exL("Difficulty ", "Schwierigkeit ") + exDiff().toFixed(2) + " · Pool +" + ex.pool * 12 + "%" + (Date.now() < ex.blackout ? " · ⚡ " + exL("BLACKOUT", "STROMAUSFALL") : "");
+    var upSig = [ex.cool, ex.tariff, ex.pool, ex.oc, Math.floor(state.balance / 500), state.lang].join();
+    exSet("ex-ups", upSig, function(e){
+      e.innerHTML = "";
+      var cc = 3000 * Math.pow(3, ex.cool), tc = 8000 * Math.pow(3, ex.tariff), pc = 5000 * Math.pow(2.5, ex.pool);
+      e.appendChild(exBtn("❄️ " + exL("Cooling ", "Kühlung ") + ex.cool + "/4<br>" + (ex.cool < 4 ? fmtCost(cc) : "MAX"), function(){ if(ex.cool < 4 && state.balance >= cc){ state.balance -= cc; ex.cool++; save(); render(); exRenderPanel(); } }, ex.cool >= 4 || state.balance < cc));
+      e.appendChild(exBtn("💡 " + exL("Power plan ", "Stromtarif ") + ex.tariff + "/3<br>" + (ex.tariff < 3 ? fmtCost(tc) : "MAX"), function(){ if(ex.tariff < 3 && state.balance >= tc){ state.balance -= tc; ex.tariff++; save(); render(); exRenderPanel(); } }, ex.tariff >= 3 || state.balance < tc));
+      e.appendChild(exBtn("🤝 Pool " + ex.pool + "/5<br>" + (ex.pool < 5 ? fmtCost(pc) : "MAX"), function(){ if(ex.pool < 5 && state.balance >= pc){ state.balance -= pc; ex.pool++; save(); render(); exRenderPanel(); } }, ex.pool >= 5 || state.balance < pc));
+      e.appendChild(exBtn("⚡ " + exL("Overclock ", "Übertakten ") + (ex.oc ? "ON" : "OFF") + "<br>+30% / " + exL("hot", "heiß"), function(){ ex.oc = !ex.oc; save(); exRenderPanel(); }, false, ex.oc ? "on" : ""));
+    });
+    exEl("ex-h-farm").textContent = "🏭 " + exL("MINING FARM", "MINING-FARM") + " (" + ex.farm.length + "/" + ex.slots + ")";
+    var farmSig = ex.farm.map(function(f){ return Math.round(f.dust / 10) + ":" + Math.round(f.cost); }).join("|") + ex.slots + state.lang + Math.floor(state.balance / 500);
+    exSet("ex-farm", farmSig, function(e){
+      e.innerHTML = "";
+      for(var i = 0; i < ex.slots; i++){
+        (function(i){
+          var f = ex.farm[i]; var s = document.createElement("div"); s.className = "ex-slot" + (f ? " full" : "");
+          if(f){
+            var inc = f.cost * 0.005 * (1 - f.dust / 160);
+            s.innerHTML = "🖥️ Rig #" + (i + 1) + "<br><span class='ex-small'>+" + fmtSats(inc) + "/s · " + exL("dust ", "Staub ") + Math.round(f.dust) + "%</span>";
+            s.appendChild(document.createElement("br"));
+            s.appendChild(exBtn("🧹 " + exL("Clean", "Reinigen"), function(){ f.dust = 0; save(); exSigs["ex-farm"] = ""; exRenderPanel(); }, f.dust < 5));
+          } else s.innerHTML = "<span class='ex-small'>" + exL("empty slot", "freier Platz") + "</span>";
+          e.appendChild(s);
+        })(i);
+      }
+    });
+    exSet("ex-farm-ctl", ex.slots + "|" + Math.floor(state.balance / 500) + state.lang, function(e){
+      e.innerHTML = ""; var sc = 20000 * Math.pow(2, ex.slots - 4);
+      e.appendChild(exBtn("➕ " + exL("Extra slot ", "Extra-Platz ") + fmtCost(sc), function(){ if(state.balance >= sc && ex.slots < 12){ state.balance -= sc; ex.slots++; save(); render(); exRenderPanel(); } }, ex.slots >= 12 || state.balance < sc));
+      var t2 = document.createElement("span"); t2.className = "ex-small"; t2.textContent = exL("Finished rigs can go into the farm instead of being sold.", "Fertige Rigs kannst du in die Farm stellen statt sie zu verkaufen."); e.appendChild(t2);
+    });
+    exEl("ex-h-deals").textContent = "🛒 " + exL("USED PARTS MARKET (today)", "GEBRAUCHTMARKT (heute)");
+    exSet("ex-deals", Object.keys(ex.deals).join() + state.lang, function(e){
+      e.innerHTML = "";
+      Object.keys(ex.deals).forEach(function(id){
+        var p = PARTS_BY_ID[id]; if(!p) return; var r = document.createElement("div"); r.className = "ex-small"; r.style.margin = "4px 0";
+        r.textContent = p.name[state.lang] + " −" + Math.round(ex.deals[id] * 100) + "% · " + exL("used: may be faulty", "gebraucht: evtl. defekt"); e.appendChild(r);
+      });
+      var n = document.createElement("div"); n.className = "ex-small"; n.style.marginTop = "6px"; n.textContent = exL("Discount applies automatically in the PC build shop.", "Der Rabatt gilt automatisch im PC-Bau-Shop."); e.appendChild(n);
+    });
+    exEl("ex-h-speed").textContent = "⏱️ " + exL("SPEED BUILD", "SPEEDBAU");
+    exSet("ex-speed", ex.speed + "|" + ex.best.join() + state.lang, function(e){
+      e.innerHTML = ""; e.appendChild(exBtn(exL("Timer ", "Zeitmessung ") + (ex.speed ? "ON" : "OFF"), function(){ ex.speed = !ex.speed; save(); exRenderPanel(); }, false, ex.speed ? "on" : ""));
+      var t3 = document.createElement("span"); t3.className = "ex-small"; t3.textContent = (ex.best.length ? exL("Best: ", "Bestzeiten: ") + ex.best.map(function(x){ return x.toFixed(0) + "s"; }).join(" · ") : exL("Under 2 min = +25% sale price", "Unter 2 Min = +25% Verkaufspreis")); e.appendChild(t3);
+    });
+    exEl("ex-h-ach").textContent = "🏆 " + exL("MISSIONS", "MISSIONEN");
+    exSet("ex-ach", EX_ACH.map(function(a){ return ex.ach[a.id] ? 1 : 0; }).join("") + state.lang, function(e){
+      e.innerHTML = "";
+      EX_ACH.forEach(function(a){ var r = document.createElement("div"); r.className = "ex-small"; r.style.margin = "4px 0"; r.style.color = ex.ach[a.id] ? "var(--green)" : "var(--muted)"; r.textContent = (ex.ach[a.id] ? "✓ " : "○ ") + a.t[state.lang === "de" ? 1 : 0] + " (+" + fmtSats(a.r) + ")"; e.appendChild(r); });
+    });
+    exEl("ex-h-look").textContent = "🎨 " + exL("CASE LOOK (RGB)", "GEHÄUSE-LOOK (RGB)");
+    exSet("ex-look", ex.style + "|" + ex.styles.join() + Math.floor(state.balance / 500) + state.lang, function(e){
+      e.innerHTML = "";
+      EX_STYLES.forEach(function(s, i){
+        var own = ex.styles[i];
+        e.appendChild(exBtn((i === ex.style ? "✓ " : "") + s.n[state.lang === "de" ? 1 : 0] + (own ? "" : "<br>" + fmtCost(s.cost)), function(){
+          if(!own){ if(state.balance < s.cost) return; state.balance -= s.cost; ex.styles[i] = true; }
+          ex.style = i; exApplyStyle(); save(); render(); exRenderPanel();
+        }, !own && state.balance < s.cost, i === ex.style ? "on" : ""));
+      });
+    });
+  }
+  function exApplyStyle(){
+    var c = EX_STYLES[state.ex.style].c;
+    if(typeof rgbMeshes !== "undefined") rgbMeshes.forEach(function(m){ m.material.color.setHex(c); m.material.emissive.setHex(c); });
+  }
+
+  /* --- missions --- */
+  var EX_ACH = [
+    {id:"first", r:500, t:["Build your first PC","Baue deinen ersten PC"], ok:function(){ return state.rigsSold >= 1; }},
+    {id:"sold3", r:5000, t:["Finish 3 rigs","Stelle 3 Rigs fertig"], ok:function(){ return state.rigsSold >= 3; }},
+    {id:"farm3", r:15000, t:["3 rigs in the farm","3 Rigs in der Farm"], ok:function(){ return state.ex.farm.length >= 3; }},
+    {id:"speed", r:8000, t:["Build a PC in under 2 min","Baue einen PC in unter 2 Min"], ok:function(){ return state.ex.best.length && state.ex.best[0] <= 120; }},
+    {id:"fix", r:3000, t:["Find a faulty part","Finde ein defektes Teil"], ok:function(){ return state.ex.fixes >= 1; }},
+    {id:"ev5", r:6000, t:["Survive 5 incidents","Überstehe 5 Zwischenfälle"], ok:function(){ return state.ex.ev >= 5; }},
+    {id:"m1", r:20000, t:["Mine 1M sats in total","Minde insgesamt 1 Mio. Sats"], ok:function(){ return state.lifetime >= 1e6; }},
+    {id:"cool", r:4000, t:["Cooling level 2","Kühlung Stufe 2"], ok:function(){ return state.ex.cool >= 2; }}
+  ];
+  function exCheckMissions(){
+    var got = false;
+    EX_ACH.forEach(function(a){
+      if(!state.ex.ach[a.id] && a.ok()){ state.ex.ach[a.id] = true; state.balance += a.r; state.lifetime += a.r; got = true; exToast("🏆 " + a.t[state.lang === "de" ? 1 : 0] + " +" + fmtSats(a.r)); }
+    });
+    if(got){ save(); render(); }
+  }
+
+  /* --- market, heat, dust, deals --- */
+  function exDayDeals(){
+    var day = new Date().toISOString().slice(0, 10);
+    if(state.ex.dealDay === day) return;
+    state.ex.dealDay = day; state.ex.deals = {};
+    var ids = PARTS.map(function(p){ return p.id; }).sort(function(){ return Math.random() - 0.5; }).slice(0, 3);
+    ids.forEach(function(id){ state.ex.deals[id] = 0.3 + Math.random() * 0.2; });
+  }
+  setInterval(function(){
+    var ex = state.ex;
+    ex.trend = ex.trend * 0.9 + (Math.random() - 0.5) * 0.06;
+    if(Math.random() < 0.04) ex.trend += (Math.random() < 0.5 ? -0.25 : 0.25);
+    ex.mkt = Math.max(0.55, Math.min(2.1, ex.mkt + ex.trend + (1 - ex.mkt) * 0.03));
+    ex.hist.push(ex.mkt); if(ex.hist.length > 16) ex.hist.shift();
+  }, 3000);
+  setInterval(function(){
+    var ex = state.ex, units = 0;
+    UPGRADES.forEach(function(u){ units += state.owned[u.id]; });
+    var load = units * 1.5 + ex.farm.length * 9 + (ex.oc ? 18 : 0), cap = 40 + ex.cool * 30;
+    var target = Math.min(100, load / cap * 65);
+    ex.heat += (target - ex.heat) * 0.1;
+    ex.throttle = ex.heat > 90 ? 0.5 : ex.heat > 75 ? 0.8 : 1;
+    ex.farm.forEach(function(f){ f.dust = Math.min(100, f.dust + 0.2 + Math.random() * 0.15); });
+    exDayDeals();
+    exCheckMissions();
+    exRenderPanel();
+  }, 1000);
+
+  /* --- random events (quick-time) --- */
+  function exEvent(kind){
+    if(exActive) return;
+    var ex = state.ex;
+    var D = {
+      outage:{i:"⚡", t:exL("Power outage!", "Stromausfall!"), b:exL("Flip the fuse", "Sicherung einschalten"), need:1, time:8, fail:function(){ ex.blackout = Date.now() + 25000; }},
+      hack:{i:"🛡️", t:exL("Hacker attack!", "Hackerangriff!"), b:exL("DEFEND!", "ABWEHREN!"), need:6, time:7, fail:function(){ var l = Math.floor(state.balance * 0.1); state.balance -= l; }},
+      dust:{i:"🌫️", t:exL("Dust storm in the hall", "Staubsturm in der Halle"), b:exL("Blow it out", "Auspusten"), need:4, time:8, fail:function(){ ex.farm.forEach(function(f){ f.dust = Math.min(100, f.dust + 35); }); ex.heat = Math.min(100, ex.heat + 15); }},
+      fire:{i:"🔥", t:exL("Cable fire!", "Kabelbrand!"), b:exL("EXTINGUISH", "LÖSCHEN"), need:6, time:6, fail:function(){ if(ex.farm.length) ex.farm.pop(); else state.balance -= state.balance * 0.15; }}
+    };
+    var d = D[kind]; if(!d) return;
+    var box = document.createElement("div"); box.id = "ex-toast";
+    box.innerHTML = "<b>" + d.i + " " + d.t + "</b><div class='ex-small' id='ex-tt'></div><button class='ex-btn' id='ex-tb'></button><div class='ex-bar'><div id='ex-tbar' style='background:var(--red);width:100%'></div></div>";
+    document.body.appendChild(box);
+    var count = 0, start = Date.now(); exActive = kind;
+    var btn = exEl("ex-tb");
+    function label(){ btn.textContent = d.b + (d.need > 1 ? " (" + count + "/" + d.need + ")" : ""); }
+    label();
+    function finish(win){
+      clearInterval(iv); exActive = null; box.remove();
+      if(win){ var rw = Math.max(50, Math.round(passiveRate() * 45)); state.balance += rw; state.lifetime += rw; exToast("✅ " + exL("Saved! ", "Gerettet! ") + "+" + fmtSats(rw)); }
+      else { d.fail(); exToast("💥 " + exL("Failed – you took damage.", "Fehlgeschlagen – es gab Schaden.")); }
+      ex.ev++; save(); render(); exRenderPanel(); exCheckMissions();
+    }
+    btn.addEventListener("click", function(){ count++; label(); if(count >= d.need) finish(true); });
+    var iv = setInterval(function(){
+      var left = d.time - (Date.now() - start) / 1000;
+      exEl("ex-tbar").style.width = Math.max(0, left / d.time * 100) + "%";
+      if(left <= 0) finish(false);
+    }, 100);
+  }
+  function exScheduleEvent(){
+    setTimeout(function(){
+      var ex = state.ex, kinds = ["outage", "hack", "dust"];
+      if(ex.farm.length || ex.oc) kinds.push("fire");
+      var kind = (ex.oc && ex.heat > 80 && Math.random() < 0.5) ? "fire" : kinds[Math.floor(Math.random() * kinds.length)];
+      if(exEl("build-overlay") && exEl("build-overlay").style.display !== "none") { /* not while building */ } else exEvent(kind);
+      exScheduleEvent();
+    }, 45000 + Math.random() * 45000);
+  }
+
+  /* --- boot faults (used parts / bent pins) --- */
+  function exBootFault(){
+    var ex = state.ex, cand = PARTS.filter(function(p){ return ex.used[p.id] && Math.random() < 0.3; }).map(function(p){ return p.id; });
+    if(!cand.length && Math.random() < 0.08) cand = [PARTS[Math.floor(Math.random() * PARTS.length)].id];
+    if(!cand.length) return false;
+    ex.faultPart = cand[0];
+    var m = document.createElement("div"); m.id = "ex-fault";
+    var sym = EX_SYMPTOM[ex.faultPart][state.lang === "de" ? 1 : 0];
+    m.innerHTML = "<div class='box'><div class='ex-h'>⚠️ " + exL("BOOT FAILED", "BOOT FEHLGESCHLAGEN") + "</div><div class='ex-small' style='font-size:12px;color:var(--text)'>" + exL("Symptom: ", "Symptom: ") + "<b>" + sym + "</b><br>" + exL("Which part is faulty?", "Welches Teil ist defekt?") + "</div><div class='ex-grid' id='ex-fp'></div><div class='ex-small' id='ex-fmsg' style='margin-top:8px'></div></div>";
+    document.body.appendChild(m);
+    PARTS.forEach(function(p){
+      exEl("ex-fp").appendChild(exBtn(p.icon + " " + p.name[state.lang], function(){
+        if(p.id === ex.faultPart){
+          var c = Math.min(state.balance, Math.round(buildPartCost(p) * 0.3)); state.balance -= c; ex.used[p.id] = false; ex.fixes++; m.remove();
+          exToast("🔧 " + exL("Fixed! Replacement cost ", "Behoben! Ersatzteil ") + fmtCost(c)); bootPlayed = true; exAfterBoot(); save(); render();
+        } else {
+          var pen = Math.min(state.balance, Math.round(state.balance * 0.03)); state.balance -= pen; exEl("ex-fmsg").textContent = "❌ " + exL("Wrong part, lost ", "Falsches Teil, verloren: ") + fmtCost(pen); render();
+        }
+      }));
+    });
+    return true;
+  }
+  function exAfterBoot(){
+    var ex = state.ex;
+    if(ex.speed && ex.tStart){
+      var s = (Date.now() - ex.tStart) / 1000; ex.tStart = 0;
+      ex.best.push(s); ex.best.sort(function(a, b){ return a - b; }); ex.best = ex.best.slice(0, 5);
+      ex.bonus = s <= 120 ? 1.25 : s <= 240 ? 1.1 : 1;
+      exToast("⏱️ " + s.toFixed(0) + "s" + (ex.bonus > 1 ? " · +" + Math.round((ex.bonus - 1) * 100) + "% " + exL("sale bonus", "Verkaufsbonus") : ""));
+    }
+    exCheckMissions();
+  }
+
+  /* --- farm placement + sell reset --- */
+  function exFarmBtn(reward){
+    var b = exEl("bo-farm-btn");
+    if(!b){
+      b = document.createElement("button"); b.id = "bo-farm-btn"; b.className = "bo-primary-btn"; b.style.marginTop = "8px";
+      var ref = exEl("bo-action-btn"); ref.parentNode.insertBefore(b, ref.nextSibling);
+    }
+    var ex = state.ex, cost = buildTotalCost();
+    var full = ex.farm.length >= ex.slots;
+    b.style.display = "block"; b.disabled = full;
+    b.textContent = full ? "🏭 " + exL("Farm is full", "Farm ist voll") : "🏭 " + exL("Place in farm  +", "In Farm stellen  +") + fmtSats(cost * 0.005) + "/s";
+    b.onclick = function(){ if(full) return; ex.farm.push({cost: cost, dust: 0}); ex.bonus = 1; ex.used = {}; exSigs["ex-farm"] = ""; sellRig(0); exToast("🏭 " + exL("Rig placed in the farm", "Rig in die Farm gestellt")); };
+  }
+  function exHideFarmBtn(){ var b = exEl("bo-farm-btn"); if(b) b.style.display = "none"; }
+  function exOnSell(){ state.ex.bonus = 1; state.ex.used = {}; exCheckMissions(); }
+
+  /* --- speed timer display --- */
+  (function(){
+    var bh = document.querySelector(".bo-header");
+    var tm = document.createElement("div"); tm.id = "ex-timer"; bh.appendChild(tm);
+    var toA = exEl("bo-to-assemble");
+    if(toA) toA.addEventListener("click", function(){ if(state.ex.speed) state.ex.tStart = Date.now(); });
+    setInterval(function(){
+      var ex = state.ex;
+      tm.textContent = (ex.speed && ex.tStart) ? "⏱️ " + ((Date.now() - ex.tStart) / 1000).toFixed(0) + "s" : "";
+    }, 500);
+  })();
+
+  if(!state.ex) state.ex = exDefaults();
+  exDayDeals();
+  setTimeout(function(){ exBuildRoot(); exRenderPanel(); exApplyStyle(); }, 50);
+  setInterval(function(){ exApplyStyle(); }, 2000);
+  exScheduleEvent();
+
+  setInterval(save, 10000);
+  window.addEventListener("beforeunload", save);
+
+  load();
+
+  if(state._starter){
+    setTimeout(function(){
+      document.getElementById("welcome-title").textContent = t("starterTitle");
+      document.getElementById("welcome-body").textContent = t("starterBody");
+      document.getElementById("welcome-amount").textContent = "+12 sats";
+      document.getElementById("welcome-close").textContent = t("close");
+      document.getElementById("welcome-modal").style.display = "flex";
+      state._starter = false;
+      save();
+    }, 400);
+  }
+  render();
+
+
+  // --- Public bot / tester API (no real AI — scripted checks + metrics) ---
+  window.HASHPOOL = {
+    version: "bot-1",
+    getState: function(){
+      return {
+        balance: state.balance,
+        perClick: state.perClick,
+        passive: passiveRate(),
+        lifetime: state.lifetime,
+        owned: Object.assign({}, state.owned),
+        clickOwned: Object.assign({}, state.clickOwned),
+        rigsSold: state.rigsSold,
+        lang: state.lang,
+        pasteDone: !!state.pasteDone,
+        biosDone: !!state.biosDone,
+        buildBought: Object.assign({}, state.buildBought),
+        buildInstalled: Object.assign({}, state.buildInstalled)
+      };
+    },
+    mine: function(n){
+      n = n || 1;
+      var gained = 0;
+      for(var i=0;i<n;i++){
+        var crit = Math.random() < 0.08;
+        var gain = crit ? state.perClick * 8 : state.perClick;
+        state.balance += gain;
+        state.lifetime += gain;
+        gained += gain;
+      }
+      save(); render();
+      return gained;
+    },
+    buyUpgrade: function(id, qty){
+      var u = UPGRADES.filter(function(x){ return x.id === id; })[0];
+      if(!u) return { ok:false, reason:"unknown" };
+      var q = qty || 1;
+      var oldQty = state.buyQty;
+      state.buyQty = q;
+      var c = bulkCost(u, state.owned[u.id], q);
+      if(state.balance < c){ state.buyQty = oldQty; return { ok:false, reason:"broke", cost:c }; }
+      state.balance -= c;
+      state.owned[u.id] += q;
+      state.buyQty = oldQty;
+      save(); render();
+      return { ok:true, cost:c, owned: state.owned[u.id] };
+    },
+    buyClick: function(id, qty){
+      var u = CLICK_UPGRADES.filter(function(x){ return x.id === id; })[0];
+      if(!u) return { ok:false, reason:"unknown" };
+      var q = qty || 1;
+      var oldQty = state.buyQty;
+      state.buyQty = q;
+      var c = bulkCost(u, state.clickOwned[u.id], q);
+      if(state.balance < c){ state.buyQty = oldQty; return { ok:false, reason:"broke", cost:c }; }
+      state.balance -= c;
+      state.clickOwned[u.id] += q;
+      state.buyQty = oldQty;
+      save(); render();
+      return { ok:true, cost:c, owned: state.clickOwned[u.id] };
+    },
+    costOf: function(id){
+      var u = UPGRADES.filter(function(x){ return x.id === id; })[0];
+      if(!u) return null;
+      return bulkCost(u, state.owned[u.id], 1);
+    },
+    listUpgrades: function(){
+      return UPGRADES.map(function(u){
+        return { id:u.id, name:u.name.en, hr:u.hr, owned:state.owned[u.id]||0, cost: bulkCost(u, state.owned[u.id]||0, 1) };
+      });
+    },
+    resetSoft: function(){
+      // clear save for clean bot run
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      state.balance = 0; state.lifetime = 0; state.perClick = 1;
+      state.rigsSold = 0;
+      UPGRADES.forEach(function(u){ state.owned[u.id] = 0; });
+      CLICK_UPGRADES.forEach(function(u){ state.clickOwned[u.id] = 0; });
+      PARTS.forEach(function(p){ state.buildBought[p.id]=false; state.buildInstalled[p.id]=false; });
+      state.pasteDone=false; state.biosDone=false; state.moboCased=false;
+      save(); render();
+      return true;
+    },
+    /** Mini-agent (rule-based, not an LLM): plays closer to a impatient human. */
+    runBot: function(opts){
+      opts = opts || {};
+      var maxMs = opts.maxMs || 12000;
+      var t0 = Date.now();
+      var log = [];
+      var issues = [];
+      var score = 10;
+      var actions = [];
+
+      function note(msg){ log.push({ t: Date.now()-t0, msg: msg }); }
+      function fail(msg, penalty){ issues.push(msg); score = Math.max(1, score - (penalty||1)); note("FAIL: "+msg); }
+      function act(name, detail){ actions.push(name); note(name + (detail ? ": "+detail : "")); }
+
+      try{
+        if(opts.reset !== false) window.HASHPOOL.resetSoft();
+        act("wake_up", "fresh save");
+
+        var s0 = window.HASHPOOL.getState();
+        if(typeof s0.balance !== "number") fail("balance not numeric", 3);
+        if(s0.perClick < 1) fail("perClick < 1", 2);
+
+        // Phase 1: spam clicks like a human discovering the button
+        var burst = 15 + Math.floor(Math.random()*20);
+        var g1 = window.HASHPOOL.mine(burst);
+        act("click_burst", burst + " clicks, +" + g1.toFixed(1));
+        if(g1 <= 0) fail("mine gained 0", 3);
+
+        // Phase 2: human loop — click a bit, buy cheapest if "feels" affordable (keep buffer)
+        var buys = 0, clicks = burst, thinkBuys = 0;
+        while(Date.now() - t0 < maxMs * 0.85){
+          var st = window.HASHPOOL.getState();
+          var list = window.HASHPOOL.listUpgrades().slice().sort(function(a,b){ return a.cost - b.cost; });
+          var target = list[0];
+          // keep ~20% buffer or at least a few sats — "don't go broke"
+          var buffer = Math.max(3, st.balance * 0.15);
+          var canBuy = target && st.balance >= target.cost + buffer;
+          // sometimes impulse-buy without buffer (human impatience)
+          if(!canBuy && target && st.balance >= target.cost && Math.random() < 0.25){
+            canBuy = true;
+            act("impulse_buy_temptation", target.id);
+          }
+          if(canBuy){
+            var r = window.HASHPOOL.buyUpgrade(target.id, 1);
+            if(r.ok){
+              buys++; thinkBuys++;
+              act("buy", target.id + " @" + r.cost);
+            } else {
+              window.HASHPOOL.mine(12);
+              clicks += 12;
+            }
+          } else {
+            // grind: more clicks when far from goal, fewer when close
+            var need = target ? Math.max(0, target.cost - st.balance) : 10;
+            var n = need > 30 ? 35 : (need > 10 ? 18 : 8);
+            window.HASHPOOL.mine(n);
+            clicks += n;
+            act("grind", n + " clicks (need ~" + need.toFixed(0) + ")");
+          }
+          // "bored" early exit if passive is already decent
+          st = window.HASHPOOL.getState();
+          if(st.passive >= 0.5 && buys >= 2 && Math.random() < 0.15){
+            act("bored_enough", "passive "+st.passive.toFixed(3));
+            break;
+          }
+        }
+
+        var s2 = window.HASHPOOL.getState();
+        if(s2.balance <= 0 && buys === 0) fail("stuck at zero with no buys", 2);
+        if(s2.passive < 0) fail("negative passive", 3);
+        if(buys === 0) fail("never bought anything (pacing too hard?)", 1);
+
+        // Fun heuristic: variety of actions + progress + few failures
+        var fun = 5;
+        if(buys >= 2) fun += 1;
+        if(buys >= 4) fun += 1;
+        if(s2.passive > 0.15) fun += 1;
+        if(thinkBuys > 0 && clicks > 40) fun += 1;
+        if(actions.indexOf("impulse_buy_temptation") >= 0) fun += 0.5;
+        fun -= issues.length;
+        fun = Math.max(1, Math.min(10, Math.round(fun*10)/10));
+
+        var report = {
+          ok: issues.length === 0,
+          score: score,
+          funEstimate: fun,
+          style: "humanish-rules",
+          durationMs: Date.now() - t0,
+          snapshot: s2,
+          buys: buys,
+          clicks: clicks,
+          actions: actions.slice(0, 40),
+          issues: issues,
+          log: log,
+          summary: issues.length === 0
+            ? ("Humanish bot OK — "+clicks+" clicks, "+buys+" buys, passive "+s2.passive.toFixed(3)+"/s, fun~"+fun+"/10")
+            : ("Humanish bot issues ("+issues.length+"): "+issues.join("; "))
+        };
+        console.log("[HASHPOOL bot]", report.summary, report);
+        return report;
+      } catch(err){
+        return { ok:false, score:1, funEstimate:1, style:"humanish-rules", issues:[String(err)], log:log, actions:actions, summary:"Bot crashed: "+err };
+      }
+    }
+  };
+
+  // Auto-run when ?bot=1
+  if(/[?&]bot=1(?:&|$)/.test(location.search)){
+    setTimeout(function(){
+      var r = window.HASHPOOL.runBot({ maxMs: 6000, reset: true });
+      var pre = document.createElement("pre");
+      pre.id = "bot-report";
+      pre.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;max-height:40vh;overflow:auto;z-index:99999;background:#0b0d10;color:#2fd98a;border:1px solid #242a32;border-radius:10px;padding:12px;font:12px/1.4 monospace;white-space:pre-wrap;";
+      pre.textContent = JSON.stringify(r, null, 2);
+      document.body.appendChild(pre);
+    }, 600);
+  }
+
+  if(offlineEarnings > 0){
+    document.getElementById("welcome-title").textContent = t("welcomeTitle");
+    document.getElementById("welcome-body").textContent = t("welcomeBody");
+    document.getElementById("welcome-amount").textContent = "+" + fmtSats(offlineEarnings) + " sats";
+    document.getElementById("welcome-close").textContent = t("close");
+    document.getElementById("welcome-modal").style.display = "flex";
+  }
+})();
+</script>
+</body>
+</html>
