@@ -1,3 +1,0 @@
-Hallo! Das ist ein Schreibtest von Grok.
-Lesen und Schreiben auf GitHub funktioniert einwandfrei.
-Zeitstempel: 2026-09-29
