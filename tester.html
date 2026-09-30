@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HASHPOOL — Bot Tester</title>
+<style>
+  :root {
+    --bg:#0b0d10; --panel:#12151a; --line:#242a32;
+    --text:#e7e9ec; --muted:#7c8794; --btc:#f7931a; --green:#2fd98a; --red:#ff5c5c;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); padding:16px; }
+  h1 { font-size:16px; margin:0 0 8px; }
+  h1 span { color:var(--btc); }
+  p { color:var(--muted); font-size:12px; line-height:1.45; max-width:640px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+  button {
+    font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
+    border:1px solid var(--line); border-radius:8px; padding:10px 14px;
+    background:var(--panel); color:var(--text);
+  }
+  button.primary { background:var(--btc); color:#1a1206; border-color:var(--btc); }
+  button:disabled { opacity:.4; cursor:default; }
+  #out {
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:12px; font-size:12px; white-space:pre-wrap; min-height:120px;
+    max-height:50vh; overflow:auto;
+  }
+  .ok { color:var(--green); }
+  .bad { color:var(--red); }
+  iframe {
+    width:100%; height:55vh; border:1px solid var(--line); border-radius:10px;
+    background:#000; margin-top:12px;
+  }
+  code { color:var(--btc); }
+</style>
+</head>
+<body>
+  <h1><span>HASHPOOL</span> Bot Tester</h1>
+  <p>
+    Keine echte KI — ein <strong>Skript-Bot</strong> im Spiel (<code>window.HASHPOOL</code>).
+    Er setzt den Save zurück, klickt, kauft Upgrades und schreibt einen Report
+    (Bugs, Käufe, Passive Rate, Spaß-Schätzung 1–10).
+  </p>
+  <p>
+    Direkt im Spiel: <code>index.html?bot=1</code><br>
+    Später: beliebiges Plugin kann dieselbe API aufrufen (<code>getState</code>, <code>mine</code>, <code>runBot</code>).
+  </p>
+  <div class="row">
+    <button class="primary" id="run" type="button">Bot starten</button>
+    <button id="reload" type="button">Spiel neu laden</button>
+  </div>
+  <div id="out">Warte auf Start…</div>
+  <iframe id="game" title="Hashpool" src="index.html"></iframe>
+<script>
+(function(){
+  var out = document.getElementById("out");
+  var frame = document.getElementById("game");
+  function log(msg, cls){
+    var line = document.createElement("div");
+    if(cls) line.className = cls;
+    line.textContent = msg;
+    out.appendChild(line);
+    out.scrollTop = out.scrollHeight;
+  }
+  function clearOut(){ out.innerHTML = ""; }
+
+  function api(){
+    try {
+      return frame.contentWindow && frame.contentWindow.HASHPOOL;
+    } catch(e) {
+      return null;
+    }
+  }
+
+  document.getElementById("reload").onclick = function(){
+    frame.src = "index.html?t=" + Date.now();
+    clearOut();
+    log("Spiel neu geladen.");
+  };
+
+  document.getElementById("run").onclick = function(){
+    clearOut();
+    var hp = api();
+    if(!hp || typeof hp.runBot !== "function"){
+      log("API nicht gefunden. Warte bis das Spiel geladen ist, dann nochmal.", "bad");
+      log("Tipp: index.html muss die HASHPOOL-API enthalten (aktuelle Version).");
+      return;
+    }
+    log("Bot läuft…");
+    var report = hp.runBot({ maxMs: 7000, reset: true });
+    log(report.summary, report.ok ? "ok" : "bad");
+    log("Spaß-Schätzung: " + report.funEstimate + "/10");
+    log("Score: " + report.score + "/10 · Käufe: " + report.buys);
+    if(report.issues && report.issues.length){
+      report.issues.forEach(function(i){ log("• " + i, "bad"); });
+    }
+    log("--- raw ---");
+    log(JSON.stringify(report, null, 2));
+  };
+
+  frame.addEventListener("load", function(){
+    setTimeout(function(){
+      if(api()) log("Spiel geladen — API bereit.", "ok");
+      else log("Frame geladen, API noch nicht sichtbar (Script-Fehler?).", "bad");
+    }, 800);
+  });
+})();
+</script>
+</body>
+</html>
