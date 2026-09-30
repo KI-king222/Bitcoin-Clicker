@@ -2,144 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hashpool — Bitcoin Miner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style-1.css">
-<link rel="stylesheet" href="css/style-2.css">
-<link rel="stylesheet" href="css/style-3.css">
-<link rel="stylesheet" href="css/style-4.css">
-<link rel="stylesheet" href="css/style-5.css">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hashpool — loading…</title>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo">⛏</div>
-      <div>
-        <h1>HASHPOOL</h1>
-        <div class="sub" id="sub-title">bitcoin miner</div>
-      </div>
-    </div>
-    <div class="top-actions">
-      <div class="lang">
-        <button type="button" id="lang-de">DE</button>
-        <button type="button" id="lang-en">EN</button>
-      </div>
-      <button class="icon-btn" id="mute-btn" type="button">🔊</button>
-    </div>
-  </header>
-
-  <div class="account-bar">
-    <p class="account-hint" id="account-hint"></p>
-    <div id="auth-box">
-      <div class="account-row" id="login-row">
-        <input type="text" id="username-input" maxlength="18" placeholder="username" autocomplete="username">
-        <input type="password" id="password-input" maxlength="64" placeholder="password" autocomplete="current-password">
-      </div>
-      <div class="account-row">
-        <button type="button" id="login-btn">Sign in</button>
-        <button type="button" id="register-btn">Register</button>
-      </div>
-      <div class="account-msg" id="account-msg"></div>
-    </div>
-    <div class="account-row" id="greeting-row" style="display:none;">
-      <span id="greeting-text">Signed in as</span>
-      <button type="button" id="logout-btn">Sign out</button>
-    </div>
-    <div class="account-row cheat-row">
-      <input type="text" id="cheat-input" placeholder="enter code" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false">
-      <button id="cheat-btn">Redeem</button>
-    </div>
-    <div class="cheat-msg" id="cheat-msg"></div>
-  </div>
-
-  <div class="balance">
-    <div class="amt" id="bal">0</div>
-    <div class="unit" id="unit-label">sats</div>
-    <div class="rates">
-      <span id="rate-click">1 / click</span>
-      <span id="rate-passive">0 / sec</span>
-    </div>
-  </div>
-
-  <div class="mine-wrap">
-    <div class="floaters" id="floaters"></div>
-    <button id="mine-btn" type="button">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L15 8H9L12 2Z" fill="#f7931a"/>
-        <circle cx="12" cy="14" r="6" stroke="#f7931a" stroke-width="2"/>
-      </svg>
-    </button>
-    <div class="mine-label" id="mine-label">mine</div>
-  </div>
-
-  <h2 class="sec-title" id="title-rig">Mining rigs</h2>
-  <div class="shop" id="shop-rigs"></div>
-
-  <h2 class="sec-title" id="title-click">Click power</h2>
-  <div class="shop" id="shop-click"></div>
-
-  <h2 class="sec-title" id="title-hw">PC build</h2>
-  <div id="build-panel"></div>
-
-  <div class="footer-row">
-    <button type="button" id="export-btn">export save</button>
-    <button type="button" id="import-btn">import save</button>
-    <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
-  </div>
-
-  <div class="footer-row">
-    <span id="tick">block height —</span>
-    <button id="reset-btn" type="button">reset wallet</button>
-  </div>
-</div>
-
-<div id="welcome-modal" style="display:none;">
-  <div class="modal-card">
-    <h3 id="welcome-title"></h3>
-    <p id="welcome-body"></p>
-    <div id="welcome-amount"></div>
-    <button type="button" id="welcome-close">OK</button>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/game-01.js"></script>
-<script src="js/game-02.js"></script>
-<script src="js/game-03.js"></script>
-<script src="js/game-04.js"></script>
-<script src="js/game-05.js"></script>
-<script src="js/game-06.js"></script>
-<script src="js/game-07.js"></script>
-<script src="js/game-08.js"></script>
-<script src="js/game-09.js"></script>
-<script src="js/game-10.js"></script>
-<script src="js/game-11.js"></script>
-<script src="js/game-12.js"></script>
-<script src="js/game-13.js"></script>
-<script src="js/game-14.js"></script>
-<script src="js/game-15.js"></script>
-<script src="js/game-16.js"></script>
-<script src="js/game-17.js"></script>
-<script src="js/game-18.js"></script>
-<script src="js/game-19.js"></script>
-<script src="js/game-20.js"></script>
-<script src="js/game-21.js"></script>
-<script src="js/game-22.js"></script>
-<script src="js/game-23.js"></script>
-<script src="js/game-24.js"></script>
-<script src="js/game-25.js"></script>
-<script src="js/game-26.js"></script>
-<script src="js/game-27.js"></script>
-<script src="js/game-28.js"></script>
-<script src="js/game-29.js"></script>
-<script src="js/game-30.js"></script>
-<script src="js/game-31.js"></script>
-<script src="js/game-32.js"></script>
-<script src="js/game-33.js"></script>
+<body style="margin:0;background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
+<p id="st">Loading Hashpool…</p>
+<script>
+(async function () {
+  var st = document.getElementById("st");
+  try {
+    // Last known complete single-file game
+    var url = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
+    st.textContent = "Fetching full game…";
+    var r = await fetch(url);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var html = await r.text();
+    document.open();
+    document.write(html);
+    document.close();
+  } catch (e) {
+    st.textContent = "Load failed: " + e.message + " — try hard refresh or open the repo commit 0611b74 index.html";
+    console.error(e);
+  }
+})();
+</script>
 </body>
 </html>
