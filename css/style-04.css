@@ -1,0 +1,31 @@
+  .bo-mode-btn.active{background:var(--btc,#f7931a);border-color:var(--btc,#f7931a);color:#111;}
+  .drag-ghost{position:fixed;z-index:9999;pointer-events:none;font-size:22px;text-align:center;
+    background:rgba(20,22,26,.9);border:1px solid #3a3f47;border-radius:12px;padding:6px 8px;
+    transform:translate(-50%,-50%);box-shadow:0 6px 18px rgba(0,0,0,.4);}
+  .drag-ghost .gname{display:block;font-size:9px;font-weight:700;color:#fff;margin-top:2px;}
+  .tray-part.pending{opacity:.3;filter:grayscale(.6);}
+  @keyframes shakeDrop{0%,100%{transform:translate(-50%,-50%) rotate(0);}25%{transform:translate(-50%,-50%) rotate(-8deg);}75%{transform:translate(-50%,-50%) rotate(8deg);}}
+  .drag-ghost.shake{animation:shakeDrop .25s ease;}
+  .parts-tray{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:10px;}
+  .tray-part{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px 10px;
+    text-align:center; cursor:pointer; font-family:inherit; min-width:64px; touch-action:none;
+  }
+  .tray-part .picon{font-size:20px;display:block;}
+  .tray-part .pname{font-size:10px;font-weight:700;color:var(--text);display:block;margin-top:2px;}
+  .tray-part .pcost{font-size:10px;color:var(--btc);margin-top:2px;display:block;}
+  .tray-part[disabled]{opacity:.4;cursor:default;}
+  #sell-btn{
+    width:100%; background:linear-gradient(180deg,#caff88,#78d505); color:#0f2000; border:none;
+    border-radius:10px; font-family:inherit; font-weight:800; font-size:15px; padding:12px; cursor:pointer;
+    margin-bottom:8px;
+  }
+  .build-stat{color:var(--muted);font-size:11px;text-align:center;margin-bottom:22px;}
+
+  .build-launch-btn[disabled]{cursor:default;filter:grayscale(.4);}
+  .build-launch-btn{
+    width:100%; background:linear-gradient(180deg,#3a2308,#241605); color:var(--btc);
+    border:1px solid var(--btc-dim); border-radius:12px; font-family:inherit; font-weight:800;
+    font-size:15px; padding:14px; cursor:pointer; margin-bottom:8px;
+  }
+

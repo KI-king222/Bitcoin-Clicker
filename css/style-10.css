@@ -1,0 +1,25 @@
+  .bios-keys{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    max-width:320px;margin:10px auto 12px;
+  }
+  .bios-keys button{
+    min-height:56px;height:56px;border-radius:12px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--text);font-family:inherit;font-weight:800;font-size:18px;
+    cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  .bios-keys button:active{transform:scale(.96);background:var(--btc);color:#1a1206;}
+  @media (max-width:480px){
+    .bios-keys button{min-height:64px;height:64px;font-size:20px;}
+    .bios-target{font-size:48px;}
+    .bios-key{width:40px;height:40px;font-size:13px;}
+    .paste-canvas-wrap{max-width:100%;}
+  }
+  .bios-bar{height:6px;background:#1a1d22;border-radius:4px;overflow:hidden;margin-bottom:10px;}
+  .bios-bar > div{height:100%;width:100%;background:var(--btc);transform-origin:left center;}
+  .bios-msg{text-align:center;font-size:12px;min-height:18px;color:var(--muted);}
+  .account-hint{ font-size:11px; color:var(--muted); margin:-4px 0 4px; line-height:1.3; }
+  @media (max-width:600px){
+    .shop{ grid-template-columns:1fr; }
+    .item{ padding:12px; }
+  }
