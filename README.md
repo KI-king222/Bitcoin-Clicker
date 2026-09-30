@@ -4,62 +4,44 @@ Live: **https://ki-king222.github.io/Bitcoin-Clicker/**
 
 ---
 
-## Ordner-Struktur (so sollst du dich orientieren)
+## Struktur
 
 ```
 Bitcoin-Clicker/
-│
-├── index.html          ← DAS SPIEL (einzige Datei, die die Website braucht)
-├── README.md           ← diese Übersicht
-│
-├── docs/               ← Dokumentation (zum Lesen, nicht fürs Spiel)
-│   ├── CHANGELOG.md    ← was wann geändert wurde
-│   └── TEST_PLAN.md    ← Test-Checkliste
-│
-├── tools/              ← Hilfs-Seiten (optional)
-│   └── tester.html     ← Bot-Tester
-│
-└── deploy/             ← nur Technik-Notizen (Chunks etc.)
+├── index.html          ← HTML-Gerüst (lädt CSS + JS)
+├── css/
+│   ├── style-1.css … style-5.css   ← Design
+├── js/
+│   ├── game-01.js … game-33.js    ← Spiel-Logik (gemeinsamer Scope)
+├── docs/
+│   ├── CHANGELOG.md
+│   └── TEST_PLAN.md
+├── tools/
+│   └── tester.html
+└── deploy/
     └── README.md
 ```
 
-**Root (oberste Ebene) = nur Spiel + Übersicht.**  
-Alles andere steckt in Ordnern.
+### Warum so viele `game-XX.js`?
 
----
+Der Code war eine große Datei (~130 KB). Aufgeteilt in kleine Stücke, damit:
+1. man besser navigieren kann
+2. automatische Uploads nicht an Größenlimits scheitern
 
-## Was gehört wohin?
+**Reihenfolge ist wichtig:** `game-01.js` → `game-33.js` (nacheinander laden).
 
-| Ort | Inhalt | Musst du anfassen? |
-|-----|--------|---------------------|
-| `index.html` | Komplettes Spiel | Ja, bei Updates |
-| `docs/` | Changelog, Tests | Zum Nachlesen |
-| `tools/` | Tester | Optional |
-| `deploy/` | Erklärung zu Chunks | Meist ignorieren |
+Später können wir logisch umbenennen (`shop.js`, `build3d.js`, …) — funktioniert genauso.
 
 ---
 
 ## Spiel aktualisieren
 
-1. Neue `index.html` hochladen (Root ersetzen)
-2. Commit
-3. Hard-Refresh: https://ki-king222.github.io/Bitcoin-Clicker/
-
-Optional Changelog: `docs/CHANGELOG.md` ergänzen.
-
----
+- HTML/CSS/JS einzeln committen, oder
+- ganze Ordner `css/` und `js/` ersetzen
 
 ## Links
 
 | Was | URL |
 |-----|-----|
 | Spiel | https://ki-king222.github.io/Bitcoin-Clicker/ |
-| Bot-Tester | https://ki-king222.github.io/Bitcoin-Clicker/tools/tester.html |
-| Changelog | https://github.com/KI-king222/Bitcoin-Clicker/blob/main/docs/CHANGELOG.md |
-
----
-
-## Hinweis zu alten Dateien
-
-Früher lagen im Root viele unnötige Dateien (`*_d.ts`, `c0.b64` …).  
-Die werden aufgeräumt. **Fürs Spiel zählt nur `index.html`.**
+| Tester | https://ki-king222.github.io/Bitcoin-Clicker/tools/tester.html |
