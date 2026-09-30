@@ -1,8 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>RECOVERY - loading full file next</title>
-</head>
-<body><p>Temporarily broken during update. Fix incoming.</p></body>
-</html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hashpool — loading…</title></head>
+<body style="background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
+<p>Loading Hashpool…</p>
+<script>
+(async function(){
+  const parts = ["hp_part0.txt","hp_part1.txt","hp_part2.txt"];
+  let html = "";
+  for (const p of parts) {
+    const r = await fetch(p + "?t=" + Date.now());
+    if (!r.ok) { document.body.innerHTML = "<p>Failed to load " + p + "</p>"; return; }
+    html += await r.text();
+  }
+  document.open();
+  document.write(html);
+  document.close();
+})();
+</script>
+</body></html>
