@@ -1,28 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hashpool — Bitcoin Miner</title>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hashpool — loading…</title></head>
+<body style="background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
+<p id="st">Loading Hashpool…</p>
 <script>
-// Load last known-good build (before accidental PLACEHOLDER overwrite).
-// UX fixes are in the repo artifacts / ready to re-apply once full file push works.
-(async function () {
+(async function(){
+  const st = document.getElementById("st");
+  const N = 28;
   try {
-    const url = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@69f20fe252337cd2970eb3dc06bd9ca3bfcad1f3/index.html";
-    const r = await fetch(url);
-    if (!r.ok) throw new Error("CDN " + r.status);
-    const html = await r.text();
-    document.open();
-    document.write(html);
-    document.close();
+    let b64 = "";
+    for (let i = 0; i < N; i++) {
+      st.textContent = "Loading " + (i+1) + "/" + N + "…";
+      const r = await fetch("c" + i + ".b64?t=" + Date.now());
+      if (!r.ok) throw new Error("Failed c" + i + " (" + r.status + ")");
+      b64 += (await r.text()).trim();
+    }
+    st.textContent = "Decompressing…";
+    const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const ds = new DecompressionStream("gzip");
+    const stream = new Blob([bin]).stream().pipeThrough(ds);
+    const html = await new Response(stream).text();
+    document.open(); document.write(html); document.close();
   } catch (e) {
-    document.body.innerHTML = "<pre style='color:#e7e9ec;background:#0b0d10;padding:24px;font-family:monospace'>Could not load Hashpool: " + e.message + "\n\nOpen the previous good version:\nhttps://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@69f20fe252337cd2970eb3dc06bd9ca3bfcad1f3/index.html</pre>";
+    st.textContent = "Error: " + e.message;
+    console.error(e);
   }
 })();
 </script>
-</head>
-<body style="background:#0b0d10;color:#7c8794;font-family:monospace;padding:40px;text-align:center">
-Loading Hashpool…
-</body>
-</html>
+</body></html>
