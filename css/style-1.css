@@ -74,12 +74,3 @@
   .halving-progress-fill{background:linear-gradient(90deg,var(--btc-dim),var(--btc));height:100%;width:0%;transition:width .3s ease;}
   .halving-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
   .halving-row span{font-size:11px;color:var(--muted);}
-  #halving-btn{
-    background:var(--btc); color:#1a1206; border:none; border-radius:8px; font-family:inherit;
-    font-weight:700; font-size:12px; padding:8px 14px; cursor:pointer;
-  }
-  #halving-btn[disabled]{background:var(--panel2); color:var(--muted); cursor:default;}
-
-  .data-row{display:flex;gap:8px;justify-content:center;margin-top:14px;}
-  .data-row button{
-    background:none; border:1px solid var(--line); color:var(--muted); border-
