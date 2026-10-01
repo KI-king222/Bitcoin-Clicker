@@ -2,66 +2,216 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hashpool — loading…</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hashpool — Bitcoin Miner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/shop.css">
+<link rel="stylesheet" href="css/account.css">
+<link rel="stylesheet" href="css/build.css">
+<link rel="stylesheet" href="css/minigames.css">
+<link rel="stylesheet" href="css/modals.css">
 </head>
-<body style="margin:0;background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
-<p id="st">Loading Hashpool…</p>
-<script>
-(async function () {
-  var st = document.getElementById("st");
-  try {
-    var url = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
-    st.textContent = "Fetching full game…";
-    var r = await fetch(url);
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    var html = await r.text();
+<body>
+<div class="wrap">
+  <div class="modal-bg" id="confirm-modal" style="display:none;">
+    <div class="modal">
+      <p id="confirm-text" style="color:var(--text);font-size:14px;margin-bottom:16px;"></p>
+      <div class="modal-btns">
+        <button id="confirm-cancel" class="modal-btn-secondary">Cancel</button>
+        <button id="confirm-ok">OK</button>
+      </div>
+    </div>
+  </div>
 
-    // --- Flicker fix: stable fmtSats + light UI updates ---
-    html = html.replace(
-      /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
-      'function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return "0";\n    var abs = Math.abs(n);\n    if(abs < 1) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + "M";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + "B";\n  }'
-    );
+  <div class="modal-bg" id="welcome-modal" style="display:none;">
+    <div class="modal">
+      <h2 id="welcome-title">Welcome back</h2>
+      <p id="welcome-body">Your rig kept hashing while you were away. You earned:</p>
+      <div class="earned" id="welcome-amount">+0 sats</div>
+      <button id="welcome-close">Nice</button>
+    </div>
+  </div>
+  <header>
+    <div class="logo">HASH<span>POOL</span></div>
+    <div class="head-right">
+      <div class="rate"><span id="rate-label">BTC/USD</span> <b id="price">—</b></div>
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="de" id="lang-de">DE</button>
+        <button class="lang-btn" data-lang="en" id="lang-en">EN</button>
+      </div>
+      <button class="icon-btn" id="mute-btn">🔊</button>
+    </div>
+  </header>
 
-    var helpers = [
-      'var _uiBal="",_uiUsd="",_uiHr="";',
-      'function updateBalanceUI(){',
-      '  var b=fmtSats(state.balance)+"<small> sats</small>";',
-      '  if(b!==_uiBal){_uiBal=b;balanceEl.innerHTML=b;}',
-      '  var u="≈ "+fmtUSD(state.balance);',
-      '  if(u!==_uiUsd){_uiUsd=u;usdEl.textContent=u;}',
-      '  var h=fmtSats(passiveRate())+" "+t("passive")+" · "+fmtSats(state.perClick)+" "+t("perClick");',
-      '  if(h!==_uiHr){_uiHr=h;hrEl.textContent=h;}',
-      '}',
-      'function updateShopDisabled(){',
-      '  Array.prototype.forEach.call(shopClickEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});',
-      '  Array.prototype.forEach.call(shopEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});',
-      '}'
-    ].join("");
+  <div class="account-bar">
+    <p class="account-hint" id="account-hint"></p>
+    <div id="auth-box">
+      <div class="account-row" id="login-row">
+        <input type="text" id="username-input" maxlength="18" placeholder="username" autocomplete="username">
+        <input type="password" id="password-input" maxlength="64" placeholder="password" autocomplete="current-password">
+      </div>
+      <div class="account-row">
+        <button type="button" id="login-btn">Sign in</button>
+        <button type="button" id="register-btn">Register</button>
+      </div>
+      <div id="acct-msg" class="cheat-msg"></div>
+    </div>
+    <div class="account-row" id="greeting-row" style="display:none;">
+      <span id="greeting-text"></span>
+      <button type="button" id="logout-btn">Logout</button>
+    </div>
+  </div>
 
-    html = html.replace(
-      /(var balanceEl = document\.getElementById\("balance"\);)/,
-      '$1\n  ' + helpers
-    );
+  <div class="hero">
+    <div class="balance" id="balance">0<small> sats</small></div>
+    <div class="usd">≈ <span id="usd-val">$0.00</span></div>
+    <div class="hr" id="hashrate">0 H/s · 1 / click</div>
+  </div>
 
-    html = html.replace(
-      /(spawnFloat\(gain, \(Math\.random\(\)\*20-10\), crit\);\s*save\(\);\s*)render\(\);/,
-      '$1updateBalanceUI();updateShopDisabled();'
-    );
+  <div class="mine-wrap">
+    <button class="mine" id="mine-btn"><span id="mine-label">TAP TO MINE</span></button>
+    <div class="floaters" id="floaters"></div>
+  </div>
 
-    html = html.replace(
-      /\/\/ Light UI update only — avoid full re-render flash every second[\s\S]*?Array\.prototype\.forEach\.call\(shopEl\.children, function\(row\)\{ row\.disabled = state\.balance < Number\(row\.dataset\.cost\); \}\);/,
-      'updateBalanceUI();\n      updateShopDisabled();'
-    );
+  <div class="panel">
+    <h2 id="title-rig">YOUR RIG</h2>
+    <div id="rig-scene"></div>
+  </div>
 
-    document.open();
-    document.write(html);
-    document.close();
-  } catch (e) {
-    st.textContent = "Load failed: " + e.message;
-    console.error(e);
-  }
-})();
-</script>
+  <div class="panel">
+    <h2 id="title-click">CLICK POWER</h2>
+    <div class="qty-row">
+      <button class="qty-btn active" data-qty="1">×1</button>
+      <button class="qty-btn" data-qty="10">×10</button>
+      <button class="qty-btn" data-qty="100">×100</button>
+    </div>
+    <div class="shop" id="shop-click"></div>
+  </div>
+
+  <div class="panel">
+    <h2 id="title-hw">HARDWARE</h2>
+    <div class="shop" id="shop"></div>
+  </div>
+
+  <div class="panel">
+    <h2 id="title-build">PC BUILD</h2>
+    <p class="muted" id="build-desc"></p>
+    <div class="build-stat" id="build-stat"></div>
+    <p class="muted" id="drag-hint"></p>
+    <button class="open-build" id="open-build-btn">Launch PC build</button>
+  </div>
+
+  <div id="ex-root"></div>
+
+  <div class="panel halving">
+    <h2 id="halving-title">HALVING</h2>
+    <p class="muted" id="halving-desc"></p>
+    <div class="halving-mult"><span id="halving-mult-val">+0%</span></div>
+    <p class="muted">Multiplies everything you earn.</p>
+    <div class="halving-progress"><div class="halving-progress-fill" id="halving-fill"></div></div>
+    <div class="halving-row">
+      <span id="halving-progress-text">0 / 0</span>
+      <button id="halving-btn">Trigger halving</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>CHEATS</h2>
+    <div class="cheat-row">
+      <input type="text" id="cheat-input" placeholder="code">
+      <button id="cheat-btn">Redeem</button>
+    </div>
+    <div id="cheat-msg" class="cheat-msg"></div>
+  </div>
+
+  <div class="data-row">
+    <button id="export-btn">Export save</button>
+    <button id="import-btn">Import save</button>
+    <input type="file" id="import-file" accept=".json,application/json" style="display:none;">
+  </div>
+
+  <div class="footer-row">
+    <span id="tick">block height —</span>
+    <button id="reset-btn">reset wallet</button>
+  </div>
+</div>
+
+<!-- Build overlay (structure from full game) -->
+<div id="build-overlay" style="display:none;">
+  <div class="bo-header">
+    <div class="bo-modes">
+      <button type="button" class="bo-mode-btn" id="mode-quick"><span id="mode-quick-label">Quick</span></button>
+      <button type="button" class="bo-mode-btn" id="mode-detailed"><span id="mode-detailed-label">Detailed</span></button>
+    </div>
+    <div id="bo-steps"></div>
+    <button type="button" id="bo-close">✕</button>
+  </div>
+  <div class="bo-body">
+    <div id="bo-shop" style="display:none;">
+      <p id="bo-shop-hint"></p>
+      <div id="bo-shop-grid"></div>
+      <button type="button" class="bo-primary-btn" id="bo-to-assemble">Start assembly</button>
+    </div>
+    <div id="bo-rig-area" style="display:none;">
+      <div id="case-3d-wrap">
+        <div id="case-3d"></div>
+        <button type="button" id="case-expand-btn">⤢</button>
+      </div>
+      <div id="parts-tray"></div>
+      <div id="boot-screen" style="display:none;">
+        <pre id="boot-text"></pre>
+        <div class="boot-bar"><div id="boot-bar-fill"></div></div>
+      </div>
+      <button type="button" class="bo-primary-btn" id="bo-action-btn" style="display:none;"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="js/KEY.js"></script>
+<script src="js/acctLogin-1.js"></script>
+<script src="js/acctLogin-2.js"></script>
+<script src="js/acctLogin-3.js"></script>
+<script src="js/PARTS-1.js"></script>
+<script src="js/PARTS-2.js"></script>
+<script src="js/buildSsd.js"></script>
+<script src="js/buildGpu.js"></script>
+<script src="js/BUILDERS.js"></script>
+<script src="js/buildTable-1.js"></script>
+<script src="js/buildTable-2.js"></script>
+<script src="js/buildTable-3.js"></script>
+<script src="js/spawnScrews.js"></script>
+<script src="js/beep.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/globalMult.js"></script>
+<script src="js/data-1.js"></script>
+<script src="js/_staticSig-1.js"></script>
+<script src="js/_staticSig-2.js"></script>
+<script src="js/buildPartCost-1.js"></script>
+<script src="js/buildPartCost-2.js"></script>
+<script src="js/moveGhost-1.js"></script>
+<script src="js/moveGhost-2.js"></script>
+<script src="js/moveGhost-3.js"></script>
+<script src="js/pasteScoreFromCoverage.js"></script>
+<script src="js/openBiosStage.js"></script>
+<script src="js/playBootSequence.js"></script>
+<script src="js/mineBtn.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/cheatMsgEl.js"></script>
+<script src="js/exActive-1.js"></script>
+<script src="js/exActive-2.js"></script>
+<script src="js/exSigs-1.js"></script>
+<script src="js/exSigs-2.js"></script>
+<script src="js/exSigs-3.js"></script>
+<script src="js/exApplyStyle-1.js"></script>
+<script src="js/exApplyStyle-2.js"></script>
+<script src="js/exScheduleEvent-1.js"></script>
+<script src="js/exScheduleEvent-2.js"></script>
+<script src="js/exScheduleEvent-3.js"></script>
+<script src="js/exScheduleEvent-4.js"></script>
 </body>
 </html>
