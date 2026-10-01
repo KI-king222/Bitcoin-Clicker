@@ -16,6 +16,44 @@
     var r = await fetch(url);
     if (!r.ok) throw new Error("HTTP " + r.status);
     var html = await r.text();
+
+    // --- Flicker fix: stable fmtSats + light UI updates ---
+    html = html.replace(
+      /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
+      'function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return "0";\n    var abs = Math.abs(n);\n    if(abs < 1) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + "M";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + "B";\n  }'
+    );
+
+    var helpers = [
+      'var _uiBal="",_uiUsd="",_uiHr="";',
+      'function updateBalanceUI(){',
+      '  var b=fmtSats(state.balance)+"<small> sats</small>";',
+      '  if(b!==_uiBal){_uiBal=b;balanceEl.innerHTML=b;}',
+      '  var u="≈ "+fmtUSD(state.balance);',
+      '  if(u!==_uiUsd){_uiUsd=u;usdEl.textContent=u;}',
+      '  var h=fmtSats(passiveRate())+" "+t("passive")+" · "+fmtSats(state.perClick)+" "+t("perClick");',
+      '  if(h!==_uiHr){_uiHr=h;hrEl.textContent=h;}',
+      '}',
+      'function updateShopDisabled(){',
+      '  Array.prototype.forEach.call(shopClickEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});',
+      '  Array.prototype.forEach.call(shopEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});',
+      '}'
+    ].join("");
+
+    html = html.replace(
+      /(var balanceEl = document\.getElementById\("balance"\);)/,
+      '$1\n  ' + helpers
+    );
+
+    html = html.replace(
+      /(spawnFloat\(gain, \(Math\.random\(\)\*20-10\), crit\);\s*save\(\);\s*)render\(\);/,
+      '$1updateBalanceUI();updateShopDisabled();'
+    );
+
+    html = html.replace(
+      /\/\/ Light UI update only — avoid full re-render flash every second[\s\S]*?Array\.prototype\.forEach\.call\(shopEl\.children, function\(row\)\{ row\.disabled = state\.balance < Number\(row\.dataset\.cost\); \}\);/,
+      'updateBalanceUI();\n      updateShopDisabled();'
+    );
+
     document.open();
     document.write(html);
     document.close();
