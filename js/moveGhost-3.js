@@ -1,4 +1,4 @@
-/* moveGhost-3.js — build overlay stages (install / cables / boot / sell) */
+/* moveGhost-3.js — build overlay stages */
 on(a,b){ return (partAvailable(b.id)?1:0) - (partAvailable(a.id)?1:0); }).forEach(function(p){
           if(state.buildInstalled[p.id]) return;
           var available = partAvailable(p.id);
@@ -52,14 +52,16 @@ on(a,b){ return (partAvailable(b.id)?1:0) - (partAvailable(a.id)?1:0); }).forEac
         actionBtn.disabled = bootPlaying;
         actionBtn.textContent = t("powerOnBtn");
         actionBtn.onclick = function(){
+          // Paste, then BIOS key-press minigame (mobile-friendly buttons), then ready to sell
           openPasteStage(function(){
-            bootPlayed = true;
-            bootPlaying = false;
-            state.biosDone = true;
-            var bs = document.getElementById("boot-screen");
-            if(bs) bs.style.display = "none";
-            save();
-            render();
+            openBiosStage(function(){
+              bootPlayed = true;
+              bootPlaying = false;
+              var bs = document.getElementById("boot-screen");
+              if(bs) bs.style.display = "none";
+              save();
+              render();
+            });
           });
         };
         bootScreen.style.display = bootPlaying ? "block" : "none";
