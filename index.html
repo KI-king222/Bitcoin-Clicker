@@ -11,78 +11,50 @@
 (async function () {
   var st = document.getElementById("st");
   try {
-    var candidates = [
-      "./index.full.html",
-      "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html"
-    ];
-    var html = null, lastErr = null;
-    for (var i = 0; i < candidates.length; i++) {
-      try {
-        st.textContent = "Fetching game…";
-        var r = await fetch(candidates[i], { cache: "no-store" });
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        html = await r.text();
-        if (html.indexOf("mine-btn") !== -1) break;
-        html = null;
-      } catch (e) { lastErr = e; html = null; }
-    }
-    if (!html) throw lastErr || new Error("Game not found");
+    st.textContent = "Fetching game…";
+    var url = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
+    var r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var html = await r.text();
+    if (html.indexOf("mine-btn") === -1) throw new Error("Game HTML incomplete");
 
     html = html.replace(
       /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
-      'function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return "0";\n    var abs = Math.abs(n);\n    if(abs < 1) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + "M";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + "B";\n  }'
+      "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 1) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }"
     );
 
-    var helpers = [
-      'var _uiBal="",_uiUsd="",_uiHr="";',
-      'function updateBalanceUI(){',
-      '  var b=fmtSats(state.balance)+"<small> sats</small>";',
-      '  if(b!==_uiBal){_uiBal=b;balanceEl.innerHTML=b;}',
-      '  var u="≈ "+fmtUSD(state.balance);',
-      '  if(u!==_uiUsd){_uiUsd=u;usdEl.textContent=u;}',
-      '  var h=fmtSats(passiveRate())+" "+t("passive")+" · "+fmtSats(state.perClick)+" "+t("perClick");',
-      '  if(h!==_uiHr){_uiHr=h;hrEl.textContent=h;}',
-      '}',
-      'function updateShopDisabled(){',
-      '  Array.prototype.forEach.call(shopClickEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});',
-      '  Array.prototype.forEach.call(shopEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});',
-      '}'
-    ].join("");
-
-    html = html.replace(
-      /(var balanceEl = document\.getElementById\("balance"\);)/,
-      '$1\n  ' + helpers
-    );
-
-    html = html.replace(
-      /(spawnFloat\(gain, \(Math\.random\(\)\*20-10\), crit\);\s*save\(\);\s*)render\(\);/,
-      '$1updateBalanceUI();updateShopDisabled();'
-    );
-
-    html = html.replace(
-      /\/\/ Light UI update only — avoid full re-render flash every second[\s\S]*?Array\.prototype\.forEach\.call\(shopEl\.children, function\(row\)\{ row\.disabled = state\.balance < Number\(row\.dataset\.cost\); \}\);/,
-      'updateBalanceUI();\n      updateShopDisabled();'
-    );
+    var helpers = "var _uiBal=\"\",_uiUsd=\"\",_uiHr=\"\";function updateBalanceUI(){var b=fmtSats(state.balance)+\"<small> sats</small>\";if(b!==_uiBal){_uiBal=b;balanceEl.innerHTML=b;}var u=\"≈ \"+fmtUSD(state.balance);if(u!==_uiUsd){_uiUsd=u;usdEl.textContent=u;}var h=fmtSats(passiveRate())+\" \"+t(\"passive\")+\" · \"+fmtSats(state.perClick)+\" \"+t(\"perClick\");if(h!==_uiHr){_uiHr=h;hrEl.textContent=h;}}function updateShopDisabled(){Array.prototype.forEach.call(shopClickEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});Array.prototype.forEach.call(shopEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});}";
+    html = html.replace(/(var balanceEl = document\.getElementById\("balance"\);)/, "$1\n  " + helpers);
+    html = html.replace(/(spawnFloat\(gain, \(Math\.random\(\)\*20-10\), crit\);\s*save\(\);\s*)render\(\);/, "$1updateBalanceUI();updateShopDisabled();");
 
     html = html.replace(
       /openPasteStage\(function\(\)\{\s*bootPlayed\s*=\s*true;[\s\S]*?render\(\);\s*\}\);/,
-      'openPasteStage(function(){\n            openBiosStage(function(){\n              bootPlayed = true;\n              bootPlaying = false;\n              var bs = document.getElementById("boot-screen");\n              if(bs) bs.style.display = "none";\n              save();\n              render();\n            });\n          });'
+      "openPasteStage(function(){\n            openBiosStage(function(){\n              bootPlayed = true;\n              bootPlaying = false;\n              var bs = document.getElementById(\"boot-screen\");\n              if(bs) bs.style.display = \"none\";\n              save();\n              render();\n            });\n          });"
     );
 
-    // SOUND: unlock AudioContext + clearer clicks
-    var newAudio = "var audioCtx = null;\n  var audioUnlocked = false;\n  function ensureAudio(){\n    if(!audioCtx){\n      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}\n    }\n    if(audioCtx && audioCtx.state === \"suspended\"){\n      try{ audioCtx.resume(); }catch(e){}\n    }\n    return audioCtx;\n  }\n  function unlockAudio(){\n    var ctx = ensureAudio();\n    if(!ctx) return;\n    if(ctx.state === \"suspended\"){ try{ ctx.resume(); }catch(e){} }\n    if(audioUnlocked) return;\n    audioUnlocked = true;\n    try{\n      var buf = ctx.createBuffer(1, 1, 22050);\n      var src = ctx.createBufferSource();\n      src.buffer = buf; src.connect(ctx.destination); src.start(0);\n    }catch(e){}\n  }\n  [\"pointerdown\",\"touchstart\",\"keydown\",\"click\"].forEach(function(ev){\n    document.addEventListener(ev, unlockAudio, {capture:true, passive:true});\n  });\n  function beep(freq, dur, type, vol){\n    if(state.muted) return;\n    unlockAudio();\n    var ctx = ensureAudio();\n    if(!ctx) return;\n    var t0 = ctx.currentTime;\n    var osc = ctx.createOscillator();\n    var gain = ctx.createGain();\n    osc.type = type || \"sine\";\n    osc.frequency.setValueAtTime(freq, t0);\n    var v = (typeof vol === \"number\") ? vol : 0.14;\n    gain.gain.setValueAtTime(Math.max(v, 0.001), t0);\n    gain.gain.exponentialRampToValueAtTime(0.001, t0 + Math.max(dur, 0.02));\n    osc.connect(gain); gain.connect(ctx.destination);\n    osc.start(t0); osc.stop(t0 + dur + 0.02);\n  }\n  function sfxClick(){ beep(520, 0.055, \"sine\", 0.16); }\n  function sfxCrit(){ beep(880, 0.055, \"triangle\", 0.20); setTimeout(function(){ beep(1320, 0.10, \"triangle\", 0.18); }, 40); }\n  function sfxBuy(){ beep(320, 0.055, \"square\", 0.12); setTimeout(function(){ beep(480, 0.09, \"square\", 0.12); }, 45); }\n  function sfxInstall(){ [0,60,120,180].forEach(function(t,i){ setTimeout(function(){ beep(720 - i*40, 0.035, \"square\", 0.10); }, t); }); }\n  function sfxHalving(){ [300,450,650,900].forEach(function(f,i){ setTimeout(function(){ beep(f, 0.14, \"triangle\", 0.18); }, i*90); }); }";
-    var a0 = html.indexOf("var audioCtx = null;");
-    var a1 = html.indexOf("function sfxHalving()");
-    if (a0 !== -1 && a1 !== -1) {
-      var lineEnd = html.indexOf("\n", a1);
-      html = html.slice(0, a0) + newAudio + html.slice(lineEnd);
-    }
+    html = html.replace(
+      "if(audioCtx && audioCtx.state === \"suspended\"){ audioCtx.resume(); }",
+      "if(audioCtx && audioCtx.state === \"suspended\"){ try{ audioCtx.resume(); }catch(e){} }"
+    );
+    html = html.replace(
+      "function sfxClick(){ beep(520, 0.05, \"sine\", 0.10); }",
+      "function sfxClick(){ beep(520, 0.055, \"sine\", 0.16); }"
+    );
+    html = html.replace(
+      "function beep(freq, dur, type, vol){\n    if(state.muted) return;\n    var ctx = ensureAudio();\n    if(!ctx) return;",
+      "function beep(freq, dur, type, vol){\n    if(state.muted) return;\n    var ctx = ensureAudio();\n    if(!ctx) return;\n    if(ctx.state===\"suspended\"){ try{ ctx.resume(); }catch(e){} }"
+    );
+    html = html.replace(
+      "var audioCtx = null;\n  function ensureAudio(){",
+      "var audioCtx = null;\n  function unlockAudio(){ try{ var c=ensureAudio(); if(c&&c.state===\"suspended\") c.resume(); }catch(e){} }\n  document.addEventListener(\"pointerdown\", unlockAudio, {passive:true});\n  document.addEventListener(\"touchstart\", unlockAudio, {passive:true});\n  function ensureAudio(){"
+    );
 
     document.open();
     document.write(html);
     document.close();
   } catch (e) {
-    st.textContent = "Load failed: " + e.message;
+    st.innerHTML = "Load failed: " + e.message +
+      "<br><br><a style=\"color:#f7931a\" href=\"https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html\">Direct game link</a>";
     console.error(e);
   }
 })();
