@@ -11,13 +11,23 @@
 (async function () {
   var st = document.getElementById("st");
   try {
-    var url = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
-    st.textContent = "Fetching full game…";
-    var r = await fetch(url);
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    var html = await r.text();
+    var candidates = [
+      "./index.full.html",
+      "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html"
+    ];
+    var html = null, lastErr = null;
+    for (var i = 0; i < candidates.length; i++) {
+      try {
+        st.textContent = "Fetching game…";
+        var r = await fetch(candidates[i], { cache: "no-store" });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        html = await r.text();
+        if (html.indexOf("mine-btn") !== -1) break;
+        html = null;
+      } catch (e) { lastErr = e; html = null; }
+    }
+    if (!html) throw lastErr || new Error("Game not found");
 
-    // Flicker fix: stable fmtSats
     html = html.replace(
       /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
       'function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return "0";\n    var abs = Math.abs(n);\n    if(abs < 1) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + "M";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + "B";\n  }'
@@ -54,11 +64,19 @@
       'updateBalanceUI();\n      updateShopDisabled();'
     );
 
-    // Restore BIOS key-press after paste
     html = html.replace(
       /openPasteStage\(function\(\)\{\s*bootPlayed\s*=\s*true;[\s\S]*?render\(\);\s*\}\);/,
       'openPasteStage(function(){\n            openBiosStage(function(){\n              bootPlayed = true;\n              bootPlaying = false;\n              var bs = document.getElementById("boot-screen");\n              if(bs) bs.style.display = "none";\n              save();\n              render();\n            });\n          });'
     );
+
+    // SOUND: unlock AudioContext + clearer clicks
+    var newAudio = "var audioCtx = null;\n  var audioUnlocked = false;\n  function ensureAudio(){\n    if(!audioCtx){\n      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}\n    }\n    if(audioCtx && audioCtx.state === \"suspended\"){\n      try{ audioCtx.resume(); }catch(e){}\n    }\n    return audioCtx;\n  }\n  function unlockAudio(){\n    var ctx = ensureAudio();\n    if(!ctx) return;\n    if(ctx.state === \"suspended\"){ try{ ctx.resume(); }catch(e){} }\n    if(audioUnlocked) return;\n    audioUnlocked = true;\n    try{\n      var buf = ctx.createBuffer(1, 1, 22050);\n      var src = ctx.createBufferSource();\n      src.buffer = buf; src.connect(ctx.destination); src.start(0);\n    }catch(e){}\n  }\n  [\"pointerdown\",\"touchstart\",\"keydown\",\"click\"].forEach(function(ev){\n    document.addEventListener(ev, unlockAudio, {capture:true, passive:true});\n  });\n  function beep(freq, dur, type, vol){\n    if(state.muted) return;\n    unlockAudio();\n    var ctx = ensureAudio();\n    if(!ctx) return;\n    var t0 = ctx.currentTime;\n    var osc = ctx.createOscillator();\n    var gain = ctx.createGain();\n    osc.type = type || \"sine\";\n    osc.frequency.setValueAtTime(freq, t0);\n    var v = (typeof vol === \"number\") ? vol : 0.14;\n    gain.gain.setValueAtTime(Math.max(v, 0.001), t0);\n    gain.gain.exponentialRampToValueAtTime(0.001, t0 + Math.max(dur, 0.02));\n    osc.connect(gain); gain.connect(ctx.destination);\n    osc.start(t0); osc.stop(t0 + dur + 0.02);\n  }\n  function sfxClick(){ beep(520, 0.055, \"sine\", 0.16); }\n  function sfxCrit(){ beep(880, 0.055, \"triangle\", 0.20); setTimeout(function(){ beep(1320, 0.10, \"triangle\", 0.18); }, 40); }\n  function sfxBuy(){ beep(320, 0.055, \"square\", 0.12); setTimeout(function(){ beep(480, 0.09, \"square\", 0.12); }, 45); }\n  function sfxInstall(){ [0,60,120,180].forEach(function(t,i){ setTimeout(function(){ beep(720 - i*40, 0.035, \"square\", 0.10); }, t); }); }\n  function sfxHalving(){ [300,450,650,900].forEach(function(f,i){ setTimeout(function(){ beep(f, 0.14, \"triangle\", 0.18); }, i*90); }); }";
+    var a0 = html.indexOf("var audioCtx = null;");
+    var a1 = html.indexOf("function sfxHalving()");
+    if (a0 !== -1 && a1 !== -1) {
+      var lineEnd = html.indexOf("\n", a1);
+      html = html.slice(0, a0) + newAudio + html.slice(lineEnd);
+    }
 
     document.open();
     document.write(html);
