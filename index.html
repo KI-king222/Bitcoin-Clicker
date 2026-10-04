@@ -69,14 +69,15 @@
       var rc = await Promise.all([
         fetch(RAW + "/css/partShop.css", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
         fetch(RAW + "/js/partCatalog.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
-        fetch(RAW + "/js/partShop.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; })
+        fetch(RAW + "/js/partShop.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
+        fetch(RAW + "/js/partCheat.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; })
       ].concat(p3d.map(function(n){
         return fetch(RAW + "/js/parts3d/" + n + ".js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; });
       })));
       cssText = rc[0] || "";
       catText = rc[1] || "";
-      shopText = rc[2] || "";
-      parts3dText = rc.slice(3).filter(Boolean).join("\n");
+      shopText = (rc[2] || "") + "\n" + (rc[3] || "");
+      parts3dText = rc.slice(4).filter(Boolean).join("\n");
     } catch (e) { console.warn("Parts Shop modules", e); }
 
     if (cssText) {
@@ -133,6 +134,18 @@
       html = html.replace(
         "buildTotalCost() * 1.38 * pasteMul",
         "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)"
+      );
+    }
+    if (html.indexOf("FULLPARTS") === -1) {
+      html = html.replace(
+        '"HODLGANG": { sats: 25000000 }',
+        '"HODLGANG": { sats: 25000000 }, "FULLPARTS": { allParts: 1 }, "PARTBOX": { allParts: 1 }'
+      );
+    }
+    if (html.indexOf("CheatAllPartsHook") === -1) {
+      html = html.replace(
+        "state.redeemed[code] = true;\n    state.balance += reward.sats;\n    state.lifetime += reward.sats;\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    showCheatMsg(t(\"cheatOk\") + \" +\" + fmtSats(reward.sats) + \" sats\", true);",
+        "state.redeemed[code] = true;\n    if(reward.allParts){ try{ var n=(window.PartShop&&PartShop.grantAllParts)?PartShop.grantAllParts(reward.allParts||1):0; showCheatMsg((state.lang===\"de\"?\"Alle Teile x\":\"All parts x\")+(reward.allParts||1)+\" (\"+n+\")\", true); }catch(_c){ showCheatMsg(\"parts err\", false);} /*CheatAllPartsHook*/ }\n    else { state.balance += reward.sats; state.lifetime += reward.sats; showCheatMsg(t(\"cheatOk\") + \" +\" + fmtSats(reward.sats) + \" sats\", true); }\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");"
       );
     }
 
