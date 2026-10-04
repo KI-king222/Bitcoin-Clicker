@@ -1,4 +1,4 @@
-/* partShop.js — Fullscreen Parts Shop UI (Phase 1) */
+/* partShop.js — 3D shelves, brand chips, consume on sell */
 (function(){
   if(typeof PART_CATALOG === "undefined") return;
   var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler"];
@@ -21,6 +21,55 @@
   }
   function hasAnyInCat(cat){ return categoryOwned(cat) > 0; }
   function canBuildPC(){ return REQUIRED_FOR_BUILD.every(hasAnyInCat); }
+  function brandChipClass(brand, tier){
+    var b = (brand||"").toLowerCase().replace(/[^a-z]/g,"");
+    var map = {
+      intel:"ps-chip-intel", amd:"ps-chip-amd", nvidia:"ps-chip-nvidia",
+      corsair:"ps-chip-corsair", samsung:"ps-chip-samsung", kingston:"ps-chip-kingston",
+      noctua:"ps-chip-noctua", asus:"ps-chip-asus", msi:"ps-chip-msi",
+      gigabyte:"ps-chip-gigabyte", seasonic:"ps-chip-seasonic",
+      bequiet:"ps-chip-bequiet", deepcool:"ps-chip-default", arctic:"ps-chip-default",
+      nzxt:"ps-chip-corsair", fractal:"ps-chip-default", lianli:"ps-chip-default",
+      crucial:"ps-chip-kingston", wd:"ps-chip-default", seagate:"ps-chip-default",
+      gskill:"ps-chip-corsair", stock:"ps-chip-default", asrock:"ps-chip-amd",
+      generic:"ps-chip-default"
+    };
+    var cls = map[b] || "ps-chip-default";
+    if(tier >= 8) cls += " ps-chip-tier-hi";
+    else if(tier >= 5) cls += " ps-chip-tier-mid";
+    return cls;
+  }
+  function chipLabel(it){
+    return (it.brand||"").slice(0,3).toUpperCase() + "\nT" + it.tier;
+  }
+  function bestOwnedInCat(cat){
+    ensureInv();
+    var best = null, bestTier = -1;
+    (PART_CATALOG[cat].items||[]).forEach(function(it){
+      if((state.partInv[it.id]||0) > 0 && it.tier > bestTier){
+        best = it.id; bestTier = it.tier;
+      }
+    });
+    return best;
+  }
+  function consumeBuildParts(){
+    ensureInv();
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var id = state.buildPick[cat] || bestOwnedInCat(cat);
+      if(id && state.partInv[id]){
+        state.partInv[id] -= 1;
+        if(state.partInv[id] <= 0) delete state.partInv[id];
+      }
+      if(state.buildPick) delete state.buildPick[cat];
+    });
+    if(PART_CATALOG.case){
+      var cid = (state.buildPick && state.buildPick.case) || bestOwnedInCat("case");
+      if(cid && state.partInv[cid]){
+        state.partInv[cid] -= 1;
+        if(state.partInv[cid] <= 0) delete state.partInv[cid];
+      }
+    }
+  }
   function showToast(msg){
     var el = document.getElementById("ps-toast");
     if(!el) return;
@@ -45,16 +94,19 @@
     if(back) back.style.visibility = view.mode === "shelves" ? "hidden" : "visible";
     if(view.mode === "shelves"){
       if(title) title.textContent = (state.lang==="de") ? "Teile-Shop" : "Parts Shop";
-      var html = '<p class="ps-inv-hint">'+(state.lang==="de" ? "Tippe ein Regal an · wähle ein Teil · siehe Bewertung · kaufen" : "Tap a shelf · pick a part · see ratings · buy")+'</p><div class="ps-shelves">';
+      var html = '<p class="ps-inv-hint">'+(state.lang==="de"
+        ? "Tippe ein Regal · waehle ein Teil · kaufen. Nach dem Verkauf sind eingebaute Teile weg."
+        : "Tap a shelf · pick a part · buy. Built-in parts are gone after you sell the PC.")+'</p><div class="ps-shelves">';
       PART_CATEGORIES.forEach(function(cat){
         var c = PART_CATALOG[cat];
         var nm = (c.name && c.name[state.lang]) || (c.name && c.name.en) || cat;
         var own = categoryOwned(cat);
         html += '<div class="ps-shelf" data-cat="'+cat+'"><span class="ps-shelf-icon">'+(c.icon||"📦")+'</span><div class="ps-shelf-name">'+nm+'</div><div class="ps-shelf-count">'+(own? (state.lang==="de"?"Im Inventar: "+own:"Owned: "+own) : (c.items.length+" models"))+'</div></div>';
       });
-      html += '</div>';
+      html += '</div><div class="ps-floor"></div>';
       if(canBuildPC()){
-        html += '<p class="ps-inv-hint" style="color:#78d505;margin-top:16px;font-weight:700;">' + (state.lang==="de" ? "✓ Du hast genug Teile fuer einen PC — nutze PC bauen." : "✓ You have enough parts to build a PC — use Build a PC.") + '</p>';
+        html += '<p class="ps-inv-hint" style="color:#78d505;margin-top:16px;font-weight:700;">' +
+          (state.lang==="de" ? "✓ Genug Teile fuer einen PC." : "✓ Enough parts to build a PC.") + '</p>';
       }
       body.innerHTML = html;
       body.querySelectorAll(".ps-shelf").forEach(function(el){
@@ -68,11 +120,15 @@
     var c = PART_CATALOG[cat];
     var nm = (c.name && c.name[state.lang]) || cat;
     if(title) title.textContent = (c.icon||"") + " " + nm;
-    var html = '<div class="ps-list-wrap"><p class="ps-list-title">' + (state.lang==="de" ? "Wähle ein Modell" : "Choose a model") + '</p>';
+    var html = '<div class="ps-list-wrap"><p class="ps-list-title">' + (state.lang==="de" ? "Waehle ein Modell" : "Choose a model") + '</p>';
     c.items.forEach(function(it){
       var own = ownedCount(it.id);
       var sel = view.selected === it.id;
-      html += '<div class="ps-row'+(sel?" selected":"")+'" data-id="'+it.id+'"><div class="ps-row-icon">'+(c.icon||"📦")+'</div><div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div><div class="ps-row-tier">Tier '+it.tier+'/10'+(own? ' <span class="ps-row-owned">×'+own+'</span>':'')+'</div></div><div class="ps-row-price">'+fmt(it.cost)+'</div></div>';
+      var chip = brandChipClass(it.brand, it.tier);
+      html += '<div class="ps-row'+(sel?" selected":"")+'" data-id="'+it.id+'">' +
+        '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
+        '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div><div class="ps-row-tier">Tier '+it.tier+'/10'+(own? ' <span class="ps-row-owned">x'+own+'</span>':'')+'</div></div>' +
+        '<div class="ps-row-price">'+fmt(it.cost)+'</div></div>';
       if(sel){
         var canBuy = state.balance >= it.cost;
         html += '<div class="ps-detail open"><div class="ps-detail-name">'+partDisplayName(it)+'</div><div class="ps-detail-brand">'+it.brand+' · Tier '+it.tier+'</div>' +
@@ -101,13 +157,16 @@
     if(state.balance < it.cost){ showToast(state.lang==="de" ? "Nicht genug Sats" : "Not enough sats"); return; }
     state.balance -= it.cost;
     state.partInv[it.id] = (state.partInv[it.id]||0) + 1;
+    if(!state.buildPick[it.cat] || (PART_BY_ID[state.buildPick[it.cat]]||{}).tier < it.tier){
+      state.buildPick[it.cat] = it.id;
+    }
     if(state.buildBought && it.cat) state.buildBought[it.cat] = true;
     if(typeof save === "function") save();
     if(typeof updateBalanceUI === "function") updateBalanceUI();
     showToast((state.lang==="de"?"Gekauft: ":"Bought: ") + partDisplayName(it));
     if(canBuildPC()){
       setTimeout(function(){
-        showToast(state.lang==="de" ? "Du hast genug Teile, um einen PC zu bauen!" : "You have enough parts to build a PC!");
+        showToast(state.lang==="de" ? "Du hast genug Teile fuer einen PC!" : "You have enough parts to build a PC!");
       }, 900);
     }
     var sats = document.getElementById("ps-sats");
@@ -135,7 +194,12 @@
       if(view.mode === "list"){ view.mode = "shelves"; view.cat = null; view.selected = null; render(); }
     });
   }
-  window.PartShop = { open: openShop, close: closeShop, canBuildPC: canBuildPC, ownedCount: ownedCount, categoryOwned: categoryOwned, REQUIRED: REQUIRED_FOR_BUILD, ensureInv: ensureInv };
+  window.PartShop = {
+    open: openShop, close: closeShop, canBuildPC: canBuildPC,
+    ownedCount: ownedCount, categoryOwned: categoryOwned,
+    consumeBuildParts: consumeBuildParts, bestOwnedInCat: bestOwnedInCat,
+    REQUIRED: REQUIRED_FOR_BUILD, ensureInv: ensureInv
+  };
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
   else wire();
 })();
