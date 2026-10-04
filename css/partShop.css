@@ -1,12 +1,14 @@
 /* partShop.css — shelves + brand chips + accordion picker */
 .ps-open-btn{
-  position:relative; z-index:5;
-  background:linear-gradient(180deg,#2a3344,#1a222e);
-  border:1px solid #3d4a5c; color:#e7e9ec;
-  border-radius:12px; padding:10px 14px; font-family:inherit; font-weight:700;
-  cursor:pointer; margin:6px;
+  width:100%; margin:10px 0 8px; padding:16px 18px;
+  background:linear-gradient(180deg,#3d4a5c,#1e2633);
+  border:1px solid #5a6a80; border-radius:14px;
+  color:#e7e9ec; font-family:inherit; font-weight:800; font-size:16px;
+  cursor:pointer; min-height:52px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
 }
 .ps-open-btn:hover{ border-color:#78d505; color:#caff88; }
+.ps-open-btn:active{ transform:scale(0.98); }
 .ps-overlay{
   position:fixed; inset:0; z-index:9000; display:none;
   flex-direction:column; background:#0b0d10;
@@ -115,8 +117,6 @@
   background:linear-gradient(180deg,#2a2218,#1a1510);
   box-shadow:0 8px 20px rgba(0,0,0,0.5); opacity:0.85;
 }
-
-/* Accordion build picker */
 .ps-acc{
   max-width:720px; margin:0 auto 10px;
   border:1px solid #2a3344; border-radius:12px;
@@ -135,10 +135,5 @@
   flex:1; font-size:12px; color:#8b95a5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .ps-acc.has-pick .ps-acc-mid{ color:#78d505; font-weight:600; }
-.ps-acc-arrow{
-  flex:0 0 22px; text-align:center; color:#8b95a5; font-size:16px;
-}
-.ps-acc-body{
-  padding:0 10px 12px; border-top:1px solid #1e2633;
-  animation: psIn 0.15s ease;
-}
+.ps-acc-arrow{ flex:0 0 22px; text-align:center; color:#8b95a5; font-size:16px; }
+.ps-acc-body{ padding:0 10px 12px; border-top:1px solid #1e2633; animation: psIn 0.15s ease; }
