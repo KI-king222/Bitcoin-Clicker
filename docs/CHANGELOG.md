@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-04 — SEO for Google
+- index.html: title, description, keywords, canonical, Open Graph, Twitter cards
+- robots.txt + sitemap.xml (hashpool.pages.dev)
+- noscript fallback with HASHPOOL text for crawlers
+- Next step for you: Google Search Console → property + index request
+
 ## 2026-10-03 — SFX-Katalog für Videos
 - `docs/SFX_CATALOG.md`: Name ↔ beep.js-Funktion ↔ Einsatz
 - `sfx/generate_sfx.py`: erzeugt click, crit, buy, install, halving (+ Aliase)
