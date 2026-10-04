@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-04 — Parts Shop + 3D detail + cheats
+- Fullscreen Parts Shop (shelves), ~10 SKUs/category, brand chips, 1–10 scales
+- Inventory + build picker: only selected parts consumed on sell
+- Modest sell mult by average tier (~12–27%)
+- `js/parts3d/*`: tier/brand meshes (CPU/GPU/RAM/SSD/PSU/cooler), axis fixes
+- `js/partCheat.js`: buy/select SFX; grant-all-parts for obscured cheat codes
+- SEO: meta, robots, sitemap, Search Console tag
+
 ## 2026-10-04 — SEO for Google
 - index.html: title, description, keywords, canonical, Open Graph, Twitter cards
 - robots.txt + sitemap.xml (hashpool.pages.dev)
