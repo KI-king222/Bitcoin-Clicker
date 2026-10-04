@@ -76,8 +76,8 @@
     } catch (e) { console.warn("Parts Shop modules", e); }
 
     if (cssText) {
-      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", "\n" + cssText + "\n</style>");
-      else html = html.replace("</head>", "<style>" + cssText + "</style></head>");
+      if (html.indexOf("<\/style>") !== -1) html = html.replace("<\/style>", "\n" + cssText + "\n<\/style>");
+      else html = html.replace("<\/head>", "<style>" + cssText + "<\/style><\/head>");
     }
     if (html.indexOf("id=\"ps-open-btn\"") === -1) {
       var btn = '<button type="button" id="ps-open-btn" class="ps-open-btn">🛒 Parts Shop</button>';
@@ -88,7 +88,7 @@
       if (html.indexOf("id=\"build-overlay\"") !== -1) {
         html = html.replace('<div class="build-overlay" id="build-overlay"', ov + '<div class="build-overlay" id="build-overlay"');
       } else {
-        html = html.replace("</body>", ov + "</body>");
+        html = html.replace("<\/body>", ov + "<\/body>");
       }
     }
     if (html.indexOf("partInv:") === -1) {
@@ -107,7 +107,7 @@
       var js = "\n" + catText + "\n" + shopText + "\n";
       var mark = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(mark) !== -1) html = html.replace(mark, mark + js);
-      else html = html.replace("</script>", js + "</script>");
+      else html = html.replace("<\/scr"+"ipt>", js + "<\/scr"+"ipt>");
     }
 
     document.open();
