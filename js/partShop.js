@@ -1,4 +1,4 @@
-/* partShop.js — inventory, build picker, modest tier sell, brand chips */
+/* partShop.js — inventory, accordion build picker, modest tier sell */
 (function(){
   if(typeof PART_CATALOG === "undefined") return;
   var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler"];
@@ -92,6 +92,7 @@
     return '<div class="ps-scale"><div class="ps-scale-label"><span>'+label+'</span><span>'+score+'/10</span></div><div class="ps-scale-bar"><div class="ps-scale-fill '+(cls||'')+'" style="width:'+(score*10)+'%"></div></div></div>';
   }
   var view = { mode:"shelves", cat:null, selected:null };
+  var pickerExpand = {};
   function render(){
     var body = document.getElementById("ps-body");
     var title = document.getElementById("ps-title");
@@ -185,31 +186,48 @@
     var costEl = document.getElementById("ps-picker-cost");
     if(title) title.textContent = state.lang==="de" ? "Teile fuer den Bau" : "Parts for this build";
     var html = '<p class="ps-inv-hint">'+(state.lang==="de"
-      ? "Waehle aus dem Inventar je ein Teil pro Kategorie. Nur diese gehen beim Verkauf weg."
-      : "Pick one owned part per category. Only these are removed when you sell.")+'</p>';
+      ? "Tippe eine Kategorie, um sie auszuklappen. Waehle je ein Teil aus deinem Inventar."
+      : "Tap a category to expand. Pick one owned part per category.")+'</p>';
     REQUIRED_FOR_BUILD.forEach(function(cat){
       var c = PART_CATALOG[cat];
       var nm = (c.name && c.name[state.lang]) || cat;
       var owned = ownedItemsInCat(cat);
-      html += '<div class="ps-list-wrap" style="margin-bottom:14px"><div class="ps-list-title">'+(c.icon||"")+' '+nm+'</div>';
-      if(!owned.length){
-        html += '<p class="ps-inv-hint" style="color:#f7931a">'+(state.lang==="de"?"Keine Teile — im Shop kaufen":"None owned — buy in shop")+'</p>';
-      } else {
-        owned.forEach(function(it){
-          var picked = state.buildPick[cat] === it.id;
-          var chip = brandChipClass(it.brand, it.tier);
-          html += '<div class="ps-row'+(picked?" selected":"")+'" data-pick-cat="'+cat+'" data-pick-id="'+it.id+'">' +
-            '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
-            '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div>' +
-            '<div class="ps-row-tier">Tier '+it.tier+'/10 · x'+ownedCount(it.id)+'</div></div></div>';
-        });
+      var open = !!pickerExpand[cat];
+      var pickedId = state.buildPick[cat];
+      var pickedIt = pickedId && PART_BY_ID[pickedId];
+      var summary = pickedIt
+        ? (pickedIt.brand + " " + pickedIt.model)
+        : (owned.length
+            ? (owned.length + (state.lang==="de" ? " im Inventar" : " owned"))
+            : (state.lang==="de" ? "leer" : "empty"));
+      html += '<div class="ps-acc'+(open?" open":"")+(pickedIt?" has-pick":"")+'">';
+      html += '<button type="button" class="ps-acc-head" data-acc-cat="'+cat+'">';
+      html += '<span class="ps-acc-left">'+(c.icon||"")+' <strong>'+nm+'</strong></span>';
+      html += '<span class="ps-acc-mid">'+summary+'</span>';
+      html += '<span class="ps-acc-arrow" aria-hidden="true">'+(open?"▾":"▸")+'</span>';
+      html += '</button>';
+      if(open){
+        html += '<div class="ps-acc-body">';
+        if(!owned.length){
+          html += '<p class="ps-inv-hint" style="color:#f7931a;margin:8px 0">'+(state.lang==="de"?"Keine Teile — im Shop kaufen":"None owned — buy in shop")+'</p>';
+        } else {
+          owned.forEach(function(it){
+            var picked = state.buildPick[cat] === it.id;
+            var chip = brandChipClass(it.brand, it.tier);
+            html += '<div class="ps-row'+(picked?" selected":"")+'" data-pick-cat="'+cat+'" data-pick-id="'+it.id+'">' +
+              '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
+              '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div>' +
+              '<div class="ps-row-tier">Tier '+it.tier+'/10 · x'+ownedCount(it.id)+'</div></div></div>';
+          });
+        }
+        html += '</div>';
       }
       html += '</div>';
     });
     var ready = allPicked(); var cost = selectedBuildCost(); var mult = sellMult();
     var est = Math.round(cost * mult);
     if(costEl) costEl.textContent = ready ? ("~"+fmt(est)+" sats") : "—";
-    html += '<div class="ps-list-wrap" style="margin-top:8px">';
+    html += '<div class="ps-list-wrap" style="margin-top:12px">';
     if(ready){
       html += '<p class="ps-inv-hint" style="color:#8b95a5">'+(state.lang==="de"
         ? ("Kosten "+fmt(cost)+" · Verkauf ca. "+fmt(est)+" (+"+Math.round((mult-1)*100)+"%)")
@@ -221,6 +239,13 @@
         (state.lang==="de"?"Noch nicht alle Kategorien gewaehlt":"Select all categories first")+'</button>';
     }
     html += '</div>'; body.innerHTML = html;
+    body.querySelectorAll("[data-acc-cat]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var cat = el.getAttribute("data-acc-cat");
+        pickerExpand[cat] = !pickerExpand[cat];
+        renderPicker();
+      });
+    });
     body.querySelectorAll("[data-pick-id]").forEach(function(el){
       el.addEventListener("click", function(){
         var cat = el.getAttribute("data-pick-cat"); var id = el.getAttribute("data-pick-id");
