@@ -1,4 +1,4 @@
-/* partShop.js — 3D shelves, brand chips, consume on sell */
+/* partShop.js — inventory, build picker, modest tier sell, brand chips */
 (function(){
   if(typeof PART_CATALOG === "undefined") return;
   var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler"];
@@ -21,60 +21,69 @@
   }
   function hasAnyInCat(cat){ return categoryOwned(cat) > 0; }
   function canBuildPC(){ return REQUIRED_FOR_BUILD.every(hasAnyInCat); }
+  function ownedItemsInCat(cat){
+    ensureInv();
+    return (PART_CATALOG[cat].items||[]).filter(function(it){ return (state.partInv[it.id]||0) > 0; });
+  }
+  function allPicked(){
+    ensureInv();
+    return REQUIRED_FOR_BUILD.every(function(cat){
+      var id = state.buildPick[cat];
+      return id && (state.partInv[id]||0) > 0;
+    });
+  }
+  function avgPickedTier(){
+    ensureInv(); var sum = 0, n = 0;
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var id = state.buildPick[cat]; var it = id && PART_BY_ID[id];
+      if(it){ sum += it.tier; n++; }
+    });
+    return n ? sum / n : 1;
+  }
+  function sellMult(){
+    var t = avgPickedTier();
+    return 1.12 + Math.min(0.15, (t - 1) * 0.0167);
+  }
+  function selectedBuildCost(){
+    ensureInv(); var total = 0, n = 0;
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var id = state.buildPick[cat]; var it = id && PART_BY_ID[id];
+      if(it){ total += it.cost; n++; }
+    });
+    return n ? total : 0;
+  }
+  function consumeBuildParts(){
+    ensureInv();
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var id = state.buildPick[cat];
+      if(id && state.partInv[id]){
+        state.partInv[id] -= 1;
+        if(state.partInv[id] <= 0) delete state.partInv[id];
+      }
+      delete state.buildPick[cat];
+    });
+    if(state.buildPick.case){
+      var cid = state.buildPick.case;
+      if(cid && state.partInv[cid]){
+        state.partInv[cid] -= 1;
+        if(state.partInv[cid] <= 0) delete state.partInv[cid];
+      }
+      delete state.buildPick.case;
+    }
+  }
   function brandChipClass(brand, tier){
     var b = (brand||"").toLowerCase().replace(/[^a-z]/g,"");
-    var map = {
-      intel:"ps-chip-intel", amd:"ps-chip-amd", nvidia:"ps-chip-nvidia",
-      corsair:"ps-chip-corsair", samsung:"ps-chip-samsung", kingston:"ps-chip-kingston",
-      noctua:"ps-chip-noctua", asus:"ps-chip-asus", msi:"ps-chip-msi",
-      gigabyte:"ps-chip-gigabyte", seasonic:"ps-chip-seasonic",
-      bequiet:"ps-chip-bequiet", deepcool:"ps-chip-default", arctic:"ps-chip-default",
-      nzxt:"ps-chip-corsair", fractal:"ps-chip-default", lianli:"ps-chip-default",
-      crucial:"ps-chip-kingston", wd:"ps-chip-default", seagate:"ps-chip-default",
-      gskill:"ps-chip-corsair", stock:"ps-chip-default", asrock:"ps-chip-amd",
-      generic:"ps-chip-default"
-    };
+    var map = {intel:"ps-chip-intel",amd:"ps-chip-amd",nvidia:"ps-chip-nvidia",corsair:"ps-chip-corsair",samsung:"ps-chip-samsung",kingston:"ps-chip-kingston",noctua:"ps-chip-noctua",asus:"ps-chip-asus",msi:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",seasonic:"ps-chip-seasonic",bequiet:"ps-chip-bequiet",deepcool:"ps-chip-default",arctic:"ps-chip-default",nzxt:"ps-chip-corsair",fractal:"ps-chip-default",lianli:"ps-chip-default",crucial:"ps-chip-kingston",wd:"ps-chip-default",seagate:"ps-chip-default",gskill:"ps-chip-corsair",stock:"ps-chip-default",asrock:"ps-chip-amd",generic:"ps-chip-default"};
     var cls = map[b] || "ps-chip-default";
     if(tier >= 8) cls += " ps-chip-tier-hi";
     else if(tier >= 5) cls += " ps-chip-tier-mid";
     return cls;
   }
-  function chipLabel(it){
-    return (it.brand||"").slice(0,3).toUpperCase() + "\nT" + it.tier;
-  }
-  function bestOwnedInCat(cat){
-    ensureInv();
-    var best = null, bestTier = -1;
-    (PART_CATALOG[cat].items||[]).forEach(function(it){
-      if((state.partInv[it.id]||0) > 0 && it.tier > bestTier){
-        best = it.id; bestTier = it.tier;
-      }
-    });
-    return best;
-  }
-  function consumeBuildParts(){
-    ensureInv();
-    REQUIRED_FOR_BUILD.forEach(function(cat){
-      var id = state.buildPick[cat] || bestOwnedInCat(cat);
-      if(id && state.partInv[id]){
-        state.partInv[id] -= 1;
-        if(state.partInv[id] <= 0) delete state.partInv[id];
-      }
-      if(state.buildPick) delete state.buildPick[cat];
-    });
-    if(PART_CATALOG.case){
-      var cid = (state.buildPick && state.buildPick.case) || bestOwnedInCat("case");
-      if(cid && state.partInv[cid]){
-        state.partInv[cid] -= 1;
-        if(state.partInv[cid] <= 0) delete state.partInv[cid];
-      }
-    }
-  }
+  function chipLabel(it){ return (it.brand||"").slice(0,3).toUpperCase() + "\nT" + it.tier; }
   function showToast(msg){
     var el = document.getElementById("ps-toast");
     if(!el) return;
-    el.textContent = msg;
-    el.classList.add("show");
+    el.textContent = msg; el.classList.add("show");
     clearTimeout(showToast._t);
     showToast._t = setTimeout(function(){ el.classList.remove("show"); }, 3200);
   }
@@ -95,18 +104,18 @@
     if(view.mode === "shelves"){
       if(title) title.textContent = (state.lang==="de") ? "Teile-Shop" : "Parts Shop";
       var html = '<p class="ps-inv-hint">'+(state.lang==="de"
-        ? "Tippe ein Regal · waehle ein Teil · kaufen. Nach dem Verkauf sind eingebaute Teile weg."
-        : "Tap a shelf · pick a part · buy. Built-in parts are gone after you sell the PC.")+'</p><div class="ps-shelves">';
+        ? "Kaufen · spaeter im Bau-Menue aus dem Inventar waehlen. Nur gewaehlte Teile werden verbraucht."
+        : "Buy · later pick from inventory in build menu. Only selected parts are used up.")+'</p><div class="ps-shelves">';
       PART_CATEGORIES.forEach(function(cat){
         var c = PART_CATALOG[cat];
         var nm = (c.name && c.name[state.lang]) || (c.name && c.name.en) || cat;
         var own = categoryOwned(cat);
-        html += '<div class="ps-shelf" data-cat="'+cat+'"><span class="ps-shelf-icon">'+(c.icon||"📦")+'</span><div class="ps-shelf-name">'+nm+'</div><div class="ps-shelf-count">'+(own? (state.lang==="de"?"Im Inventar: "+own:"Owned: "+own) : (c.items.length+" models"))+'</div></div>';
+        html += '<div class="ps-shelf" data-cat="'+cat+'"><span class="ps-shelf-icon">'+(c.icon||"📦")+'</span><div class="ps-shelf-name">'+nm+'</div><div class="ps-shelf-count">'+(own? (state.lang==="de"?"Inventar: "+own:"Owned: "+own) : (c.items.length+" models"))+'</div></div>';
       });
       html += '</div><div class="ps-floor"></div>';
       if(canBuildPC()){
         html += '<p class="ps-inv-hint" style="color:#78d505;margin-top:16px;font-weight:700;">' +
-          (state.lang==="de" ? "✓ Genug Teile fuer einen PC." : "✓ Enough parts to build a PC.") + '</p>';
+          (state.lang==="de" ? "✓ Inventar reicht — oeffne PC bauen und waehle die Teile." : "✓ Inventory ready — open Build and choose parts.") + '</p>';
       }
       body.innerHTML = html;
       body.querySelectorAll(".ps-shelf").forEach(function(el){
@@ -116,14 +125,12 @@
       });
       return;
     }
-    var cat = view.cat;
-    var c = PART_CATALOG[cat];
+    var cat = view.cat; var c = PART_CATALOG[cat];
     var nm = (c.name && c.name[state.lang]) || cat;
     if(title) title.textContent = (c.icon||"") + " " + nm;
     var html = '<div class="ps-list-wrap"><p class="ps-list-title">' + (state.lang==="de" ? "Waehle ein Modell" : "Choose a model") + '</p>';
     c.items.forEach(function(it){
-      var own = ownedCount(it.id);
-      var sel = view.selected === it.id;
+      var own = ownedCount(it.id); var sel = view.selected === it.id;
       var chip = brandChipClass(it.brand, it.tier);
       html += '<div class="ps-row'+(sel?" selected":"")+'" data-id="'+it.id+'">' +
         '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
@@ -138,13 +145,11 @@
           '<div class="ps-detail-actions"><div class="ps-price-big">'+fmt(it.cost)+' sats</div><button class="ps-buy-btn" id="ps-buy"'+(canBuy?"":" disabled")+'>'+(state.lang==="de"?"Kaufen":"Buy")+'</button></div></div>';
       }
     });
-    html += '</div>';
-    body.innerHTML = html;
+    html += '</div>'; body.innerHTML = html;
     body.querySelectorAll(".ps-row").forEach(function(el){
       el.addEventListener("click", function(){
         var id = el.getAttribute("data-id");
-        view.selected = (view.selected === id) ? null : id;
-        render();
+        view.selected = (view.selected === id) ? null : id; render();
       });
     });
     var buy = document.getElementById("ps-buy");
@@ -157,28 +162,100 @@
     if(state.balance < it.cost){ showToast(state.lang==="de" ? "Nicht genug Sats" : "Not enough sats"); return; }
     state.balance -= it.cost;
     state.partInv[it.id] = (state.partInv[it.id]||0) + 1;
-    if(!state.buildPick[it.cat] || (PART_BY_ID[state.buildPick[it.cat]]||{}).tier < it.tier){
-      state.buildPick[it.cat] = it.id;
-    }
     if(state.buildBought && it.cat) state.buildBought[it.cat] = true;
     if(typeof save === "function") save();
     if(typeof updateBalanceUI === "function") updateBalanceUI();
-    showToast((state.lang==="de"?"Gekauft: ":"Bought: ") + partDisplayName(it));
-    if(canBuildPC()){
-      setTimeout(function(){
-        showToast(state.lang==="de" ? "Du hast genug Teile fuer einen PC!" : "You have enough parts to build a PC!");
-      }, 900);
-    }
+    showToast((state.lang==="de"?"Gekauft: ":"Bought: ") + partDisplayName(it) + " (x"+state.partInv[it.id]+")");
     var sats = document.getElementById("ps-sats");
     if(sats) sats.textContent = fmt(state.balance) + " sats";
     render();
+  }
+  function ensurePickerDom(){
+    if(document.getElementById("ps-picker")) return;
+    var d = document.createElement("div");
+    d.id = "ps-picker"; d.className = "ps-overlay";
+    d.innerHTML = '<div class="ps-top"><button type="button" class="ps-back" id="ps-picker-back" style="visibility:hidden">←</button><h2 id="ps-picker-title">Build</h2><div class="ps-sats" id="ps-picker-cost">—</div><button type="button" class="ps-close" id="ps-picker-close">✕</button></div><div class="ps-body" id="ps-picker-body"></div>';
+    document.body.appendChild(d);
+    document.getElementById("ps-picker-close").addEventListener("click", closePicker);
+  }
+  function renderPicker(){
+    ensurePickerDom(); ensureInv();
+    var body = document.getElementById("ps-picker-body");
+    var title = document.getElementById("ps-picker-title");
+    var costEl = document.getElementById("ps-picker-cost");
+    if(title) title.textContent = state.lang==="de" ? "Teile fuer den Bau" : "Parts for this build";
+    var html = '<p class="ps-inv-hint">'+(state.lang==="de"
+      ? "Waehle aus dem Inventar je ein Teil pro Kategorie. Nur diese gehen beim Verkauf weg."
+      : "Pick one owned part per category. Only these are removed when you sell.")+'</p>';
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var c = PART_CATALOG[cat];
+      var nm = (c.name && c.name[state.lang]) || cat;
+      var owned = ownedItemsInCat(cat);
+      html += '<div class="ps-list-wrap" style="margin-bottom:14px"><div class="ps-list-title">'+(c.icon||"")+' '+nm+'</div>';
+      if(!owned.length){
+        html += '<p class="ps-inv-hint" style="color:#f7931a">'+(state.lang==="de"?"Keine Teile — im Shop kaufen":"None owned — buy in shop")+'</p>';
+      } else {
+        owned.forEach(function(it){
+          var picked = state.buildPick[cat] === it.id;
+          var chip = brandChipClass(it.brand, it.tier);
+          html += '<div class="ps-row'+(picked?" selected":"")+'" data-pick-cat="'+cat+'" data-pick-id="'+it.id+'">' +
+            '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
+            '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div>' +
+            '<div class="ps-row-tier">Tier '+it.tier+'/10 · x'+ownedCount(it.id)+'</div></div></div>';
+        });
+      }
+      html += '</div>';
+    });
+    var ready = allPicked(); var cost = selectedBuildCost(); var mult = sellMult();
+    var est = Math.round(cost * mult);
+    if(costEl) costEl.textContent = ready ? ("~"+fmt(est)+" sats") : "—";
+    html += '<div class="ps-list-wrap" style="margin-top:8px">';
+    if(ready){
+      html += '<p class="ps-inv-hint" style="color:#8b95a5">'+(state.lang==="de"
+        ? ("Kosten "+fmt(cost)+" · Verkauf ca. "+fmt(est)+" (+"+Math.round((mult-1)*100)+"%)")
+        : ("Cost "+fmt(cost)+" · est. sale "+fmt(est)+" (+"+Math.round((mult-1)*100)+"%)"))+'</p>';
+      html += '<button type="button" class="ps-buy-btn" id="ps-picker-go" style="width:100%">'+
+        (state.lang==="de"?"Zusammenbauen starten":"Start assembly")+'</button>';
+    } else {
+      html += '<button type="button" class="ps-buy-btn" disabled style="width:100%">'+
+        (state.lang==="de"?"Noch nicht alle Kategorien gewaehlt":"Select all categories first")+'</button>';
+    }
+    html += '</div>'; body.innerHTML = html;
+    body.querySelectorAll("[data-pick-id]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var cat = el.getAttribute("data-pick-cat"); var id = el.getAttribute("data-pick-id");
+        state.buildPick[cat] = id;
+        if(state.buildBought) state.buildBought[cat] = true;
+        if(typeof save === "function") save();
+        renderPicker();
+      });
+    });
+    var go = document.getElementById("ps-picker-go");
+    if(go) go.addEventListener("click", function(){
+      closePicker();
+      REQUIRED_FOR_BUILD.forEach(function(cat){ if(state.buildBought) state.buildBought[cat] = true; });
+      if(typeof save === "function") save();
+      if(typeof openBuildOverlay === "function") openBuildOverlay();
+    });
+  }
+  function openPicker(){
+    if(!canBuildPC()){
+      showToast(state.lang==="de" ? "Zuerst je 1 Teil pro Kategorie im Parts Shop kaufen" : "Buy 1 part per category in Parts Shop first");
+      openShop(); return;
+    }
+    ensurePickerDom();
+    document.getElementById("ps-picker").classList.add("open");
+    renderPicker();
+  }
+  function closePicker(){
+    var el = document.getElementById("ps-picker");
+    if(el) el.classList.remove("open");
   }
   function openShop(){
     var ov = document.getElementById("ps-overlay");
     if(!ov) return;
     view = { mode:"shelves", cat:null, selected:null };
-    ov.classList.add("open");
-    render();
+    ov.classList.add("open"); render();
   }
   function closeShop(){
     var ov = document.getElementById("ps-overlay");
@@ -193,11 +270,21 @@
     if(backBtn) backBtn.addEventListener("click", function(){
       if(view.mode === "list"){ view.mode = "shelves"; view.cat = null; view.selected = null; render(); }
     });
+    var buildBtn = document.getElementById("open-build-btn");
+    if(buildBtn && !buildBtn._psWired){
+      buildBtn._psWired = true;
+      buildBtn.addEventListener("click", function(e){
+        if(canBuildPC() || Object.keys(state.partInv||{}).length){
+          e.stopImmediatePropagation(); e.preventDefault(); openPicker();
+        }
+      }, true);
+    }
   }
   window.PartShop = {
-    open: openShop, close: closeShop, canBuildPC: canBuildPC,
-    ownedCount: ownedCount, categoryOwned: categoryOwned,
-    consumeBuildParts: consumeBuildParts, bestOwnedInCat: bestOwnedInCat,
+    open: openShop, close: closeShop, openPicker: openPicker,
+    canBuildPC: canBuildPC, ownedCount: ownedCount, categoryOwned: categoryOwned,
+    consumeBuildParts: consumeBuildParts, selectedBuildCost: selectedBuildCost,
+    sellMult: sellMult, avgPickedTier: avgPickedTier, allPicked: allPicked,
     REQUIRED: REQUIRED_FOR_BUILD, ensureInv: ensureInv
   };
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
