@@ -63,16 +63,20 @@
     );
 
     st.textContent = "Loading Parts Shop…";
-    var cssText = "", catText = "", shopText = "";
+    var cssText = "", catText = "", shopText = "", parts3dText = "";
     try {
+      var p3d = ["registry","cpu","gpu","ram","ssd","psu","cooler","patch"];
       var rc = await Promise.all([
         fetch(RAW + "/css/partShop.css", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
         fetch(RAW + "/js/partCatalog.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
         fetch(RAW + "/js/partShop.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; })
-      ]);
+      ].concat(p3d.map(function(n){
+        return fetch(RAW + "/js/parts3d/" + n + ".js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; });
+      })));
       cssText = rc[0] || "";
       catText = rc[1] || "";
       shopText = rc[2] || "";
+      parts3dText = rc.slice(3).filter(Boolean).join("\n");
     } catch (e) { console.warn("Parts Shop modules", e); }
 
     if (cssText) {
@@ -108,6 +112,12 @@
       var mark = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(mark) !== -1) html = html.replace(mark, mark + js);
       else html = html.replace("<" + "/scr" + "ipt>", js + "<" + "/scr" + "ipt>");
+    }
+    if (parts3dText && html.indexOf("Parts3DBind") === -1) {
+      var p3 = "\n" + parts3dText + "\n try{ if(window.Parts3D){ if(Parts3D.buildCpu) buildCpu=Parts3D.buildCpu; if(Parts3D.buildGpu) buildGpu=Parts3D.buildGpu; if(Parts3D.buildRam) buildRamStick=function(c){return Parts3D.buildRam(c);}; if(Parts3D.buildSsd) buildSsd=Parts3D.buildSsd; if(Parts3D.buildPsu) buildPsu=Parts3D.buildPsu; if(Parts3D.buildCooler) buildCooler=Parts3D.buildCooler; } }catch(_p3){} /*Parts3DBind*/\n";
+      var mark2 = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
+      if (html.indexOf(mark2) !== -1) html = html.replace(mark2, mark2 + p3);
+      else html = html.replace("<" + "/scr" + "ipt>", p3 + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("PartShopConsumeHook") === -1) {
       html = html.replace(
