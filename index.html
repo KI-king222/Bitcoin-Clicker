@@ -115,6 +115,16 @@
         "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); }catch(_e){} /*PartShopConsumeHook*/"
       );
     }
+    if (html.indexOf("PartShopCostHook") === -1) {
+      html = html.replace(
+        "function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }",
+        "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }"
+      );
+      html = html.replace(
+        "buildTotalCost() * 1.38 * pasteMul",
+        "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)"
+      );
+    }
 
     document.open();
     document.write(html);
