@@ -92,7 +92,9 @@ var PART_CATALOG={
 var PART_CATEGORIES=Object.keys(PART_CATALOG);
 var PART_BY_ID={};
 PART_CATEGORIES.forEach(function(cat){PART_CATALOG[cat].items.forEach(function(it){PART_BY_ID[it.id]=Object.assign({cat:cat},it);});});
-function partDisplayName(it){return(it.brand?it.brand+' ':'')+it.model;}
+function partBaseName(it){return(it.brand?it.brand+' ':'')+it.model;}
+function partLang(){try{return(typeof navigator!=='undefined'&&/^de/i.test(navigator.language||''))?'de':'en';}catch(e){return'de';}}
+function partDisplayName(it){return partBaseName(it)+' · '+partTierLabel(it,partLang());}
 function partAvgScore(it){return Math.round((it.power+it.efficiency+it.value)/3*10)/10;}
 var PART_TIER_LABELS={
  en:["Entry","Basic","Budget","Mainstream","Mainstream+","Performance","High-End","High-End+","Enthusiast","Flagship"],
