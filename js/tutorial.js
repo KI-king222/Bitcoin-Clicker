@@ -1,30 +1,42 @@
-/* tutorial.js — first-run guided steps (DE/EN) */
+/* tutorial.js — specific first-run guide (DE/EN), light overlay, clear outlines */
 (function(){
   var STYLE_ID = "hp-tut-style";
   var ROOT_ID = "hp-tut";
   var steps = [
     {
-      id: "welcome",
-      de: { title: "Willkommen bei HASHPOOL", body: "Tippe auf den gro\u00dfen Button, um Sats zu minen. Upgrades bringen dir passive Einnahmen." },
-      en: { title: "Welcome to HASHPOOL", body: "Tap the big button to mine sats. Upgrades give you passive income." },
+      id: "mine",
+      de: { title: "1 · Tippen zum Minen", body: "Drücke den großen orangen „Tap to Mine“-Button in der Mitte. Jeder Tipp gibt Sats. Später bringen Upgrades auch passive Sats pro Sekunde." },
+      en: { title: "1 · Tap to mine", body: "Press the big orange “Tap to Mine” button in the center. Each tap gives sats. Later, upgrades also earn passive sats per second." },
       target: "#mine-btn"
     },
     {
+      id: "balance",
+      de: { title: "2 · Dein Guthaben", body: "Oben siehst du deine Sats und den Kurs. Dort erscheinen auch passive Einnahmen und der Wert pro Klick — schau nach jedem Upgrade hierhin." },
+      en: { title: "2 · Your balance", body: "At the top you see your sats and rate. Passive income and value per click show here — check after each upgrade." },
+      target: "#balance, .balance-wrap, #hr, .hud, header .balance"
+    },
+    {
       id: "shop",
-      de: { title: "Teile-Shop", body: "Im Teile-Shop kaufst du echte PC-Komponenten (CPU, GPU, RAM \u2026). Bessere Teile = besserer Verkaufspreis." },
-      en: { title: "Parts Shop", body: "Buy real PC parts (CPU, GPU, RAM\u2026). Better parts mean a better sell price." },
+      de: { title: "3 · Teile-Shop öffnen", body: "Tippe auf „Teile-Shop“ (Warenkorb). Dort kaufst du CPU, GPU, RAM, SSD, Netzteil, Mainboard und Kühler — wie echte PC-Teile, mit Stufen 1–10." },
+      en: { title: "3 · Open Parts Shop", body: "Tap “Parts Shop”. Buy CPU, GPU, RAM, SSD, PSU, motherboard and cooler — real-style parts with tiers 1–10." },
       target: "#ps-open-btn"
     },
     {
       id: "build",
-      de: { title: "PC bauen", body: "Wenn du von jeder Kategorie mind. 1 Teil hast, \u00f6ffne \u201ePC bauen\u201c, w\u00e4hle je 1 Teil und starte den Zusammenbau." },
-      en: { title: "Build a PC", body: "Once you own 1 part per category, open Build, pick one of each, and start assembly." },
+      de: { title: "4 · PC bauen", body: "Wenn du von jeder Kategorie mind. 1 Teil hast: „PC bauen“ öffnen → Kategorien ausklappen → je 1 Teil wählen → „Zusammenbauen starten“. Danach im 3D-Menü einbauen und verkaufen." },
+      en: { title: "4 · Build a PC", body: "When you own ≥1 part per category: open Build → expand categories → pick one each → Start assembly. Then install in 3D and sell the rig." },
       target: "#open-build-btn"
     },
     {
+      id: "upgrades",
+      de: { title: "5 · Upgrades", body: "Unter dem Mine-Button (oder im Shop-Bereich) kaufst du Klick- und Passive-Upgrades. Die machen jeden Tipp und jede Sekunde stärker — aber mit fairen Kosten, damit es nicht zu schnell explodiert." },
+      en: { title: "5 · Upgrades", body: "Below the mine button (or in the shop area) buy click and passive upgrades. They boost each tap and each second — with fair costs so progress stays balanced." },
+      target: "#shop-click, #shop, .shop, #upgrades"
+    },
+    {
       id: "done",
-      de: { title: "Viel Erfolg!", body: "Verkaufe fertige Rigs f\u00fcr Sats. Das Tutorial erscheint nur einmal f\u00fcr neue Spieler." },
-      en: { title: "Have fun!", body: "Sell finished rigs for sats. This tutorial only shows once for new players." },
+      de: { title: "Fertig — viel Erfolg!", body: "Ziel: Sats minen, Teile kaufen, PC bauen, Rig verkaufen, wiederholen. Dieses Tutorial erscheint nur einmal. Viel Spaß bei HASHPOOL!" },
+      en: { title: "You’re set — have fun!", body: "Loop: mine sats → buy parts → build PC → sell rig → repeat. This tutorial only shows once. Enjoy HASHPOOL!" },
       target: null
     }
   ];
@@ -39,15 +51,16 @@
     s.id = STYLE_ID;
     s.textContent = [
       "#hp-tut{position:fixed;inset:0;z-index:100000;pointer-events:none;font-family:system-ui,-apple-system,sans-serif}",
-      "#hp-tut .hp-tut-dim{position:absolute;inset:0;background:rgba(0,0,0,0.55);pointer-events:auto}",
-      "#hp-tut .hp-tut-card{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:min(360px,92vw);background:#12151a;border:2px solid #f7931a;border-radius:16px;padding:16px 18px;color:#f0f2f5;pointer-events:auto;box-shadow:0 16px 40px rgba(0,0,0,0.5)}",
-      "#hp-tut .hp-tut-card h3{margin:0 0 8px;font-size:17px;color:#f7931a;font-weight:800}",
-      "#hp-tut .hp-tut-card p{margin:0 0 14px;font-size:14px;line-height:1.45;color:#c8ced8}",
+      "#hp-tut .hp-tut-dim{position:absolute;inset:0;background:rgba(0,0,0,0.22);pointer-events:auto}",
+      "#hp-tut .hp-tut-card{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);width:min(380px,94vw);background:rgba(18,21,26,0.96);border:2px solid #f7931a;border-radius:16px;padding:16px 18px;color:#f0f2f5;pointer-events:auto;box-shadow:0 12px 32px rgba(0,0,0,0.35)}",
+      "#hp-tut .hp-tut-card h3{margin:0 0 8px;font-size:16px;color:#f7931a;font-weight:800}",
+      "#hp-tut .hp-tut-card p{margin:0 0 14px;font-size:13.5px;line-height:1.5;color:#d0d6e0}",
       "#hp-tut .hp-tut-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}",
       "#hp-tut .hp-tut-actions button{font:700 13px system-ui;padding:10px 14px;border-radius:10px;border:1px solid #2a313c;background:#1a1f27;color:#e7e9ec;cursor:pointer}",
       "#hp-tut .hp-tut-actions button.primary{background:#f7931a;color:#1a1206;border-color:#f7931a}",
-      "#hp-tut .hp-tut-spot{position:absolute;border:2px solid #f7931a;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.55),0 0 20px rgba(247,147,26,0.5);pointer-events:none;transition:all .25s ease}",
-      "#hp-tut .hp-tut-progress{font-size:11px;color:#8b95a5;margin-bottom:8px}"
+      "#hp-tut .hp-tut-spot{position:absolute;border:3px solid #f7931a;border-radius:14px;box-shadow:0 0 0 3px rgba(247,147,26,0.35),0 0 18px rgba(247,147,26,0.55);background:transparent;pointer-events:none;transition:all .2s ease;z-index:1}",
+      "#hp-tut .hp-tut-spot::after{content:'';position:absolute;inset:-6px;border:2px dashed rgba(247,147,26,0.7);border-radius:16px;pointer-events:none}",
+      "#hp-tut .hp-tut-progress{font-size:11px;color:#8b95a5;margin-bottom:8px;letter-spacing:0.02em}"
     ].join("\n");
     document.head.appendChild(s);
   }
@@ -59,19 +72,28 @@
     var el = document.getElementById(ROOT_ID);
     if(el) el.remove();
   }
+  function resolveTarget(sel){
+    if(!sel) return null;
+    var parts = sel.split(",");
+    for(var i=0;i<parts.length;i++){
+      var t = document.querySelector(parts[i].trim());
+      if(t) return t;
+    }
+    return null;
+  }
   function highlight(sel){
     var spot = document.getElementById("hp-tut-spot");
     if(!spot) return;
     if(!sel){ spot.style.display = "none"; return; }
-    var t = document.querySelector(sel);
+    var t = resolveTarget(sel);
     if(!t){ spot.style.display = "none"; return; }
     try { t.scrollIntoView({ behavior: "smooth", block: "center" }); } catch(e){}
     var r = t.getBoundingClientRect();
-    var pad = 8;
+    var pad = 6;
     spot.style.display = "block";
-    spot.style.left = (r.left - pad) + "px";
-    spot.style.top = (r.top - pad) + "px";
-    spot.style.width = (r.width + pad * 2) + "px";
+    spot.style.left = Math.max(4, r.left - pad) + "px";
+    spot.style.top = Math.max(4, r.top - pad) + "px";
+    spot.style.width = Math.min(window.innerWidth - 8, r.width + pad * 2) + "px";
     spot.style.height = (r.height + pad * 2) + "px";
   }
   function render(){
@@ -93,8 +115,8 @@
       '<h3>' + L.title + '</h3>' +
       '<p>' + L.body + '</p>' +
       '<div class="hp-tut-actions">' +
-        (idx > 0 ? '<button type="button" id="hp-tut-back">' + (lang()==="de"?"Zur\u00fcck":"Back") + '</button>' : '') +
-        '<button type="button" id="hp-tut-skip">' + (lang()==="de"?"\u00dcberspringen":"Skip") + '</button>' +
+        (idx > 0 ? '<button type="button" id="hp-tut-back">' + (lang()==="de"?"Zurück":"Back") + '</button>' : '') +
+        '<button type="button" id="hp-tut-skip">' + (lang()==="de"?"Überspringen":"Skip") + '</button>' +
         '<button type="button" class="primary" id="hp-tut-next">' + (isLast ? (lang()==="de"?"Los geht\'s":"Let\'s go") : (lang()==="de"?"Weiter":"Next")) + '</button>' +
       '</div>';
     highlight(step.target);
@@ -106,6 +128,7 @@
     if(sk) sk.onclick = finish;
     var bk = document.getElementById("hp-tut-back");
     if(bk) bk.onclick = function(){ idx = Math.max(0, idx - 1); render(); };
+    window.addEventListener("resize", function onR(){ highlight(step.target); }, { once: true });
   }
   function shouldShow(){
     try {
@@ -123,9 +146,7 @@
   }
   window.HashpoolTutorial = { start: start, finish: finish };
   function boot(){
-    setTimeout(function(){
-      try { start(); } catch(e){}
-    }, 1800);
+    setTimeout(function(){ try { start(); } catch(e){} }, 1800);
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
