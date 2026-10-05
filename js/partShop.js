@@ -73,7 +73,7 @@
   }
   function brandChipClass(brand, tier){
     var b = (brand||"").toLowerCase().replace(/[^a-z]/g,"");
-    var map = {intel:"ps-chip-intel",amd:"ps-chip-amd",nvidia:"ps-chip-nvidia",corsair:"ps-chip-corsair",samsung:"ps-chip-samsung",kingston:"ps-chip-kingston",noctua:"ps-chip-noctua",asus:"ps-chip-asus",msi:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",seasonic:"ps-chip-seasonic",bequiet:"ps-chip-bequiet",deepcool:"ps-chip-default",arctic:"ps-chip-default",nzxt:"ps-chip-corsair",fractal:"ps-chip-default",lianli:"ps-chip-default",crucial:"ps-chip-kingston",wd:"ps-chip-default",seagate:"ps-chip-default",gskill:"ps-chip-corsair",stock:"ps-chip-default",asrock:"ps-chip-amd",generic:"ps-chip-default"};
+    var map = {intel:"ps-chip-intel",amd:"ps-chip-amd",nvidia:"ps-chip-nvidia",corsair:"ps-chip-corsair",samsung:"ps-chip-samsung",kingston:"ps-chip-kingston",noctua:"ps-chip-noctua",asus:"ps-chip-asus",msi:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",seasonic:"ps-chip-seasonic",bequiet:"ps-chip-bequiet",deepcool:"ps-chip-default",arctic:"ps-chip-default",nzxt:"ps-chip-corsair",fractal:"ps-chip-default",lianli:"ps-chip-default",crucial:"ps-chip-kingston",wd:"ps-chip-default",seagate:"ps-chip-default",gskill:"ps-chip-corsair",stock:"ps-chip-default",asrock:"ps-chip-amd",generic:"ps-chip-default",nocturne:"ps-chip-noctua",icewing:"ps-chip-default",abyssal:"ps-chip-default",corvus:"ps-chip-corsair",samsum:"ps-chip-samsung",fjordic:"ps-chip-default",lumio:"ps-chip-default",prisma:"ps-chip-default",kingforge:"ps-chip-kingston",crux:"ps-chip-kingston",seaguard:"ps-chip-default",seasonicx:"ps-chip-seasonic",asusx:"ps-chip-asus",msx:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",asrockx:"ps-chip-amd"};
     var cls = map[b] || "ps-chip-default";
     if(tier >= 8) cls += " ps-chip-tier-hi";
     else if(tier >= 5) cls += " ps-chip-tier-mid";
@@ -135,11 +135,11 @@
       var chip = brandChipClass(it.brand, it.tier);
       html += '<div class="ps-row'+(sel?" selected":"")+'" data-id="'+it.id+'">' +
         '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
-        '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div><div class="ps-row-tier">Tier '+it.tier+'/10'+(own? ' <span class="ps-row-owned">x'+own+'</span>':'')+'</div></div>' +
+        '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div><div class="ps-row-tier">'+partTierBadge(it)+(own? ' <span class="ps-row-owned">x'+own+'</span>':'')+'</div></div>' +
         '<div class="ps-row-price">'+fmt(it.cost)+'</div></div>';
       if(sel){
         var canBuy = state.balance >= it.cost;
-        html += '<div class="ps-detail open"><div class="ps-detail-name">'+partDisplayName(it)+'</div><div class="ps-detail-brand">'+it.brand+' · Tier '+it.tier+'</div>' +
+        html += '<div class="ps-detail open"><div class="ps-detail-name">'+partBaseName(it)+'</div><div class="ps-detail-brand">'+partTierBadge(it)+'</div>' +
           scaleRow(state.lang==="de"?"Leistung":"Performance", it.power, "") +
           scaleRow(state.lang==="de"?"Effizienz":"Efficiency", it.efficiency, "eff") +
           scaleRow(state.lang==="de"?"Preis/Leistung":"Value", it.value, "val") +
@@ -196,7 +196,7 @@
       var pickedId = state.buildPick[cat];
       var pickedIt = pickedId && PART_BY_ID[pickedId];
       var summary = pickedIt
-        ? (pickedIt.brand + " " + pickedIt.model)
+        ? (partBaseName(pickedIt) + " · " + partTierLabel(pickedIt))
         : (owned.length
             ? (owned.length + (state.lang==="de" ? " im Inventar" : " owned"))
             : (state.lang==="de" ? "leer" : "empty"));
@@ -217,7 +217,7 @@
             html += '<div class="ps-row'+(picked?" selected":"")+'" data-pick-cat="'+cat+'" data-pick-id="'+it.id+'">' +
               '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
               '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div>' +
-              '<div class="ps-row-tier">Tier '+it.tier+'/10 · x'+ownedCount(it.id)+'</div></div></div>';
+              '<div class="ps-row-tier">'+partTierBadge(it)+' · x'+ownedCount(it.id)+'</div></div></div>';
           });
         }
         html += '</div>';
@@ -276,7 +276,16 @@
     var el = document.getElementById("ps-picker");
     if(el) el.classList.remove("open");
   }
+  function updateOpenBtnLabel(){
+    var el = document.getElementById("ps-open-label");
+    if(el) el.textContent = (state.lang==="de") ? "Teile-Shop" : "Parts Shop";
+    else {
+      var btn = document.getElementById("ps-open-btn");
+      if(btn) btn.innerHTML = (state.lang==="de") ? "🛒 Teile-Shop" : "🛒 Parts Shop";
+    }
+  }
   function openShop(){
+    updateOpenBtnLabel();
     var ov = document.getElementById("ps-overlay");
     if(!ov) return;
     view = { mode:"shelves", cat:null, selected:null };
@@ -290,6 +299,7 @@
     var openBtn = document.getElementById("ps-open-btn");
     var closeBtn = document.getElementById("ps-close");
     var backBtn = document.getElementById("ps-back");
+    updateOpenBtnLabel();
     if(openBtn) openBtn.addEventListener("click", openShop);
     if(closeBtn) closeBtn.addEventListener("click", closeShop);
     if(backBtn) backBtn.addEventListener("click", function(){
