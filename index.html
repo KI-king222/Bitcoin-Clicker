@@ -85,11 +85,12 @@
       else html = html.replace("<" + "/head>", "<style>" + cssText + "</style><" + "/head>");
     }
     if (html.indexOf("id=\"ps-open-btn\"") === -1) {
-      var btn = '<button type="button" id="ps-open-btn" class="ps-open-btn">🛒 <span id="ps-open-label">Parts Shop</span></button>';
+      var _psLang = ((typeof navigator!=="undefined"&&(navigator.language||"")).slice(0,2)==="de")?"de":"en";
+      var btn = '<button type="button" id="ps-open-btn" class="ps-open-btn">🛒 <span id="ps-open-label">'+(_psLang==="de"?"Teile-Shop":"Parts Shop")+'</span></button>';
       if (html.indexOf("id=\"open-build-btn\"") !== -1) {
         html = html.replace(/<button([^>]*id="open-build-btn")/, btn + "<button$1");
       }
-      var ov = '<div class="ps-overlay" id="ps-overlay"><div class="ps-top"><button type="button" class="ps-back" id="ps-back" style="visibility:hidden">←</button><h2 id="ps-title">Parts Shop</h2><div class="ps-sats" id="ps-sats">0 sats</div><button type="button" class="ps-close" id="ps-close">✕</button></div><div class="ps-body" id="ps-body"></div></div><div class="ps-toast" id="ps-toast"></div>';
+      var ov = '<div class="ps-overlay" id="ps-overlay"><div class="ps-top"><button type="button" class="ps-back" id="ps-back" style="visibility:hidden">←</button><h2 id="ps-title">Teile-Shop</h2><div class="ps-sats" id="ps-sats">0 sats</div><button type="button" class="ps-close" id="ps-close">✕</button></div><div class="ps-body" id="ps-body"></div></div><div class="ps-toast" id="ps-toast"></div>';
       if (html.indexOf("id=\"build-overlay\"") !== -1) {
         html = html.replace('<div class="build-overlay" id="build-overlay"', ov + '<div class="build-overlay" id="build-overlay"');
       } else {
@@ -148,15 +149,22 @@
         "state.muted = !!saved.muted;\n        state.partInv = saved.partInv || {}; state.buildPick = saved.buildPick || {};\n        if(saved.buildBought){"
       );
     }
+    if (html.indexOf("CurrentSavePartInv") === -1) {
+      html = html.replace(
+        "function currentSaveData(){\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, rigsSold:state.rigsSold, lastSeen:Date.now()\n    };\n  }",
+        "function currentSaveData(){ /*CurrentSavePartInv*/ return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled,\n      partInv:state.partInv||{}, buildPick:state.buildPick||{}, rigsSold:state.rigsSold, lastSeen:Date.now()\n    };\n  }"
+      );
+    }
     if (html.indexOf("PsBtnI18n") === -1) {
       var i18n = [
         "",
         "try{ function psUpdateLabel(){",
         "  var el=document.getElementById('ps-open-label');",
-        "  if(el) el.textContent=(state.lang==='de')?'Teile-Shop':'Parts Shop';",
-        "  else { var b=document.getElementById('ps-open-btn'); if(b) b.textContent=(state.lang==='de')?'🛒 Teile-Shop':'🛒 Parts Shop'; }",
+        "  var de=(state&&state.lang==='de')||((navigator.language||'').slice(0,2)==='de');",
+        "  if(el) el.textContent=de?'Teile-Shop':'Parts Shop';",
+        "  else { var b=document.getElementById('ps-open-btn'); if(b) b.textContent=de?'🛒 Teile-Shop':'🛒 Parts Shop'; }",
         "}",
-        "psUpdateLabel();",
+        "psUpdateLabel(); setTimeout(psUpdateLabel,100); setTimeout(psUpdateLabel,500); setTimeout(psUpdateLabel,1500);",
         "var _or=typeof render==='function'?render:null;",
         "if(_or){ render=function(){ _or.apply(this,arguments); psUpdateLabel(); }; }",
         "}catch(_i18){} /*PsBtnI18n*/",
