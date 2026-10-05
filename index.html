@@ -180,7 +180,6 @@
       else html = html.replace("<" + "/scr" + "ipt>", i18n + "<" + "/scr" + "ipt>");
     }
 
-    // Prevent mobile double-tap / pinch zoom on the game
     if (html.indexOf("NoZoomViewport") === -1) {
       html = html.replace(
         /<meta name="viewport"[^>]*>/,
@@ -191,6 +190,26 @@
       else if (html.indexOf("<"+"/style>") !== -1) html = html.replace("<"+"/style>", noZoomCss + "<"+"/style>");
       var noZoomJs = "\ntry{(function(){document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();}catch(_z){}\n";
       html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
+    }
+
+    if (html.indexOf("EconomyNerf") === -1) {
+      html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:40, mult:1.12 /*EconomyNerf*/');
+      html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:600, mult:1.14');
+      html = html.replace('id:"asicpen", base:5500, mult:1.75', 'id:"asicpen", base:9000, mult:1.16');
+      html = html.replace('id:"quantum", base:75000, mult:2.1', 'id:"quantum", base:120000, mult:1.20');
+      html = html.replace('id:"usb", base:15,  hr:0.08', 'id:"usb", base:18,  hr:0.05');
+      html = html.replace('id:"gpu", base:160, hr:0.55', 'id:"gpu", base:220, hr:0.28');
+      html = html.replace('id:"fpga",base:1400, hr:3.5', 'id:"fpga",base:2200, hr:1.4');
+      html = html.replace('id:"asic",base:11000, hr:22', 'id:"asic",base:18000, hr:7');
+      html = html.replace('id:"farm",base:85000, hr:140', 'id:"farm",base:140000, hr:32');
+      html = html.replace('id:"plant",base:650000, hr:900', 'id:"plant",base:1100000, hr:120');
+      html = html.replace('return u.base * Math.pow(1.19, n);', 'return u.base * Math.pow(1.23, n); /*EconomyNerf*/');
+      html = html.replace(
+        'function globalMult(){\n    return 1 + state.halvings * 0.5;\n  }',
+        'function globalMult(){ /*EconomyNerf*/ return 1 + state.halvings * 0.12; }'
+      );
+      html = html.replace('var crit = Math.random() < 0.08;', 'var crit = Math.random() < 0.04;');
+      html = html.replace('var gain = crit ? state.perClick * 8 : state.perClick;', 'var gain = crit ? state.perClick * 3 : state.perClick;');
     }
 
     document.open();
