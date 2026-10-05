@@ -140,6 +140,18 @@
       html = html.replace(/state\.buildBought = saved\.buildBought \|\| state\.buildBought;/g, "state.partInv = saved.partInv || state.partInv || {}; state.buildPick = saved.buildPick || state.buildPick || {}; state.buildBought = saved.buildBought || state.buildBought; /*PartInvPersist*/");
     }
 
+    if (html.indexOf("NoZoomViewport") === -1) {
+      html = html.replace(
+        /<meta name="viewport"[^>]*>/,
+        '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><!--NoZoomViewport-->'
+      );
+      var noZoomCss = "\n/* no mobile zoom on mine */\nhtml,body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;}\n#mine-btn,button,.shop-row,.ps-open-btn,.ps-buy-btn,.ps-acc-head,.ps-row{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}\n#mine-btn{touch-action:manipulation;}\n";
+      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", noZoomCss + "</style>");
+      else if (html.indexOf("<"+"/style>") !== -1) html = html.replace("<"+"/style>", noZoomCss + "<"+"/style>");
+      var noZoomJs = "\ntry{(function(){document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});var mb=document.getElementById('mine-btn');if(mb){mb.style.touchAction='manipulation';}})();}catch(_z){}\n";
+      html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
+    }
+
     document.open();
     document.write(html);
     document.close();
