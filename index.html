@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>HASHPOOL — Bitcoin Miner | Free Idle Clicker Game</title>
 <meta name="description" content="HASHPOOL is a free Bitcoin mining idle clicker. Tap to mine sats, build your PC rig in 3D, buy upgrades and grow passive income. Play in the browser — no download.">
 <meta name="keywords" content="HASHPOOL, Hashpool, Bitcoin miner, idle clicker, crypto game, bitcoin clicker, free browser game">
@@ -178,6 +178,19 @@
       var markI = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(markI) !== -1) html = html.replace(markI, markI + i18n);
       else html = html.replace("<" + "/scr" + "ipt>", i18n + "<" + "/scr" + "ipt>");
+    }
+
+    // Prevent mobile double-tap / pinch zoom on the game
+    if (html.indexOf("NoZoomViewport") === -1) {
+      html = html.replace(
+        /<meta name="viewport"[^>]*>/,
+        '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><!--NoZoomViewport-->'
+      );
+      var noZoomCss = "\n/* no mobile zoom on mine */\nhtml,body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;}\n#mine-btn,button,.shop-row,.ps-open-btn,.ps-buy-btn,.ps-acc-head,.ps-row{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}\n#mine-btn{touch-action:manipulation;}\n";
+      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", noZoomCss + "</style>");
+      else if (html.indexOf("<"+"/style>") !== -1) html = html.replace("<"+"/style>", noZoomCss + "<"+"/style>");
+      var noZoomJs = "\ntry{(function(){document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();}catch(_z){}\n";
+      html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
     }
 
     document.open();
