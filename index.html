@@ -29,6 +29,34 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
+
+    try {
+      var sr = await fetch(RAW + "/status.json", { cache: "no-store" });
+      if (sr.ok) {
+        var status = await sr.json();
+        if (status && status.maintenance) {
+          var de = (typeof navigator !== "undefined" && /^de/i.test(navigator.language || "")) || status.lang === "de";
+          var title = de ? (status.title_de || "HASHPOOL — Wartung") : (status.title_en || "HASHPOOL — Maintenance");
+          var msg = de
+            ? (status.message_de || "Wir arbeiten gerade an der Seite. Bitte schau bald wieder vorbei.")
+            : (status.message_en || "We're improving the game. Please check back soon.");
+          var eta = status.eta
+            ? ("<p style=\"color:#8b95a5;font-size:13px;margin-top:18px\">" + (de ? "Voraussichtlich wieder: " : "Back around: ") + status.eta + "</p>")
+            : "";
+          document.title = title;
+          document.body.innerHTML =
+            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui,-apple-system,sans-serif;text-align:center">' +
+            '<div style="max-width:420px">' +
+            '<div style="font-size:42px;margin-bottom:12px">⛏️</div>' +
+            '<h1 style="font-size:22px;margin:0 0 10px;font-weight:800">' + title + '</h1>' +
+            '<p style="color:#c0c6d0;line-height:1.5;margin:0">' + msg + '</p>' + eta +
+            '<p style="margin-top:28px;font-size:12px;color:#5a6575">hashpool.pages.dev</p>' +
+            '</div></div>';
+          return;
+        }
+      }
+    } catch (_st) {}
+
     var r = await fetch(GAME, { cache: "no-store" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     var html = await r.text();
