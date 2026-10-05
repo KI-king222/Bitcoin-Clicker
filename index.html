@@ -64,7 +64,7 @@
 
     html = html.replace(
       /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
-      "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 1) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }"
+      "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 0.01) return (Math.round(n * 10000) / 10000).toFixed(4);\n    if(abs < 1) return (Math.round(n * 1000) / 1000).toFixed(3);\n    if(abs < 100) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }"
     );
     var helpers = "var _uiBal=\"\",_uiUsd=\"\",_uiHr=\"\";function updateBalanceUI(){var b=fmtSats(state.balance)+\"<small> sats</small>\";if(b!==_uiBal){_uiBal=b;balanceEl.innerHTML=b;}var u=\"≈ \"+fmtUSD(state.balance);if(u!==_uiUsd){_uiUsd=u;usdEl.textContent=u;}var h=fmtSats(passiveRate())+\" \"+t(\"passive\")+\" · \"+fmtSats(state.perClick)+\" \"+t(\"perClick\");if(h!==_uiHr){_uiHr=h;hrEl.textContent=h;}}function updateShopDisabled(){Array.prototype.forEach.call(shopClickEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});Array.prototype.forEach.call(shopEl.children,function(row){var d=state.balance<Number(row.dataset.cost);if(row.disabled!==d)row.disabled=d;});}";
     html = html.replace(/(var balanceEl = document\.getElementById\("balance"\);)/, "$1\n  " + helpers);
@@ -193,17 +193,17 @@
     }
 
     if (html.indexOf("EconomyNerf") === -1) {
-      html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:50, mult:1.05 /*EconomyNerf*/');
-      html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:800, mult:1.06');
-      html = html.replace('id:"asicpen", base:5500, mult:1.75', 'id:"asicpen", base:15000, mult:1.07');
-      html = html.replace('id:"quantum", base:75000, mult:2.1', 'id:"quantum", base:200000, mult:1.08');
-      html = html.replace('id:"usb", base:15,  hr:0.08', 'id:"usb", base:25,  hr:0.03');
-      html = html.replace('id:"gpu", base:160, hr:0.55', 'id:"gpu", base:350, hr:0.12');
-      html = html.replace('id:"fpga",base:1400, hr:3.5', 'id:"fpga",base:4000, hr:0.45');
-      html = html.replace('id:"asic",base:11000, hr:22', 'id:"asic",base:35000, hr:1.8');
-      html = html.replace('id:"farm",base:85000, hr:140', 'id:"farm",base:250000, hr:7');
-      html = html.replace('id:"plant",base:650000, hr:900', 'id:"plant",base:2000000, hr:25');
-      html = html.replace('return u.base * Math.pow(1.19, n);', 'return u.base * Math.pow(1.35, n); /*EconomyNerf*/');
+      html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:30, mult:1.08 /*EconomyNerf*/');
+      html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:450, mult:1.08');
+      html = html.replace('id:"asicpen", base:5500, mult:1.75', 'id:"asicpen", base:8000, mult:1.09');
+      html = html.replace('id:"quantum", base:75000, mult:2.1', 'id:"quantum", base:100000, mult:1.10');
+      html = html.replace('id:"usb", base:15,  hr:0.08', 'id:"usb", base:15,  hr:0.10');
+      html = html.replace('id:"gpu", base:160, hr:0.55', 'id:"gpu", base:180, hr:0.35');
+      html = html.replace('id:"fpga",base:1400, hr:3.5', 'id:"fpga",base:1800, hr:1.2');
+      html = html.replace('id:"asic",base:11000, hr:22', 'id:"asic",base:14000, hr:4');
+      html = html.replace('id:"farm",base:85000, hr:140', 'id:"farm",base:100000, hr:14');
+      html = html.replace('id:"plant",base:650000, hr:900', 'id:"plant",base:900000, hr:45');
+      html = html.replace('return u.base * Math.pow(1.19, n);', 'return u.base * Math.pow(1.28, n); /*EconomyNerf*/');
       html = html.replace(
         'function globalMult(){\n    return 1 + state.halvings * 0.5;\n  }',
         'function globalMult(){ /*EconomyNerf*/ return 1 + state.halvings * 0.06; }'
