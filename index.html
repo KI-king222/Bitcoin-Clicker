@@ -210,7 +210,7 @@
       );
       html = html.replace(
         'function currentPerClick(){\n    var v = 1;\n    CLICK_UPGRADES.forEach(function(u){ v *= Math.pow(u.mult, state.clickOwned[u.id]); });\n    return Math.round(v * globalMult());\n  }',
-        'function currentPerClick(){ /*EconomyNerf*/ var v=1; CLICK_UPGRADES.forEach(function(u){ var n=state.clickOwned[u.id]||0; var eff=0; for(var i=0;i<n;i++){ eff += 1/(1+i*0.12); } v *= Math.pow(u.mult, eff); }); return Math.max(1, Math.floor(v * globalMult())); }'
+        'function currentPerClick(){ /*EconomyNerf*/ var v=1; CLICK_UPGRADES.forEach(function(u){ var n=state.clickOwned[u.id]||0; if(n<=0) return; if(n<=12){ v*=Math.pow(u.mult,n); } else { v*=Math.pow(u.mult, 12+(n-12)*0.65); } }); return Math.max(1, Math.round(v*globalMult()*100)/100); }'
       );
       html = html.replace(
         'function passiveRate(){\n    var r = 0;\n    UPGRADES.forEach(function(u){ r += u.hr * state.owned[u.id]; });\n    return (r * globalMult() + exFarmBase()) * exMult();\n  }',
