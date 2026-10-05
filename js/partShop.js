@@ -73,7 +73,7 @@
   }
   function brandChipClass(brand, tier){
     var b = (brand||"").toLowerCase().replace(/[^a-z]/g,"");
-    var map = {intel:"ps-chip-intel",amd:"ps-chip-amd",nvidia:"ps-chip-nvidia",corsair:"ps-chip-corsair",samsung:"ps-chip-samsung",kingston:"ps-chip-kingston",noctua:"ps-chip-noctua",asus:"ps-chip-asus",msi:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",seasonic:"ps-chip-seasonic",bequiet:"ps-chip-bequiet",deepcool:"ps-chip-default",arctic:"ps-chip-default",nzxt:"ps-chip-corsair",fractal:"ps-chip-default",lianli:"ps-chip-default",crucial:"ps-chip-kingston",wd:"ps-chip-default",seagate:"ps-chip-default",gskill:"ps-chip-corsair",stock:"ps-chip-default",asrock:"ps-chip-amd",generic:"ps-chip-default",nocturne:"ps-chip-noctua",icewing:"ps-chip-default",abyssal:"ps-chip-default",corvus:"ps-chip-corsair",samsum:"ps-chip-samsung",fjordic:"ps-chip-default",lumio:"ps-chip-default",prisma:"ps-chip-default",kingforge:"ps-chip-kingston",crux:"ps-chip-kingston",seaguard:"ps-chip-default",seasonicx:"ps-chip-seasonic",asusx:"ps-chip-asus",msx:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",asrockx:"ps-chip-amd"};
+    var map = {intel:"ps-chip-intel",amd:"ps-chip-amd",nvidia:"ps-chip-nvidia",corsair:"ps-chip-corsair",samsung:"ps-chip-samsung",kingston:"ps-chip-kingston",noctua:"ps-chip-noctua",asus:"ps-chip-asus",msi:"ps-chip-msi",gigabyte:"ps-chip-gigabyte",seasonic:"ps-chip-seasonic",bequiet:"ps-chip-bequiet",deepcool:"ps-chip-default",arctic:"ps-chip-default",nzxt:"ps-chip-corsair",fractal:"ps-chip-default",lianli:"ps-chip-default",crucial:"ps-chip-kingston",wd:"ps-chip-default",seagate:"ps-chip-default",gskill:"ps-chip-corsair",stock:"ps-chip-default",asrock:"ps-chip-amd",generic:"ps-chip-default",nocturne:"ps-chip-noctua",icewing:"ps-chip-default",abyssal:"ps-chip-default",corvus:"ps-chip-corsair",samsum:"ps-chip-samsung",fjordic:"ps-chip-default",lumio:"ps-chip-default",prisma:"ps-chip-default",kingforge:"ps-chip-kingston",crux:"ps-chip-kingston",seaguard:"ps-chip-default",seasonicx:"ps-chip-seasonic",asusx:"ps-chip-asus",msx:"ps-chip-msi",asrockx:"ps-chip-amd"};
     var cls = map[b] || "ps-chip-default";
     if(tier >= 8) cls += " ps-chip-tier-hi";
     else if(tier >= 5) cls += " ps-chip-tier-mid";
@@ -105,7 +105,7 @@
     if(view.mode === "shelves"){
       if(title) title.textContent = (state.lang==="de") ? "Teile-Shop" : "Parts Shop";
       var html = '<p class="ps-inv-hint">'+(state.lang==="de"
-        ? "Kaufen · spaeter im Bau-Menue aus dem Inventar waehlen. Nur gewaehlte Teile werden verbraucht."
+        ? "Kaufen · später im Bau-Menü aus dem Inventar wählen. Nur gewählte Teile werden verbraucht."
         : "Buy · later pick from inventory in build menu. Only selected parts are used up.")+'</p><div class="ps-shelves">';
       PART_CATEGORIES.forEach(function(cat){
         var c = PART_CATALOG[cat];
@@ -116,7 +116,7 @@
       html += '</div><div class="ps-floor"></div>';
       if(canBuildPC()){
         html += '<p class="ps-inv-hint" style="color:#78d505;margin-top:16px;font-weight:700;">' +
-          (state.lang==="de" ? "✓ Inventar reicht — oeffne PC bauen und waehle die Teile." : "✓ Inventory ready — open Build and choose parts.") + '</p>';
+          (state.lang==="de" ? "✓ Inventar reicht — öffne PC bauen und wähle die Teile." : "✓ Inventory ready — open Build and choose parts.") + '</p>';
       }
       body.innerHTML = html;
       body.querySelectorAll(".ps-shelf").forEach(function(el){
@@ -129,7 +129,7 @@
     var cat = view.cat; var c = PART_CATALOG[cat];
     var nm = (c.name && c.name[state.lang]) || cat;
     if(title) title.textContent = (c.icon||"") + " " + nm;
-    var html = '<div class="ps-list-wrap"><p class="ps-list-title">' + (state.lang==="de" ? "Waehle ein Modell" : "Choose a model") + '</p>';
+    var html = '<div class="ps-list-wrap"><p class="ps-list-title">' + (state.lang==="de" ? "Wähle ein Modell" : "Choose a model") + '</p>';
     c.items.forEach(function(it){
       var own = ownedCount(it.id); var sel = view.selected === it.id;
       var chip = brandChipClass(it.brand, it.tier);
@@ -184,9 +184,9 @@
     var body = document.getElementById("ps-picker-body");
     var title = document.getElementById("ps-picker-title");
     var costEl = document.getElementById("ps-picker-cost");
-    if(title) title.textContent = state.lang==="de" ? "Teile fuer den Bau" : "Parts for this build";
+    if(title) title.textContent = state.lang==="de" ? "Teile für den Bau" : "Parts for this build";
     var html = '<p class="ps-inv-hint">'+(state.lang==="de"
-      ? "Tippe eine Kategorie, um sie auszuklappen. Waehle je ein Teil aus deinem Inventar."
+      ? "Tippe eine Kategorie, um sie auszuklappen. Wähle je ein Teil aus deinem Inventar."
       : "Tap a category to expand. Pick one owned part per category.")+'</p>';
     REQUIRED_FOR_BUILD.forEach(function(cat){
       var c = PART_CATALOG[cat];
@@ -209,7 +209,7 @@
       if(open){
         html += '<div class="ps-acc-body">';
         if(!owned.length){
-          html += '<p class="ps-inv-hint" style="color:#f7931a;margin:8px 0">'+(state.lang==="de"?"Keine Teile — im Shop kaufen":"None owned — buy in shop")+'</p>';
+          html += '<p class="ps-inv-hint" style="color:#f7931a;margin:8px 0">'+(state.lang==="de"?"Keine Teile — im Teile-Shop kaufen":"None owned — buy in shop")+'</p>';
         } else {
           owned.forEach(function(it){
             var picked = state.buildPick[cat] === it.id;
@@ -236,7 +236,7 @@
         (state.lang==="de"?"Zusammenbauen starten":"Start assembly")+'</button>';
     } else {
       html += '<button type="button" class="ps-buy-btn" disabled style="width:100%">'+
-        (state.lang==="de"?"Noch nicht alle Kategorien gewaehlt":"Select all categories first")+'</button>';
+        (state.lang==="de"?"Noch nicht alle Kategorien gewählt":"Select all categories first")+'</button>';
     }
     html += '</div>'; body.innerHTML = html;
     body.querySelectorAll("[data-acc-cat]").forEach(function(el){
@@ -265,7 +265,7 @@
   }
   function openPicker(){
     if(!canBuildPC()){
-      showToast(state.lang==="de" ? "Zuerst je 1 Teil pro Kategorie im Parts Shop kaufen" : "Buy 1 part per category in Parts Shop first");
+      showToast(state.lang==="de" ? "Zuerst je 1 Teil pro Kategorie im Teile-Shop kaufen" : "Buy 1 part per category in Parts Shop first");
       openShop(); return;
     }
     ensurePickerDom();
