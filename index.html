@@ -70,14 +70,15 @@
         fetch(RAW + "/css/partShop.css", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
         fetch(RAW + "/js/partCatalog.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
         fetch(RAW + "/js/partShop.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
-        fetch(RAW + "/js/partCheat.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; })
+        fetch(RAW + "/js/partCheat.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
+        fetch(RAW + "/js/saveApi.js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; })
       ].concat(p3d.map(function(n){
         return fetch(RAW + "/js/parts3d/" + n + ".js", {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; });
       })));
       cssText = rc[0] || "";
       catText = rc[1] || "";
-      shopText = (rc[2] || "") + "\n" + (rc[3] || "");
-      parts3dText = rc.slice(4).filter(Boolean).join("\n");
+      shopText = (rc[2] || "") + "\n" + (rc[3] || "") + "\n" + (rc[4] || "");
+      parts3dText = rc.slice(5).filter(Boolean).join("\n");
     } catch (e) { console.warn("Parts Shop modules", e); }
 
     if (cssText) {
@@ -110,26 +111,17 @@
       else html = html.replace("<" + "/scr" + "ipt>", p3 + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("PartShopConsumeHook") === -1) {
-      html = html.replace(
-        "function sellRig(reward){",
-        "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); }catch(_e){} /*PartShopConsumeHook*/"
-      );
+      html = html.replace("function sellRig(reward){", "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); }catch(_e){} /*PartShopConsumeHook*/");
     }
     if (html.indexOf("PartShopCostHook") === -1) {
       html = html.replace(
         "function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }",
         "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }"
       );
-      html = html.replace(
-        "buildTotalCost() * 1.38 * pasteMul",
-        "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)"
-      );
+      html = html.replace("buildTotalCost() * 1.38 * pasteMul", "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)");
     }
     if (html.indexOf("XR7K-M9PQ") === -1) {
-      html = html.replace(
-        '"HODLGANG": { sats: 25000000 }',
-        '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }'
-      );
+      html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }');
     }
     if (html.indexOf("CheatAllPartsHook") === -1) {
       html = html.replace(
@@ -140,36 +132,21 @@
     if (html.indexOf("PartInvPersist") === -1) {
       html = html.replace(/buildBought: \{\},/g, "buildBought: {}, partInv: {}, buildPick: {},");
       html = html.replace(/buildBought:state\.buildBought,/g, "partInv:state.partInv||{},buildPick:state.buildPick||{},buildBought:state.buildBought,");
-      html = html.replace(
-        /state\.buildBought = saved\.buildBought \|\| state\.buildBought;/g,
-        "state.partInv = saved.partInv || state.partInv || {}; state.buildPick = saved.buildPick || state.buildPick || {}; state.buildBought = saved.buildBought || state.buildBought; /*PartInvPersist*/"
-      );
-      html = html.replace(
-        "state.muted = !!saved.muted;\n        if(saved.buildBought){",
-        "state.muted = !!saved.muted;\n        state.partInv = saved.partInv || {}; state.buildPick = saved.buildPick || {};\n        if(saved.buildBought){"
-      );
+      html = html.replace(/state\.buildBought = saved\.buildBought \|\| state\.buildBought;/g, "state.partInv = saved.partInv || state.partInv || {}; state.buildPick = saved.buildPick || state.buildPick || {}; state.buildBought = saved.buildBought || state.buildBought; /*PartInvPersist*/");
+      html = html.replace("state.muted = !!saved.muted;\n        if(saved.buildBought){", "state.muted = !!saved.muted;\n        state.partInv = saved.partInv || {}; state.buildPick = saved.buildPick || {};\n        if(saved.buildBought){");
     }
-    if (html.indexOf("CurrentSavePartInv") === -1) {
+    if (html.indexOf("SaveApiHook") === -1) {
       html = html.replace(
         "function currentSaveData(){\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, rigsSold:state.rigsSold, lastSeen:Date.now()\n    };\n  }",
-        "function currentSaveData(){ /*CurrentSavePartInv*/ return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled,\n      partInv:state.partInv||{}, buildPick:state.buildPick||{}, rigsSold:state.rigsSold, lastSeen:Date.now()\n    };\n  }"
+        "function currentSaveData(){ /*SaveApiHook*/ if(window.HashpoolSave&&HashpoolSave.getPayload) return HashpoolSave.getPayload(); return {balance:state.balance,owned:state.owned,clickOwned:state.clickOwned,lang:state.lang,username:state.username,redeemed:state.redeemed,lifetime:state.lifetime,halvings:state.halvings,muted:state.muted,buildBought:state.buildBought,buildInstalled:state.buildInstalled,partInv:state.partInv||{},buildPick:state.buildPick||{},rigsSold:state.rigsSold,lastSeen:Date.now()}; }"
+      );
+      html = html.replace(
+        "function snapshotFromState(){\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      redeemed:state.redeemed, lifetime:state.lifetime, halvings:state.halvings, muted:state.muted,\n      buildBought:state.buildBought, buildInstalled:state.buildInstalled, buildCablesDone:state.buildCablesDone,\n      buildMode:state.buildMode, moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone,\n      biosDone:state.biosDone, biosQuality:state.biosQuality, ex:state.ex, rigsSold:state.rigsSold,\n      lastSeen:Date.now()\n    };\n  }",
+        "function snapshotFromState(){ /*SaveApiHook*/ if(window.HashpoolSave&&HashpoolSave.getPayload) return HashpoolSave.getPayload(); return {balance:state.balance,owned:state.owned,clickOwned:state.clickOwned,lang:state.lang,redeemed:state.redeemed,lifetime:state.lifetime,halvings:state.halvings,muted:state.muted,buildBought:state.buildBought,buildInstalled:state.buildInstalled,buildCablesDone:state.buildCablesDone,buildMode:state.buildMode,moboCased:state.moboCased,pasteQuality:state.pasteQuality,pasteDone:state.pasteDone,biosDone:state.biosDone,biosQuality:state.biosQuality,ex:state.ex,rigsSold:state.rigsSold,partInv:state.partInv||{},buildPick:state.buildPick||{},lastSeen:Date.now()}; }"
       );
     }
     if (html.indexOf("PsBtnI18n") === -1) {
-      var i18n = [
-        "",
-        "try{ function psUpdateLabel(){",
-        "  var el=document.getElementById('ps-open-label');",
-        "  var de=(state&&state.lang==='de')||((navigator.language||'').slice(0,2)==='de');",
-        "  if(el) el.textContent=de?'Teile-Shop':'Parts Shop';",
-        "  else { var b=document.getElementById('ps-open-btn'); if(b) b.textContent=de?'🛒 Teile-Shop':'🛒 Parts Shop'; }",
-        "}",
-        "psUpdateLabel(); setTimeout(psUpdateLabel,100); setTimeout(psUpdateLabel,500); setTimeout(psUpdateLabel,1500);",
-        "var _or=typeof render==='function'?render:null;",
-        "if(_or){ render=function(){ _or.apply(this,arguments); psUpdateLabel(); }; }",
-        "}catch(_i18){} /*PsBtnI18n*/",
-        ""
-      ].join("\n");
+      var i18n = ["","try{ function psUpdateLabel(){","  var el=document.getElementById('ps-open-label');","  var de=(state&&state.lang==='de')||((navigator.language||'').slice(0,2)==='de');","  if(el) el.textContent=de?'Teile-Shop':'Parts Shop';","  else { var b=document.getElementById('ps-open-btn'); if(b) b.textContent=de?'🛒 Teile-Shop':'🛒 Parts Shop'; }","}","psUpdateLabel(); setTimeout(psUpdateLabel,100); setTimeout(psUpdateLabel,500); setTimeout(psUpdateLabel,1500);","var _or=typeof render==='function'?render:null;","if(_or){ render=function(){ _or.apply(this,arguments); psUpdateLabel(); }; }","}catch(_i18){} /*PsBtnI18n*/",""].join("\n");
       var markI = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(markI) !== -1) html = html.replace(markI, markI + i18n);
       else html = html.replace("<" + "/scr" + "ipt>", i18n + "<" + "/scr" + "ipt>");
