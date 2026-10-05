@@ -11,7 +11,6 @@
     return typeof state !== "undefined" && state ? state : null;
   }
 
-  /** Full portable save object (no passwords). */
   function getPayload() {
     var s = safeState();
     if (!s) return { v: SAVE_VERSION, lastSeen: Date.now() };
@@ -39,11 +38,11 @@
       rigsSold: s.rigsSold || 0,
       partInv: s.partInv || {},
       buildPick: s.buildPick || {},
+      tutorialDone: !!s.tutorialDone,
       lastSeen: Date.now()
     };
   }
 
-  /** Apply payload into global state (merge-safe). */
   function applyPayload(saved) {
     var s = safeState();
     if (!s || !saved || typeof saved !== "object") return false;
@@ -71,6 +70,7 @@
     if (typeof saved.rigsSold === "number") s.rigsSold = saved.rigsSold;
     s.partInv = saved.partInv || s.partInv || {};
     s.buildPick = saved.buildPick || s.buildPick || {};
+    if (typeof saved.tutorialDone === "boolean") s.tutorialDone = saved.tutorialDone;
     return true;
   }
 
@@ -89,7 +89,6 @@
     }
   };
 
-  /** Stub for later cloud (Workers / Supabase). Not used until assigned. */
   var cloudAdapter = {
     name: "cloud",
     endpoint: "",
