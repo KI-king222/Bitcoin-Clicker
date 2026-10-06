@@ -180,7 +180,7 @@
         'function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";',
         'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";'
       );
-      var floatCss = "\n/* FixedFloat: original design, fixed center */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;white-space:nowrap;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n/*FixedFloat*/\n";
+      var floatCss = "\n/* FixedFloat */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;white-space:nowrap;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n/*FixedFloat*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", floatCss + "</style>");
     }
 
@@ -194,47 +194,32 @@
     if (html.indexOf("HeaderFarmPlay") === -1) {
       html = html.replace(
         /<header>[\s\S]*?<\/header>/,
-        '<header class="hp-header">' +
-        '<div class="logo">HASH<span>POOL</span></div>' +
-        '<div class="head-row2">' +
-        '<div class="rate"><span id="rate-label">BTC/USD</span> <b id="price">—</b></div>' +
-        '<div class="head-tools">' +
-        '<span class="play-clock" id="play-clock" title="Play time">⏱ 0:00</span>' +
-        '<div class="lang-switch">' +
-        '<button class="lang-btn" data-lang="de" id="lang-de">DE</button>' +
-        '<button class="lang-btn" data-lang="en" id="lang-en">EN</button>' +
-        '</div>' +
-        '<button class="icon-btn" id="mute-btn">🔊</button>' +
-        '</div></div></header>'
+        '<header class="hp-header"><div class="logo">HASH<span>POOL</span></div><div class="head-row2"><div class="rate"><span id="rate-label">BTC/USD</span> <b id="price">—</b></div><div class="head-tools"><span class="play-clock" id="play-clock" title="Play time">⏱ 0:00</span><div class="lang-switch"><button class="lang-btn" data-lang="de" id="lang-de">DE</button><button class="lang-btn" data-lang="en" id="lang-en">EN</button></div><button class="icon-btn" id="mute-btn">🔊</button></div></div></header>'
       );
-      var headFarmCss = "\n/* HeaderFarmPlay */\nheader.hp-header,header{display:flex !important;flex-direction:column !important;align-items:stretch !important;justify-content:flex-start !important;flex-wrap:nowrap !important;gap:8px;margin-bottom:16px;}\n.logo{width:100%;text-align:center;font-weight:800;font-size:20px;letter-spacing:.03em;}\n.head-row2{display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;flex-wrap:nowrap;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:left;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:left;font-variant-numeric:tabular-nums;color:var(--text);}\n.head-tools{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;}\n.play-clock{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:6.5ch;text-align:right;}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderFarmPlay*/\n";
+      var headFarmCss = "\n/* HeaderFarmPlay */\nheader.hp-header,header{display:flex !important;flex-direction:column !important;align-items:stretch !important;flex-wrap:nowrap !important;gap:8px;margin-bottom:16px;}\n.logo{width:100%;text-align:center;font-weight:800;font-size:20px;}\n.head-row2{display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;min-width:12ch;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;font-variant-numeric:tabular-nums;color:var(--text);}\n.head-tools{display:flex;align-items:center;gap:8px;margin-left:auto;}\n.play-clock{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:7ch;}\n/*HeaderFarmPlay*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headFarmCss + "</style>");
-
-      html = html.replace(
-        "ex.farm.push({cost: cost, dust: 0});",
-        "ex.farm.push({cost: cost, dust: 0, placedAt: Date.now()}); /*HeaderFarmPlay*/"
-      );
-
+      html = html.replace("ex.farm.push({cost: cost, dust: 0});", "ex.farm.push({cost: cost, dust: 0, placedAt: Date.now()}); /*HeaderFarmPlay*/");
       html = html.replace(
         "s.innerHTML = \"🖥️ Rig #\" + (i + 1) + \"<br><span class='ex-small'>+\" + fmtSats(inc) + \"/s · \" + exL(\"dust \", \"Staub \") + Math.round(f.dust) + \"%</span>\";\n            s.appendChild(document.createElement(\"br\"));\n            s.appendChild(exBtn(\"🧹 \" + exL(\"Clean\", \"Reinigen\"), function(){ f.dust = 0; save(); exSigs[\"ex-farm\"] = \"\"; exRenderPanel(); }, f.dust < 5));",
         "var _hrs = Math.max(0, (Date.now() - (f.placedAt || Date.now())) / 3600000);\n            var _ageMul = 0.12 + 0.43 * Math.pow(0.5, _hrs / 8);\n            var _sellV = Math.max(1, Math.floor(f.cost * _ageMul * (1 - f.dust / 200)));\n            var _h = Math.floor(_hrs), _m = Math.floor((_hrs - _h) * 60);\n            var _ageTxt = (_h > 0 ? _h + \"h \" : \"\") + _m + \"m\";\n            s.innerHTML = \"🖥️ Rig #\" + (i + 1) + \"<br><span class='ex-small'>+\" + fmtSats(inc) + \"/s · \" + exL(\"dust \", \"Staub \") + Math.round(f.dust) + \"% · ⏱ \" + _ageTxt + \"</span>\";\n            s.appendChild(document.createElement(\"br\"));\n            s.appendChild(exBtn(\"🧹 \" + exL(\"Clean\", \"Reinigen\"), function(){ f.dust = 0; save(); exSigs[\"ex-farm\"] = \"\"; exRenderPanel(); }, f.dust < 5));\n            s.appendChild(exBtn(\"💰 \" + exL(\"Sell \", \"Verkaufen \") + fmtSats(_sellV), function(){ state.balance += _sellV; state.lifetime += _sellV; ex.farm.splice(i, 1); save(); exSigs[\"ex-farm\"] = \"\"; exRenderPanel(); if(typeof exToast===\"function\") exToast(\"💰 +\" + fmtSats(_sellV)); }, false));"
       );
+    }
 
+    if (html.indexOf("SavePlayFix") === -1) {
       html = html.replace(
-        "rigsSold: 0\n  };",
-        "rigsSold: 0, totalPlayMs: 0\n  }; /*HeaderFarmPlay*/"
+        "function currentSaveData(){\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, rigsSold:state.rigsSold, lastSeen:Date.now()\n    };\n  }",
+        "function currentSaveData(){ /*SavePlayFix*/\n    var _pm=0; try{ _pm=(Number(localStorage.getItem('hashpool-play-ms'))||0)+(Date.now()-(window.__hpSessionStart||Date.now())); }catch(_e){}\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted,\n      buildBought:state.buildBought, buildInstalled:state.buildInstalled,\n      buildCablesDone:state.buildCablesDone, buildMode:state.buildMode,\n      moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone,\n      biosDone:state.biosDone, biosQuality:state.biosQuality,\n      ex:state.ex, rigsSold:state.rigsSold,\n      partInv:state.partInv||{}, buildPick:state.buildPick||{},\n      tutorialDone:!!state.tutorialDone, totalPlayMs:_pm,\n      lastSeen:Date.now()\n    };\n  }"
       );
       html = html.replace(
-        "rigsSold:state.rigsSold, lastSeen:Date.now()",
-        "rigsSold:state.rigsSold, totalPlayMs:state.totalPlayMs||0, lastSeen:Date.now()"
+        "localStorage.setItem(KEY, JSON.stringify({balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang, username:state.username, redeemed:state.redeemed, lifetime:state.lifetime, halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, buildCablesDone:state.buildCablesDone, buildMode:state.buildMode, moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone, biosDone:state.biosDone, biosQuality:state.biosQuality, ex:state.ex, rigsSold:state.rigsSold, lastSeen:Date.now()}));",
+        "localStorage.setItem(KEY, JSON.stringify({balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang, username:state.username, redeemed:state.redeemed, lifetime:state.lifetime, halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, buildCablesDone:state.buildCablesDone, buildMode:state.buildMode, moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone, biosDone:state.biosDone, biosQuality:state.biosQuality, ex:state.ex, rigsSold:state.rigsSold, partInv:state.partInv||{}, buildPick:state.buildPick||{}, tutorialDone:!!state.tutorialDone, totalPlayMs:(function(){try{return (Number(localStorage.getItem('hashpool-play-ms'))||0)+(Date.now()-(window.__hpSessionStart||Date.now()));}catch(e){return state.totalPlayMs||0;}})(), lastSeen:Date.now()})); /*SavePlayFix*/"
       );
       html = html.replace(
-        "state.rigsSold = saved.rigsSold || 0;",
-        "state.rigsSold = saved.rigsSold || 0; state.totalPlayMs = saved.totalPlayMs || 0; /*HeaderFarmPlay*/"
+        "state.buildInstalled = saved.buildInstalled || state.buildInstalled;",
+        "state.buildInstalled = saved.buildInstalled || state.buildInstalled; /*SavePlayFix*/\n    if(saved.partInv) state.partInv = saved.partInv;\n    if(saved.buildPick) state.buildPick = saved.buildPick;\n    if(typeof saved.tutorialDone===\"boolean\") state.tutorialDone = saved.tutorialDone;\n    if(typeof saved.totalPlayMs===\"number\"){ state.totalPlayMs = saved.totalPlayMs; try{ localStorage.setItem(\"hashpool-play-ms\", String(saved.totalPlayMs)); window.__hpSessionStart=Date.now(); }catch(_e){} }\n    if(saved.ex) state.ex = saved.ex;"
       );
-
-      var playJs = "\n/* playtime clock HeaderFarmPlay */\ntry{(function(){\n  if(typeof state===\"undefined\") return;\n  window.__hpSessionStart = Date.now();\n  function fmtPlay(ms){\n    var s=Math.floor(ms/1000); var h=Math.floor(s/3600); var m=Math.floor((s%3600)/60); var sec=s%60;\n    if(h>0) return h+\":\"+String(m).padStart(2,\"0\")+\":\"+String(sec).padStart(2,\"0\");\n    return m+\":\"+String(sec).padStart(2,\"0\");\n  }\n  function tickPlay(){\n    var el=document.getElementById(\"play-clock\"); if(!el) return;\n    var total=(state.totalPlayMs||0)+(Date.now()-(window.__hpSessionStart||Date.now()));\n    el.textContent=\"⏱ \"+fmtPlay(total);\n  }\n  var _os=typeof save===\"function\"?save:null;\n  if(_os && !save._hpPlay){\n    window.save=function(){\n      try{ state.totalPlayMs=(state.totalPlayMs||0)+(Date.now()-(window.__hpSessionStart||Date.now())); window.__hpSessionStart=Date.now(); }catch(_e){}\n      return _os.apply(this, arguments);\n    }; save._hpPlay=true;\n  }\n  setInterval(tickPlay, 1000); tickPlay();\n})();}catch(_pt){}\n";
-      html = html.replace("<" + "/scr" + "ipt>", playJs + "<" + "/scr" + "ipt>");
+      var playBody = "<script>(function(){var KEY='hashpool-play-ms';window.__hpSessionStart=Date.now();function commit(){try{var a=Number(localStorage.getItem(KEY))||0;var n=a+(Date.now()-(window.__hpSessionStart||Date.now()));localStorage.setItem(KEY,String(n));window.__hpSessionStart=Date.now();}catch(e){}}function total(){return (Number(localStorage.getItem(KEY))||0)+(Date.now()-(window.__hpSessionStart||Date.now()));}function fmt(ms){ms=Math.max(0,ms|0);var s=Math.floor(ms/1000);var d=Math.floor(s/86400);var h=Math.floor((s%86400)/3600);var m=Math.floor((s%3600)/60);var sec=s%60;if(d>0)return d+'d '+h+'h '+m+'m';if(h>0)return h+'h '+String(m).padStart(2,'0')+'m';return m+':'+String(sec).padStart(2,'0');}function tick(){var el=document.getElementById('play-clock');if(el)el.textContent='⏱ '+fmt(total());}setInterval(tick,1000);tick();document.addEventListener('visibilitychange',function(){if(document.hidden)commit();else window.__hpSessionStart=Date.now();});window.addEventListener('pagehide',commit);window.addEventListener('beforeunload',commit);})();<\/script>";
+      if (html.indexOf("hashpool-play-ms") === -1) html = html.replace("</body>", playBody + "</body>");
     }
 
     document.open();
