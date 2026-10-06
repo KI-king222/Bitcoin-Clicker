@@ -152,7 +152,6 @@
       html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
     }
 
-    // Decimal sats for early game
     html = html.replace(
       /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
       "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 0.01) return (Math.round(n * 10000) / 10000).toFixed(4);\n    if(abs < 1) return (Math.round(n * 1000) / 1000).toFixed(3);\n    if(abs < 100) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }"
@@ -191,6 +190,12 @@
         'document.getElementById("build-overlay").style.display = "none";',
         'document.getElementById("build-overlay").style.display = "none"; try{ if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_c){} /*BuildPickClearHook*/'
       );
+    }
+
+    if (html.indexOf("MineBtnWide") === -1) {
+      var mineCss = "\n/* MineBtnWide: full-width tap button */\n.rig{width:100%;display:flex;justify-content:center;margin:16px 0 20px;padding:0;}\n#mine-btn{width:100% !important;max-width:100% !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n#mine-btn svg{width:48px;height:48px;}\n@media (min-width:700px){\n  #mine-btn{min-height:130px;font-size:16px;}\n  #mine-btn svg{width:56px;height:56px;}\n}\n/*MineBtnWide*/\n";
+      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", mineCss + "</style>");
+      else if (html.indexOf("<"+"/style>") !== -1) html = html.replace("<"+"/style>", mineCss + "<"+"/style>");
     }
 
     document.open();
