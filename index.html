@@ -171,7 +171,7 @@
     }
 
     if (html.indexOf("MineBtnWide") === -1) {
-      var mineCss = "\n/* MineBtnWide */\n.rig{width:100%;display:flex;justify-content:center;margin:16px 0 20px;padding:0;}\n#mine-btn{width:100% !important;max-width:100% !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n#mine-btn svg{width:48px;height:48px;}\n@media (min-width:700px){#mine-btn{min-height:130px;font-size:16px;}#mine-btn svg{width:56px;height:56px;}}\n/*MineBtnWide*/\n";
+      var mineCss = "\n/* MineBtnWide */\n.rig{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:16px auto 20px;padding:0;box-sizing:border-box;}\n#mine-btn{width:100% !important;max-width:100% !important;margin-left:auto !important;margin-right:auto !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n#mine-btn svg{width:48px;height:48px;}\n@media (min-width:700px){#mine-btn{min-height:130px;font-size:16px;}#mine-btn svg{width:56px;height:56px;}}\n/*MineBtnWide*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", mineCss + "</style>");
     }
 
@@ -180,7 +180,7 @@
         'function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";',
         'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";'
       );
-      var floatCss = "\n/* FixedFloat: click gains always centered above mine button */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute !important;left:50% !important;top:-36px !important;transform:translateX(-50%) !important;color:var(--btc);font-weight:800;font-size:18px;pointer-events:none;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,0.6);animation:riseFixed .85s ease-out forwards;}\n.float.crit{color:#78d505;font-size:20px;}\n@keyframes riseFixed{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-42px)}}\n/*FixedFloat*/\n";
+      var floatCss = "\n/* FixedFloat: original design, fixed center */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;white-space:nowrap;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n/*FixedFloat*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", floatCss + "</style>");
     }
 
