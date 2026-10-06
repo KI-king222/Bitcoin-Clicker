@@ -184,6 +184,19 @@
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", floatCss + "</style>");
     }
 
+    if (html.indexOf("HeaderStable") === -1) {
+      var headCss = "\n/* HeaderStable: rate width fixed so DE/EN/mute never jump */\nheader{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:nowrap !important;gap:10px;margin-bottom:18px;min-height:36px;}\n.logo{flex-shrink:0;}\n.head-right{display:flex !important;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:right;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderStable*/\n";
+      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headCss + "</style>");
+      html = html.replace(
+        'priceEl.textContent = "$" + state.price.toLocaleString();',
+        'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/'
+      );
+      html = html.replace(
+        'priceEl.textContent = "$" + Math.round(state.price).toLocaleString();',
+        'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/'
+      );
+    }
+
     document.open();
     document.write(html);
     document.close();
