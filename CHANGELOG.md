@@ -1,49 +1,39 @@
 # HASHPOOL — Changelog / Projekt-Protokoll
 
-Kurzprotokoll der Spiel-Änderungen. **Bei jeder Änderung ergänzen.**
-
 **Regel:** Bei neuen Loader-Patches **nie** ältere Patches entfernen (additive only).
 
 ---
 
-## 2026-10-06 (Header stabil — kein Wackeln bei BTC/USD)
+## 2026-10-06 (Header 2-Zeilen + Spielzeit + Farm-Laufzeit)
 
-### UI
-- Header: `flex-wrap:nowrap`, DE/EN + Mute rechts fixiert
-- BTC/USD: feste Mindestbreite + `tabular-nums`, immer ganzzahlig (`Math.round`)
+### UI Header
+- Zeile 1: **HASHPOOL** mittig
+- Zeile 2: links BTC/USD, rechts Spielzeit-Uhr + DE/EN + Mute
+
+### Spielzeit
+- Gesamt-Spielzeit (`totalPlayMs`) gespeichert, oben als ⏱
+
+### Farm
+- `placedAt` beim Stellen in die Farm
+- Laufzeit pro Rig sichtbar
+- Verkaufen: Wert sinkt mit Farm-Zeit
+  - Formel: `cost × (0.12 + 0.43 × 0.5^(h/8)) × (1 − dust/200)`
+  - ~55 % frisch → ~34 % / 8 h → ~17 % / 24 h → Boden ~12 %
 
 ### Dateien
-- `index.html` (HeaderStable)
+- `index.html` (HeaderFarmPlay)
 
 ---
 
-## 2026-10-06 (Float-Design original + Button mittig)
+## 2026-10-06 (Header stabil)
 
-- Klick-Anzeige Original-Design, feste Mitte; Mine-Button zentriert
-
----
-
-## 2026-10-06 (Klick-Anzeige fix + Shop-SFX)
-
-- FixedFloat; select / shop_buy im Katalog
+- BTC/USD feste Breite, DE/EN/Mute springen nicht
 
 ---
 
-## 2026-10-06 (Mine-Button volle Breite + Katalog vereint)
+## 2026-10-06 (Float + Mine-Button + Economy + Tutorial …)
 
-- Tap-to-Mine volle Breite; zentrales CHANGELOG
-
----
-
-## 2026-10-06 (Nachkommastellen + Economy + Build-Auswahl)
-
-- fmtSats Dezimalstellen; langsamere Economy; Build-Pick clear
-
----
-
-## 2026-10-05 (Tutorial + Zoom)
-
-- Tutorial nach +12 Sats; NoZoomViewport
+- FixedFloat, MineBtnWide, EconomyNerf, fmtSats, Tutorial, NoZoom
 
 ---
 
@@ -51,12 +41,11 @@ Kurzprotokoll der Spiel-Änderungen. **Bei jeder Änderung ergänzen.**
 
 | Name | Einsatz |
 |------|--------|
-| click / mine_click | Mine-Button |
-| crit | Kritischer Treffer |
-| buy | Upgrade-Kauf |
-| install | PC-Teil einbauen |
+| click | Mine |
+| crit | Crit |
+| buy | Upgrade |
+| install | PC-Bau |
+| select / shop_buy | Teile-Shop |
 | halving | Halving |
-| select | Teil wählen |
-| shop_buy | Teile-Shop kaufen |
 
 ---
