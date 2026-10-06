@@ -44,6 +44,8 @@
     var id = "";
     try {
       if(window.Parts3D && Parts3D.pickInfo) id = (Parts3D.pickInfo("gpu").id || "");
+      if(!id && Parts3D._forceId && Parts3D._forceId.gpu) id = Parts3D._forceId.gpu;
+      console.log("[HASHPOOL GPU]", id);
     } catch(e){}
     var g = new THREE.Group();
 
