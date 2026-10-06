@@ -28,7 +28,7 @@
       clearBuildSelectionUI();
     };
     var prevOpen = PartShop.openPicker;
-    if(typeof prevOpen === "function"){
+    if(typeof prevOpen === "function" && !PartShop.openPicker._hpClear){
       PartShop.openPicker = function(){
         try {
           if(state && state.buildPick){
@@ -40,12 +40,25 @@
         } catch(e){}
         return prevOpen.apply(this, arguments);
       };
+      PartShop.openPicker._hpClear = true;
     }
+  }
+  function wireOverlayClose(){
+    var ov = document.getElementById("build-overlay");
+    if(!ov || ov._hpClearWired) return;
+    ov._hpClearWired = true;
+    var obs = new MutationObserver(function(){
+      if(ov.style.display === "none"){
+        try { clearBuildSelectionUI(); if(typeof save==="function") save(); } catch(e){}
+      }
+    });
+    try { obs.observe(ov, { attributes:true, attributeFilter:["style"] }); } catch(e){}
   }
   function boot(){
     wrapConsume();
-    setTimeout(wrapConsume, 500);
-    setTimeout(wrapConsume, 2000);
+    wireOverlayClose();
+    setTimeout(function(){ wrapConsume(); wireOverlayClose(); }, 500);
+    setTimeout(function(){ wrapConsume(); wireOverlayClose(); }, 2000);
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
