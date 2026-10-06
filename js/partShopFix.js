@@ -1,4 +1,4 @@
-/* partShopFix.js — clear build selection after sell / reopen */
+/* partShopFix.js — clear build selection after sell / reopen + return to picker */
 (function(){
   function clearBuildSelectionUI(){
     try {
@@ -19,14 +19,28 @@
       state.pasteDone = false;
     } catch(e){}
   }
+  function goPicker(){
+    try{
+      var ov = document.getElementById("build-overlay");
+      if(ov) ov.style.display = "none";
+      if(window.PartShop){
+        if(PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI();
+        else clearBuildSelectionUI();
+        if(PartShop.openPicker) PartShop.openPicker();
+      }
+    }catch(e){}
+  }
   function wrapConsume(){
     if(!window.PartShop) return;
     var prev = PartShop.consumeBuildParts;
     PartShop.clearBuildSelectionUI = clearBuildSelectionUI;
+    if(PartShop.consumeBuildParts && PartShop.consumeBuildParts._hpPicker) return;
     PartShop.consumeBuildParts = function(){
       if(typeof prev === "function") prev();
-      clearBuildSelectionUI();
+      else clearBuildSelectionUI();
+      setTimeout(goPicker, 80);
     };
+    PartShop.consumeBuildParts._hpPicker = true;
     var prevOpen = PartShop.openPicker;
     if(typeof prevOpen === "function" && !PartShop.openPicker._hpClear){
       PartShop.openPicker = function(){
