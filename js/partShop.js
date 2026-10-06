@@ -1,5 +1,4 @@
-/* partShop.js — restored; see also partShopFix.js for clearBuildSelectionUI */
-/* Full file restored from last good + selection clear on sell */
+/* partShop.js — Parts Shop + Build Picker (separate buttons) */
 (function(){
   if(typeof PART_CATALOG === "undefined") return;
   var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler"];
@@ -64,13 +63,9 @@
     if(state.buildInstalled){
       Object.keys(state.buildInstalled).forEach(function(k){ state.buildInstalled[k] = false; });
     }
-    try{
-      state.moboCased = false;
-      state.pasteDone = false;
-    }catch(e){}
+    try{ state.moboCased = false; state.pasteDone = false; }catch(e){}
     var pick = document.getElementById("ps-picker");
     if(pick && pick.classList.contains("open")) renderPicker();
-    else if(document.getElementById("ps-picker-body")) renderPicker();
   }
   function consumeBuildParts(){
     ensureInv();
@@ -82,14 +77,6 @@
       }
       delete state.buildPick[cat];
     });
-    if(state.buildPick.case){
-      var cid = state.buildPick.case;
-      if(cid && state.partInv[cid]){
-        state.partInv[cid] -= 1;
-        if(state.partInv[cid] <= 0) delete state.partInv[cid];
-      }
-      delete state.buildPick.case;
-    }
     clearBuildSelectionUI();
     if(typeof save === "function") save();
   }
@@ -105,17 +92,9 @@
   function partTierLabel(it){
     var t = Number(it.tier)||1;
     if(state.lang==="de"){
-      if(t<=2) return "Einstieg";
-      if(t<=4) return "Mittelklasse";
-      if(t<=6) return "Oberklasse";
-      if(t<=8) return "High-End";
-      return "Flaggschiff";
+      if(t<=2) return "Einstieg"; if(t<=4) return "Mittelklasse"; if(t<=6) return "Oberklasse"; if(t<=8) return "High-End"; return "Flaggschiff";
     }
-    if(t<=2) return "Entry";
-    if(t<=4) return "Mid";
-    if(t<=6) return "Upper";
-    if(t<=8) return "High-End";
-    return "Flagship";
+    if(t<=2) return "Entry"; if(t<=4) return "Mid"; if(t<=6) return "Upper"; if(t<=8) return "High-End"; return "Flagship";
   }
   function chipLabel(it){ return partBaseName(it)+" · "+partTierLabel(it); }
   function showToast(msg){
@@ -162,9 +141,7 @@
       }
       body.innerHTML = html;
       body.querySelectorAll(".ps-shelf").forEach(function(el){
-        el.addEventListener("click", function(){
-          cat = el.getAttribute("data-cat"); view = "list"; selected = null; render();
-        });
+        el.addEventListener("click", function(){ cat = el.getAttribute("data-cat"); view = "list"; selected = null; render(); });
       });
       var gb = document.getElementById("ps-go-build");
       if(gb) gb.addEventListener("click", function(){ closeShop(); openPicker(); });
@@ -300,9 +277,11 @@
   }
 
   function openPicker(){
+    /* PC-Bauen: immer Picker, nie den Shop */
     if(!canBuildPC()){
-      showToast(state.lang==="de" ? "Zuerst je 1 Teil pro Kategorie kaufen" : "Buy 1 part per category first");
-      openShop(); return;
+      showToast(state.lang==="de"
+        ? "Zuerst im Teile-Shop je 1 Teil pro Kategorie kaufen"
+        : "First buy 1 part per category in the Parts Shop");
     }
     ensureInv();
     REQUIRED_FOR_BUILD.forEach(function(c){
@@ -330,12 +309,23 @@
   }
   function wire(){
     var openBtn = document.getElementById("ps-open-btn");
-    if(openBtn) openBtn.addEventListener("click", openShop);
+    if(openBtn && !openBtn._hpShop){
+      openBtn.addEventListener("click", function(e){
+        e.preventDefault(); e.stopPropagation();
+        openShop();
+      }, true);
+      openBtn._hpShop = true;
+    }
     var closeBtn = document.getElementById("ps-close");
     if(closeBtn) closeBtn.addEventListener("click", closeShop);
     var buildBtn = document.getElementById("open-build-btn");
-    if(buildBtn){
-      buildBtn.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); openPicker(); }, true);
+    if(buildBtn && !buildBtn._hpPick){
+      buildBtn.addEventListener("click", function(e){
+        e.preventDefault(); e.stopPropagation();
+        if(typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+        openPicker();
+      }, true);
+      buildBtn._hpPick = true;
     }
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
