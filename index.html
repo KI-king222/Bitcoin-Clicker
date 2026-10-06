@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006n"; /* stable build - no mesh swap */
+    var HP_CB = "?v=20261006o"; /* if/else designs + in-place fill */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -204,7 +204,15 @@
       html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
     }
 
-    /*Parts3DLateBind — only rebind BUILDERS (no mesh swap — that broke parenting/zoom) */
+    /*InPlaceMeshFill — keep same Group parent/pos, only swap children from BUILDERS */
+    if (html.indexOf("InPlaceMeshFill") === -1) {
+      html = html.replace(
+        "function setPartVisual(id, installed){\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      mesh.visible = true;",
+        "function setPartVisual(id, installed){ /*InPlaceMeshFill*/\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      try{\n        if(id !== 'mobo' && typeof BUILDERS !== 'undefined' && BUILDERS[id] && window.Parts3D){\n          while(mesh.children.length){ mesh.remove(mesh.children[0]); }\n          var tmp = BUILDERS[id]();\n          while(tmp.children.length){ mesh.add(tmp.children[0]); }\n        }\n      }catch(_ip){ console.warn('inplace mesh', _ip); }\n      mesh.visible = true;"
+      );
+    }
+
+    /*Parts3DLateBind — only rebind BUILDERS */
     if(html.indexOf("Parts3DLateBind") === -1){
       var late = "\ntry{(function(){\n  function rebind3d(){\n    if(!window.Parts3D) return;\n    try{\n      if(Parts3D.buildCpu){ buildCpu = Parts3D.buildCpu; if(typeof BUILDERS!=='undefined') BUILDERS.cpu = Parts3D.buildCpu; }\n      if(Parts3D.buildGpu){ buildGpu = Parts3D.buildGpu; if(typeof BUILDERS!=='undefined') BUILDERS.gpu = Parts3D.buildGpu; }\n      if(Parts3D.buildRam){ if(typeof BUILDERS!=='undefined') BUILDERS.ram = function(){ return Parts3D.buildRam(); }; }\n      if(Parts3D.buildSsd){ buildSsd = Parts3D.buildSsd; if(typeof BUILDERS!=='undefined') BUILDERS.ssd = Parts3D.buildSsd; }\n      if(Parts3D.buildPsu){ buildPsu = Parts3D.buildPsu; if(typeof BUILDERS!=='undefined') BUILDERS.psu = Parts3D.buildPsu; }\n      if(Parts3D.buildCooler){ buildCooler = Parts3D.buildCooler; if(typeof BUILDERS!=='undefined') BUILDERS.cooler = Parts3D.buildCooler; }\n    }catch(e){ console.warn('Parts3D rebind', e); }\n  }\n  rebind3d();\n  setTimeout(rebind3d, 200);\n  setTimeout(rebind3d, 800);\n  setTimeout(rebind3d, 2000);\n})();}catch(_l){} /*Parts3DLateBind*/\n";
       html = html.replace("<"+"/scr"+"ipt>", late + "<"+"/scr"+"ipt>");
