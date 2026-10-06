@@ -1,29 +1,36 @@
-/* partCheat.js — FULLPARTS grant + buy/select SFX */
+/* partCheat.js — grantAllParts by catalog id + buy/select SFX */
 (function(){
   function ensureInv(){
+    if(typeof state === "undefined") return false;
     if(!state.partInv) state.partInv = {};
+    if(!state.buildBought) state.buildBought = {};
+    return true;
   }
   function grantAllParts(qty){
-    ensureInv();
-    qty = qty || 1;
+    if(!ensureInv()) return 0;
+    qty = Math.max(1, Number(qty)||1);
     var n = 0;
-    if(typeof PART_BY_ID !== "undefined"){
-      Object.keys(PART_BY_ID).forEach(function(id){
-        state.partInv[id] = (state.partInv[id]||0) + qty;
-        n++;
-        var it = PART_BY_ID[id];
-        if(it && it.cat && state.buildBought) state.buildBought[it.cat] = true;
-      });
-    } else if(typeof PART_CATALOG !== "undefined"){
-      Object.keys(PART_CATALOG).forEach(function(cat){
-        (PART_CATALOG[cat].items||[]).forEach(function(it){
-          state.partInv[it.id] = (state.partInv[it.id]||0) + qty;
+    try{
+      if(typeof PART_BY_ID !== "undefined" && PART_BY_ID){
+        Object.keys(PART_BY_ID).forEach(function(id){
+          state.partInv[id] = (state.partInv[id]||0) + qty;
           n++;
+          var it = PART_BY_ID[id];
+          if(it && it.cat) state.buildBought[it.cat] = true;
         });
-        if(state.buildBought) state.buildBought[cat] = true;
-      });
-    }
-    if(typeof save === "function") save();
+      } else if(typeof PART_CATALOG !== "undefined" && PART_CATALOG){
+        Object.keys(PART_CATALOG).forEach(function(cat){
+          (PART_CATALOG[cat].items||[]).forEach(function(it){
+            if(!it || !it.id) return;
+            state.partInv[it.id] = (state.partInv[it.id]||0) + qty;
+            n++;
+          });
+          state.buildBought[cat] = true;
+        });
+      }
+      if(typeof save === "function") save();
+      if(typeof updateBalanceUI === "function") updateBalanceUI();
+    }catch(e){ console.warn("grantAllParts", e); }
     return n;
   }
   function sfxBuy(){
@@ -45,6 +52,8 @@
     window.PartShop.sfxSelect = sfxSelect;
   }
   bind();
+  setTimeout(bind, 500);
+  setTimeout(bind, 2000);
   document.addEventListener("click", function(e){
     var t = e.target;
     if(!t) return;
