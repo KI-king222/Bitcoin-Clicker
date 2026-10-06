@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006c"; /* cache-bust partShop fix */
+    var HP_CB = "?v=20261006d"; /* cache-bust restored list design */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -192,7 +192,6 @@
       html = html.replace('priceEl.textContent = "$" + Math.round(state.price).toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
     }
 
-    /* HardPickOnly: force PC-build → picker only, never shop */
     if (html.indexOf("HardPickOnly") === -1) {
       var hardPick = "\ntry{(function(){function force(){if(!window.PartShop||!PartShop.openPicker)return;var op=PartShop.openPicker;if(op._hard)return;PartShop.openPicker=function(){try{var ov=document.getElementById('ps-overlay');if(ov)ov.classList.remove('open');}catch(e){}return op.apply(this,arguments);};PartShop.openPicker._hard=true;var btn=document.getElementById('open-build-btn');if(btn&&!btn._hard){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();try{var s=document.getElementById('ps-overlay');if(s)s.classList.remove('open');}catch(x){}if(window.PartShop&&PartShop.openPicker)PartShop.openPicker();},true);btn._hard=true;}}force();setTimeout(force,300);setTimeout(force,1000);setTimeout(force,2500);})();}catch(_h){} /*HardPickOnly*/\n";
       html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
