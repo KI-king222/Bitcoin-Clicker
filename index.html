@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006g"; /* ID-based CPU/GPU 3D */
+    var HP_CB = "?v=20261006h"; /* allParts cheat fix */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -130,7 +130,15 @@
       html = html.replace("buildTotalCost() * 1.38 * pasteMul", "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)");
     }
     if (html.indexOf("XR7K-M9PQ") === -1) {
-      html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }');
+      html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
+    } else if (html.indexOf("PARTKIT-26") === -1) {
+      html = html.replace('"N0DE-INV-01": { allParts: 1 }', '"N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
+    }
+    if (html.indexOf("CheatPartsHook") === -1) {
+      html = html.replace(
+        "state.redeemed[code] = true;\n    state.balance += reward.sats;\n    state.lifetime += reward.sats;\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    showCheatMsg(t(\"cheatOk\") + \" +\" + fmtSats(reward.sats) + \" sats\", true);",
+        "state.redeemed[code] = true; /*CheatPartsHook*/\n    var addSats = Number(reward.sats)||0;\n    if(addSats){ state.balance += addSats; state.lifetime += addSats; }\n    var partsN = 0;\n    if(reward.allParts){\n      try{\n        if(window.PartShop && PartShop.grantAllParts) partsN = PartShop.grantAllParts(Number(reward.allParts)||1);\n        else if(typeof PART_BY_ID !== \"undefined\"){\n          if(!state.partInv) state.partInv = {};\n          Object.keys(PART_BY_ID).forEach(function(id){ state.partInv[id]=(state.partInv[id]||0)+(Number(reward.allParts)||1); partsN++; });\n        }\n      }catch(_ap){}\n    }\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    var msg = t(\"cheatOk\");\n    if(addSats) msg += \" +\" + fmtSats(addSats) + \" sats\";\n    if(partsN) msg += (addSats?\" · \":\" \") + partsN + (state.lang===\"de\"?\" Teile\":\" parts\");\n    showCheatMsg(msg, true);"
+      );
     }
     if (html.indexOf("PartInvPersist") === -1) {
       html = html.replace(/buildBought: \{\},/g, "buildBought: {}, partInv: {}, buildPick: {},");
