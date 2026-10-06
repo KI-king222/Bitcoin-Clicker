@@ -1,21 +1,13 @@
-/* saveApi.js — unified save payload for localStorage today, cloud later
- *
- * Later (Phase 1): set HashpoolSave.adapter = HashpoolSave.cloudAdapter
- * and implement cloudAdapter.load/save with Cloudflare Worker / Supabase.
- * UI (export/import) and PartShop keep using getPayload / applyPayload.
- */
+/* saveApi.js — HashpoolSave: getPayload / applyPayload (full game state incl. parts + playtime) */
 (function () {
-  var SAVE_VERSION = 2;
-
   function safeState() {
-    return typeof state !== "undefined" && state ? state : null;
+    try { return (typeof state !== "undefined") ? state : null; } catch (e) { return null; }
   }
 
   function getPayload() {
     var s = safeState();
-    if (!s) return { v: SAVE_VERSION, lastSeen: Date.now() };
+    if (!s) return null;
     return {
-      v: SAVE_VERSION,
       balance: s.balance,
       owned: s.owned,
       clickOwned: s.clickOwned,
@@ -39,6 +31,14 @@
       partInv: s.partInv || {},
       buildPick: s.buildPick || {},
       tutorialDone: !!s.tutorialDone,
+      totalPlayMs: (function () {
+        try {
+          return (Number(localStorage.getItem("hashpool-play-ms")) || 0) +
+            (Date.now() - (window.__hpSessionStart || Date.now()));
+        } catch (e) {
+          return s.totalPlayMs || 0;
+        }
+      })(),
       lastSeen: Date.now()
     };
   }
@@ -71,6 +71,13 @@
     s.partInv = saved.partInv || s.partInv || {};
     s.buildPick = saved.buildPick || s.buildPick || {};
     if (typeof saved.tutorialDone === "boolean") s.tutorialDone = saved.tutorialDone;
+    if (typeof saved.totalPlayMs === "number") {
+      s.totalPlayMs = saved.totalPlayMs;
+      try {
+        localStorage.setItem("hashpool-play-ms", String(saved.totalPlayMs));
+        window.__hpSessionStart = Date.now();
+      } catch (e) {}
+    }
     return true;
   }
 
@@ -78,113 +85,21 @@
     name: "local",
     async load(key) {
       try {
-        var raw = localStorage.getItem(key);
+        var raw = localStorage.getItem(key || "hashpool-save-v2");
         return raw ? JSON.parse(raw) : null;
-      } catch (e) {
-        return null;
-      }
+      } catch (e) { return null; }
     },
     async save(key, payload) {
-      localStorage.setItem(key, JSON.stringify(payload));
+      try {
+        localStorage.setItem(key || "hashpool-save-v2", JSON.stringify(payload));
+        return true;
+      } catch (e) { return false; }
     }
   };
-
-  var cloudAdapter = {
-    name: "cloud",
-    endpoint: "",
-    async load(userToken) {
-      if (!this.endpoint) throw new Error("Cloud endpoint not configured");
-      var r = await fetch(this.endpoint + "/save", {
-        headers: { Authorization: "Bearer " + userToken }
-      });
-      if (!r.ok) throw new Error("cloud load " + r.status);
-      return await r.json();
-    },
-    async save(userToken, payload) {
-      if (!this.endpoint) throw new Error("Cloud endpoint not configured");
-      var r = await fetch(this.endpoint + "/save", {
-        method: "PUT",
-        headers: {
-          Authorization: "Bearer " + userToken,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-      if (!r.ok) throw new Error("cloud save " + r.status);
-    }
-  };
-
-  var adapter = localAdapter;
-
-  function storageKey() {
-    return typeof KEY !== "undefined" ? KEY : "hashpool_save_v1";
-  }
-
-  async function persist() {
-    var payload = getPayload();
-    await adapter.save(storageKey(), payload);
-    return payload;
-  }
-
-  async function restore() {
-    var saved = await adapter.load(storageKey());
-    if (saved) applyPayload(saved);
-    return saved;
-  }
-
-  function exportJson() {
-    return JSON.stringify(getPayload(), null, 2);
-  }
-
-  function importJson(text) {
-    var data = typeof text === "string" ? JSON.parse(text) : text;
-    if (!data || typeof data !== "object") throw new Error("invalid save");
-    if (typeof data.balance !== "number" && !data.owned) throw new Error("invalid save");
-    applyPayload(data);
-    return data;
-  }
-
-  function bindGameHooks() {
-    if (typeof currentSaveData === "function" && !currentSaveData._hpBound) {
-      currentSaveData = function () {
-        return getPayload();
-      };
-      currentSaveData._hpBound = true;
-    }
-    if (typeof snapshotFromState === "function" && !snapshotFromState._hpBound) {
-      snapshotFromState = function () {
-        return getPayload();
-      };
-      snapshotFromState._hpBound = true;
-    }
-    if (typeof applySnapshot === "function" && !applySnapshot._hpBound) {
-      var _as = applySnapshot;
-      applySnapshot = function (saved) {
-        applyPayload(saved);
-        try { _as(saved); } catch (e) {}
-      };
-      applySnapshot._hpBound = true;
-    }
-  }
 
   window.HashpoolSave = {
-    version: SAVE_VERSION,
     getPayload: getPayload,
     applyPayload: applyPayload,
-    exportJson: exportJson,
-    importJson: importJson,
-    persist: persist,
-    restore: restore,
-    localAdapter: localAdapter,
-    cloudAdapter: cloudAdapter,
-    get adapter() { return adapter; },
-    set adapter(a) { if (a) adapter = a; },
-    bindGameHooks: bindGameHooks
+    adapter: localAdapter
   };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bindGameHooks);
-  } else {
-    setTimeout(bindGameHooks, 0);
-  }
 })();
