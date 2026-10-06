@@ -1,7 +1,7 @@
 /* partShop.js — original shelves + detail scales (Tier, Leistung, Effizienz, Preis/Leistung) */
 (function(){
   if(typeof PART_CATALOG === "undefined") return;
-  var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler"];
+  var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler","case"];
   function fmt(n){
     if(typeof fmtSats === "function") return fmtSats(n);
     n = Math.floor(Number(n)||0);
@@ -138,7 +138,6 @@
       if(gb) gb.addEventListener("click", function(){ closeShop(); openPicker(); });
       return;
     }
-    /* list + detail */
     var cat = view.cat;
     var info = PART_CATALOG[cat] || {};
     if(title) title.textContent = (info.name && (info.name[state.lang]||info.name.en)) || cat;
@@ -152,7 +151,6 @@
         '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
         '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div><div class="ps-row-tier">'+partTierBadge(it)+(own? ' <span class="ps-row-owned">x'+own+'</span>':'')+'</div></div>' +
         '<div class="ps-row-price">'+fmt(it.cost)+'</div></div>';
-      /* Detail direkt unter dem gewählten Produkt */
       if(sel){
         var canBuy = state.balance >= (it.cost||0);
         html += '<div class="ps-detail open"><div class="ps-detail-name">'+partBaseName(it)+'</div><div class="ps-detail-brand">'+partTierBadge(it)+'</div>' +
@@ -272,7 +270,6 @@
     });
   }
   function openPicker(){
-    /* PC-Bauen: immer Picker, nie Shop */
     if(!canBuildPC()){
       showToast(state.lang==="de"
         ? "Zuerst im Teile-Shop je 1 Teil pro Kategorie kaufen"
