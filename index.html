@@ -152,6 +152,47 @@
       html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
     }
 
+    // Decimal sats for early game
+    html = html.replace(
+      /function fmtSats\(n\)\{[\s\S]*?\n  \}/,
+      "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 0.01) return (Math.round(n * 10000) / 10000).toFixed(4);\n    if(abs < 1) return (Math.round(n * 1000) / 1000).toFixed(3);\n    if(abs < 100) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }"
+    );
+
+    if (html.indexOf("EconomyNerf") === -1) {
+      html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:45, mult:1.08');
+      html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:700, mult:1.12');
+      html = html.replace('id:"asicpen", base:5500, mult:1.75', 'id:"asicpen", base:9000, mult:1.16');
+      html = html.replace('id:"quantum", base:75000, mult:2.1', 'id:"quantum", base:130000, mult:1.22');
+      html = html.replace('id:"usb", base:15,  hr:0.08', 'id:"usb", base:22,  hr:0.035');
+      html = html.replace('id:"gpu", base:160, hr:0.55', 'id:"gpu", base:220, hr:0.22');
+      html = html.replace('id:"fpga",base:1400, hr:3.5', 'id:"fpga",base:2400, hr:0.75');
+      html = html.replace('id:"asic",base:11000, hr:22', 'id:"asic",base:18000, hr:2.2');
+      html = html.replace('id:"farm",base:85000, hr:140', 'id:"farm",base:130000, hr:7');
+      html = html.replace('id:"plant",base:650000, hr:900', 'id:"plant",base:1100000, hr:22');
+      html = html.replace('return u.base * Math.pow(1.19, n);', 'return u.base * Math.pow(1.32, n); /*EconomyNerf*/');
+      html = html.replace(
+        'function globalMult(){\n    return 1 + state.halvings * 0.5;\n  }',
+        'function globalMult(){ /*EconomyNerf*/ return 1 + state.halvings * 0.05; }'
+      );
+      html = html.replace(
+        'function currentPerClick(){\n    var v = 1;\n    CLICK_UPGRADES.forEach(function(u){ v *= Math.pow(u.mult, state.clickOwned[u.id]); });\n    return Math.round(v * globalMult());\n  }',
+        'function currentPerClick(){ /*EconomyNerf*/ var v=1; CLICK_UPGRADES.forEach(function(u){ var n=state.clickOwned[u.id]||0; if(n<=0) return; if(n<=10){ v*=Math.pow(u.mult,n); } else { v*=Math.pow(u.mult, 10+(n-10)*0.5); } }); return Math.max(0.01, Math.round(v*globalMult()*1000)/1000); }'
+      );
+      html = html.replace(
+        'function passiveRate(){\n    var r = 0;\n    UPGRADES.forEach(function(u){ r += u.hr * state.owned[u.id]; });\n    return (r * globalMult() + exFarmBase()) * exMult();\n  }',
+        'function passiveRate(){ /*EconomyNerf*/ var r=0; UPGRADES.forEach(function(u){ var n=state.owned[u.id]||0; var soft=n/(1+0.07*Math.max(0,n-2)); r += u.hr * soft; }); return (r * globalMult() + exFarmBase()) * exMult(); }'
+      );
+      html = html.replace('var crit = Math.random() < 0.08;', 'var crit = Math.random() < 0.025;');
+      html = html.replace('var gain = crit ? state.perClick * 8 : state.perClick;', 'var gain = crit ? state.perClick * 2.2 : state.perClick;');
+    }
+
+    if (html.indexOf("BuildPickClearHook") === -1) {
+      html = html.replace(
+        'document.getElementById("build-overlay").style.display = "none";',
+        'document.getElementById("build-overlay").style.display = "none"; try{ if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_c){} /*BuildPickClearHook*/'
+      );
+    }
+
     document.open();
     document.write(html);
     document.close();
