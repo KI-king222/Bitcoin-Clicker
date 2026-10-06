@@ -9,6 +9,20 @@ Dieses Dokument ist die **einzige kanonische Quelle** für Changelog, Modul-Übe
 
 ---
 
+## 2026-10-06 (Klick-Anzeige fix + Shop-SFX im Katalog)
+
+### UI
+- Klick-Gewinn (`+1,08` etc.) erscheint **immer mittig** über dem Mine-Button (nicht mehr zufällig seitlich)
+
+### Sound-Katalog
+- Neu dokumentiert: `select` (Teile wählen), `shop_buy` (Teile-Shop kaufen) aus `partCheat.js`
+- Samples: `sfx/select.wav`, `sfx/shop_buy.wav`
+
+### Dateien
+- `index.html` (FixedFloat), `CHANGELOG.md`, `sfx/select.wav`, `sfx/shop_buy.wav`
+
+---
+
 ## 2026-10-06 (Mine-Button volle Breite + Katalog vereint)
 
 ### UI
@@ -16,98 +30,50 @@ Dieses Dokument ist die **einzige kanonische Quelle** für Changelog, Modul-Übe
 
 ### Dokumentation
 - Ein zentrales Protokoll: `CHANGELOG.md` (Changelog + Module + SFX)
-- `docs/MODULES.md` und `docs/SFX_CATALOG.md` verweisen nur noch darauf
-
-### Dateien
-- `index.html` (MineBtnWide CSS), `CHANGELOG.md`, `docs/*`
 
 ---
 
 ## 2026-10-06 (Nachkommastellen + Economy + Build-Auswahl)
 
 ### Anzeige
-- `fmtSats` wieder mit Nachkommastellen (bis 4 Stellen bei sehr kleinen Werten)
+- `fmtSats` mit Nachkommastellen
 
-### Economy (langsamer)
-- Klick-Mults gesenkt (pick 1.08, cool 1.12, …), Basiskosten höher
-- Passive hr stark reduziert, Soft-Cap ab wenigen Käufen
-- Bulk-Kosten `1.32^n`, Halving-Bonus 0.05, Crit seltener/schwächer
-- `currentPerClick` liefert wieder Dezimalwerte
+### Economy
+- Langsamere Progression (Mults, Soft-Caps, Crit)
 
-### Build-Auswahl-Bug
-- Nach Verkauf und beim Schließen des Bau-Overlays: `buildPick` + Flags leeren
-- `partShopFix.js` beobachtet Overlay-Close
-
-### Dateien
-- `index.html`, `js/partShopFix.js`, `CHANGELOG.md`
+### Build
+- Auswahl nach Verkauf/Overlay-Close leeren
 
 ---
 
-## 2026-10-05 (Tutorial + Build-Auswahl + Zoom)
+## 2026-10-05 (Tutorial + Zoom)
 
-### Tutorial (`js/tutorial.js`)
-- Startet erst nach dem Starter-Modal (+12 Sats)
-- Abfrage: Kurze Einführung? → Starten / Nein danke
-- Outline direkt am echten DOM-Element
-
-### Build / Zoom
-- `buildPick` nach Verkauf leeren; `NoZoomViewport` im Loader
-
----
-
-## 2026-10-03 (SFX-Katalog für Videos)
-
-### Sounds
-- Kanonische Samples unter `sfx/`; Video-Sync per Zeitstempel
-
----
-
-## 2026-09-30 (Boot / Bot)
-
-- BIOS/Boot-Flow vereinfacht; `window.HASHPOOL` Script-Bot / tester.html
+- Tutorial nach +12-Sats-Modal; Outline am echten Element; NoZoomViewport
 
 ---
 
 ## Modul-Übersicht (Arbeitskopie)
 
-Die Live-Seite lädt die stabile Vollversion per CDN.  
-Dateien unter `css/` und `js/` sind die aufgeteilte Arbeitskopie.
-
-### css/
-| Datei | Aufgabe |
-|-------|--------|
-| `base.css` | Farben, Layout, Header |
-| `account.css` | Login / Account |
-| `shop.css` | Shop-Karten |
-| `build.css` | PC-Bau Overlay |
-| `minigames.css` | Paste / BIOS |
-| `modals.css` | Dialoge |
-| `partShop.css` | Teile-Shop |
-
-### js/ (Kern)
-| Datei | Aufgabe |
-|-------|--------|
-| `partCatalog.js` | PC-Teile Katalog |
-| `partShop.js` | Shop + Build-Picker |
-| `partShopFix.js` | Auswahl nach Verkauf leeren |
-| `partCheat.js` | Cheats / SFX Shop |
-| `saveApi.js` | Save/Export |
-| `tutorial.js` | Erstes Tutorial |
-| `parts3d/*` | 3D-Meshes |
+| Bereich | Dateien |
+|---------|--------|
+| Shop/Bau | `partCatalog.js`, `partShop.js`, `partShopFix.js`, `partCheat.js` |
+| Save/Tutorial | `saveApi.js`, `tutorial.js` |
+| 3D | `parts3d/*` |
+| SFX | `beep.js`, `sfx/*.wav` |
 
 ---
 
 ## Sound-Katalog (SFX)
 
-Jeder Spiel-Sound hat einen festen Namen und idealerweise eine WAV unter `sfx/`.
-
-| Name | Einsatz |
-|------|--------|
-| `click` / `mine_click` | Mine-Button |
-| `crit` / `crit_damage` | Kritischer Treffer |
-| `buy` | Kauf Upgrade/Teil |
-| `install` / `pc_build_install` | Teil einbauen |
-| `halving` | Halving / großer Erfolg |
+| Datei / Name | Funktion | Einsatz | Parameter |
+|--------------|----------|---------|-----------|
+| `click.wav` / `mine_click.wav` | `sfxClick()` | Mine-Button | 520 Hz sine |
+| `crit.wav` / `crit_damage.wav` | `sfxCrit()` | Kritischer Treffer | 880→1320 Hz triangle |
+| `buy.wav` | `sfxBuy()` | Upgrade-Kauf | 320→480 Hz square |
+| `install.wav` / `pc_build_install.wav` | `sfxInstall()` | PC-Teil einbauen | 4× square |
+| `halving.wav` | `sfxHalving()` | Halving | 300–900 Hz triangle |
+| `select.wav` | `PartShop.sfxSelect()` | Teil im Shop/Picker wählen | 440 Hz triangle, 0,04 s, vol 0,10 |
+| `shop_buy.wav` | `PartShop.sfxBuy()` | Kauf im Teile-Shop | 660→880 Hz sine |
 
 **Regel:** Neuer Sound im Code → Eintrag hier + optional WAV in `sfx/`.
 
