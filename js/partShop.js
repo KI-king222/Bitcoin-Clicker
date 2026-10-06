@@ -151,10 +151,13 @@
       if(back){ back.style.visibility = "visible"; back.onclick = function(){ view = "home"; selected = null; render(); }; }
       var html = '<div class="ps-list-wrap">';
       (info.items||[]).forEach(function(it){
-        var on = selected === it.id ? " on" : "";
+        var on = selected === it.id ? " selected" : "";
+        var owned = state.partInv[it.id]||0;
         html += '<button type="button" class="ps-row'+on+'" data-id="'+it.id+'">';
-        html += '<span class="ps-chip '+brandChipClass(it.brand)+'">'+chipLabel(it)+'</span>';
-        html += '<span class="ps-row-meta">'+fmt(it.cost)+' · x'+(state.partInv[it.id]||0)+'</span></button>';
+        html += '<span class="ps-chip '+brandChipClass(it.brand)+'">'+(it.brand||"?").slice(0,8)+'</span>';
+        html += '<div class="ps-row-main"><div class="ps-row-model">'+(it.model||it.id)+'</div>';
+        html += '<div class="ps-row-tier">'+partTierLabel(it)+(owned?(" · x"+owned):"")+'</div></div>';
+        html += '<span class="ps-row-price">'+fmt(it.cost)+'</span></button>';
       });
       if(selected){
         var it = PART_BY_ID[selected];
@@ -237,10 +240,11 @@
           html += '<div class="ps-row ps-muted">'+(state.lang==="de"?"Keine Teile — im Shop kaufen":"No parts — buy in shop")+'</div>';
         } else {
           owned.forEach(function(it){
-            var on = state.buildPick[c] === it.id ? " on" : "";
+            var on = state.buildPick[c] === it.id ? " selected" : "";
             html += '<button type="button" class="ps-row'+on+'" data-pick-cat="'+c+'" data-pick-id="'+it.id+'">';
-            html += '<span class="ps-chip '+brandChipClass(it.brand)+'">'+chipLabel(it)+'</span>';
-            html += '<span class="ps-row-meta">x'+(state.partInv[it.id]||0)+'</span></button>';
+            html += '<span class="ps-chip '+brandChipClass(it.brand)+'">'+(it.brand||"?").slice(0,8)+'</span>';
+            html += '<div class="ps-row-main"><div class="ps-row-model">'+(it.model||it.id)+'</div>';
+            html += '<div class="ps-row-tier">'+partTierLabel(it)+' · x'+(state.partInv[it.id]||0)+'</div></div></button>';
           });
         }
         html += '</div>';
