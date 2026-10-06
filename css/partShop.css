@@ -52,14 +52,27 @@
   display:flex; align-items:center; gap:12px;
   padding:12px; margin-bottom:8px;
   background:#121820; border:1px solid #1e2633; border-radius:12px; cursor:pointer;
+  width:100%; text-align:left; color:inherit; font-family:inherit;
 }
-.ps-row.selected{ border-color:#78d505; background:#14200a; }
+.ps-row.selected, .ps-row.on{ border-color:#78d505; background:#14200a; }
+.ps-row.ps-muted{ color:#5a6575; cursor:default; }
 .ps-row-icon{
   width:48px; height:48px; border-radius:10px;
   display:flex; align-items:center; justify-content:center;
   font-size:10px; font-weight:800; line-height:1.15; text-align:center;
   flex-shrink:0;
 }
+.ps-chip{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:8px 10px; border-radius:10px; min-width:52px;
+  font-size:11px; font-weight:800; line-height:1.15; text-align:center;
+  flex-shrink:0;
+}
+.ps-chip-blue{ background:#0a1f3d; color:#6eb6ff; }
+.ps-chip-red{ background:#3a0a0a; color:#ff7b7b; }
+.ps-chip-teal{ background:#0a2a28; color:#4fd1c5; }
+.ps-chip-purple{ background:#1a0a2e; color:#c4b5fd; }
+.ps-chip-gray{ background:#1e2633; color:#c0c6d0; }
 .ps-chip-intel{ background:#003366; color:#7eb8ff; }
 .ps-chip-amd{ background:#4a0000; color:#ff6b6b; }
 .ps-chip-nvidia{ background:#1a3d00; color:#76b900; }
@@ -77,10 +90,11 @@
 .ps-chip-tier-mid{ box-shadow:0 0 0 1px #3b82f6; }
 .ps-row-main{ flex:1; min-width:0; }
 .ps-row-brand{ font-size:11px; color:#8b95a5; }
-.ps-row-model{ font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ps-row-model{ font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#e7e9ec; }
 .ps-row-tier{ font-size:11px; color:#8b95a5; margin-top:2px; }
 .ps-row-owned{ color:#78d505; font-weight:700; }
 .ps-row-price{ font-weight:800; color:#78d505; font-size:13px; flex-shrink:0; }
+.ps-row-meta{ margin-left:auto; font-size:12px; color:#8b95a5; font-weight:600; white-space:nowrap; }
 .ps-detail{
   max-width:720px; margin:0 auto 12px; padding:14px;
   background:#0f131a; border:1px solid #2a3344; border-radius:12px;
@@ -137,3 +151,9 @@
 .ps-acc.has-pick .ps-acc-mid{ color:#78d505; font-weight:600; }
 .ps-acc-arrow{ flex:0 0 22px; text-align:center; color:#8b95a5; font-size:16px; }
 .ps-acc-body{ padding:0 10px 12px; border-top:1px solid #1e2633; animation: psIn 0.15s ease; }
+.ps-scales{ max-width:720px; margin:12px auto 0; padding:12px; background:#121820; border:1px solid #1e2633; border-radius:12px; }
+.ps-scales .ps-scale{ display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12px; }
+.ps-scales .ps-scale span{ width:72px; color:#8b95a5; }
+.ps-scales .ps-scale-bar{ flex:1; height:8px; background:#1e2633; border-radius:4px; overflow:hidden; }
+.ps-scales .ps-scale-bar i{ display:block; height:100%; background:linear-gradient(90deg,#3b82f6,#22d3ee); border-radius:4px; }
+.ps-scales .ps-scale b{ width:36px; text-align:right; color:#c0c6d0; }
