@@ -4,77 +4,59 @@ Kurzprotokoll der Spiel-Änderungen. **Bei jeder Änderung ergänzen.**
 
 Format: `YYYY-MM-DD` · Thema · Stichpunkte
 
-Dieses Dokument ist die **einzige kanonische Quelle** für Changelog, Modul-Übersicht und Sound-Katalog.  
-`docs/MODULES.md` und `docs/SFX_CATALOG.md` sind nur Kurzlinks hierher.
+Dieses Dokument ist die **einzige kanonische Quelle** für Changelog, Modul-Übersicht und Sound-Katalog.
+
+---
+
+## 2026-10-06 (Float-Design original + Button mittig)
+
+### UI
+- Klick-Anzeige (`+…`) wieder im **Original-Design** (15px, gleiche rise-Animation), feste Mitte über dem Mine-Button
+- Mine-Button zentriert (volle Breite, mittig ausgerichtet)
+
+### Dateien
+- `index.html`
 
 ---
 
 ## 2026-10-06 (Klick-Anzeige fix + Shop-SFX im Katalog)
 
 ### UI
-- Klick-Gewinn (`+1,08` etc.) erscheint **immer mittig** über dem Mine-Button (nicht mehr zufällig seitlich)
+- Klick-Gewinn feste Mitte über dem Mine-Button
 
 ### Sound-Katalog
-- Neu dokumentiert: `select` (Teile wählen), `shop_buy` (Teile-Shop kaufen) aus `partCheat.js`
-- Samples: `sfx/select.wav`, `sfx/shop_buy.wav`
-
-### Dateien
-- `index.html` (FixedFloat), `CHANGELOG.md`, `sfx/select.wav`, `sfx/shop_buy.wav`
+- `select`, `shop_buy` dokumentiert
 
 ---
 
 ## 2026-10-06 (Mine-Button volle Breite + Katalog vereint)
 
-### UI
-- Tap-to-Mine-Button: volle Breite (100 % der Content-Breite), mobil und Desktop
-
-### Dokumentation
-- Ein zentrales Protokoll: `CHANGELOG.md` (Changelog + Module + SFX)
+- Tap-to-Mine volle Breite; zentrales `CHANGELOG.md`
 
 ---
 
 ## 2026-10-06 (Nachkommastellen + Economy + Build-Auswahl)
 
-### Anzeige
-- `fmtSats` mit Nachkommastellen
-
-### Economy
-- Langsamere Progression (Mults, Soft-Caps, Crit)
-
-### Build
-- Auswahl nach Verkauf/Overlay-Close leeren
+- `fmtSats` Dezimalstellen; langsamere Economy; Build-Auswahl nach Verkauf leeren
 
 ---
 
 ## 2026-10-05 (Tutorial + Zoom)
 
-- Tutorial nach +12-Sats-Modal; Outline am echten Element; NoZoomViewport
-
----
-
-## Modul-Übersicht (Arbeitskopie)
-
-| Bereich | Dateien |
-|---------|--------|
-| Shop/Bau | `partCatalog.js`, `partShop.js`, `partShopFix.js`, `partCheat.js` |
-| Save/Tutorial | `saveApi.js`, `tutorial.js` |
-| 3D | `parts3d/*` |
-| SFX | `beep.js`, `sfx/*.wav` |
+- Tutorial nach +12-Sats-Modal; NoZoomViewport
 
 ---
 
 ## Sound-Katalog (SFX)
 
-| Datei / Name | Funktion | Einsatz | Parameter |
-|--------------|----------|---------|-----------|
-| `click.wav` / `mine_click.wav` | `sfxClick()` | Mine-Button | 520 Hz sine |
-| `crit.wav` / `crit_damage.wav` | `sfxCrit()` | Kritischer Treffer | 880→1320 Hz triangle |
-| `buy.wav` | `sfxBuy()` | Upgrade-Kauf | 320→480 Hz square |
-| `install.wav` / `pc_build_install.wav` | `sfxInstall()` | PC-Teil einbauen | 4× square |
-| `halving.wav` | `sfxHalving()` | Halving | 300–900 Hz triangle |
-| `select.wav` | `PartShop.sfxSelect()` | Teil im Shop/Picker wählen | 440 Hz triangle, 0,04 s, vol 0,10 |
-| `shop_buy.wav` | `PartShop.sfxBuy()` | Kauf im Teile-Shop | 660→880 Hz sine |
-
-**Regel:** Neuer Sound im Code → Eintrag hier + optional WAV in `sfx/`.
+| Name | Einsatz |
+|------|--------|
+| `click` / `mine_click` | Mine-Button |
+| `crit` | Kritischer Treffer |
+| `buy` | Upgrade-Kauf |
+| `install` | PC-Teil einbauen |
+| `halving` | Halving |
+| `select` | Teil wählen |
+| `shop_buy` | Teile-Shop kaufen |
 
 ---
