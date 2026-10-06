@@ -2,48 +2,48 @@
 
 Kurzprotokoll der Spiel-Änderungen. **Bei jeder Änderung ergänzen.**
 
-Format: `YYYY-MM-DD` · Thema · Stichpunkte
+**Regel:** Bei neuen Loader-Patches **nie** ältere Patches entfernen (additive only).
 
-Dieses Dokument ist die **einzige kanonische Quelle** für Changelog, Modul-Übersicht und Sound-Katalog.
+---
+
+## 2026-10-06 (Header stabil — kein Wackeln bei BTC/USD)
+
+### UI
+- Header: `flex-wrap:nowrap`, DE/EN + Mute rechts fixiert
+- BTC/USD: feste Mindestbreite + `tabular-nums`, immer ganzzahlig (`Math.round`)
+
+### Dateien
+- `index.html` (HeaderStable)
 
 ---
 
 ## 2026-10-06 (Float-Design original + Button mittig)
 
-### UI
-- Klick-Anzeige (`+…`) wieder im **Original-Design** (15px, gleiche rise-Animation), feste Mitte über dem Mine-Button
-- Mine-Button zentriert (volle Breite, mittig ausgerichtet)
-
-### Dateien
-- `index.html`
+- Klick-Anzeige Original-Design, feste Mitte; Mine-Button zentriert
 
 ---
 
-## 2026-10-06 (Klick-Anzeige fix + Shop-SFX im Katalog)
+## 2026-10-06 (Klick-Anzeige fix + Shop-SFX)
 
-### UI
-- Klick-Gewinn feste Mitte über dem Mine-Button
-
-### Sound-Katalog
-- `select`, `shop_buy` dokumentiert
+- FixedFloat; select / shop_buy im Katalog
 
 ---
 
 ## 2026-10-06 (Mine-Button volle Breite + Katalog vereint)
 
-- Tap-to-Mine volle Breite; zentrales `CHANGELOG.md`
+- Tap-to-Mine volle Breite; zentrales CHANGELOG
 
 ---
 
 ## 2026-10-06 (Nachkommastellen + Economy + Build-Auswahl)
 
-- `fmtSats` Dezimalstellen; langsamere Economy; Build-Auswahl nach Verkauf leeren
+- fmtSats Dezimalstellen; langsamere Economy; Build-Pick clear
 
 ---
 
 ## 2026-10-05 (Tutorial + Zoom)
 
-- Tutorial nach +12-Sats-Modal; NoZoomViewport
+- Tutorial nach +12 Sats; NoZoomViewport
 
 ---
 
@@ -51,12 +51,12 @@ Dieses Dokument ist die **einzige kanonische Quelle** für Changelog, Modul-Übe
 
 | Name | Einsatz |
 |------|--------|
-| `click` / `mine_click` | Mine-Button |
-| `crit` | Kritischer Treffer |
-| `buy` | Upgrade-Kauf |
-| `install` | PC-Teil einbauen |
-| `halving` | Halving |
-| `select` | Teil wählen |
-| `shop_buy` | Teile-Shop kaufen |
+| click / mine_click | Mine-Button |
+| crit | Kritischer Treffer |
+| buy | Upgrade-Kauf |
+| install | PC-Teil einbauen |
+| halving | Halving |
+| select | Teil wählen |
+| shop_buy | Teile-Shop kaufen |
 
 ---
