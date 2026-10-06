@@ -21,6 +21,7 @@
 </head>
 <body style="margin:0;background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
 <p id="st">Loading HASHPOOL — Bitcoin Miner…</p>
+<noscript><h1>HASHPOOL — Bitcoin Miner</h1><p>Free idle Bitcoin mining clicker. Play at <a href="https://hashpool.pages.dev/">hashpool.pages.dev</a>.</p></noscript>
 <script>
 (async function () {
   var st = document.getElementById("st");
@@ -28,22 +29,39 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
+
     try {
       var sr = await fetch(RAW + "/status.json", { cache: "no-store" });
       if (sr.ok) {
         var status = await sr.json();
         if (status && status.maintenance) {
           var de = (typeof navigator !== "undefined" && /^de/i.test(navigator.language || "")) || status.lang === "de";
-          document.title = de ? (status.title_de || "HASHPOOL — Wartung") : (status.title_en || "HASHPOOL — Maintenance");
-          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui;text-align:center"><div style="max-width:420px"><div style="font-size:42px;margin-bottom:12px">⛏️</div><h1 style="font-size:22px">' + document.title + '</h1><p style="color:#c0c6d0">' + (de ? (status.message_de || "Wartung") : (status.message_en || "Maintenance")) + '</p></div></div>';
+          var title = de ? (status.title_de || "HASHPOOL — Wartung") : (status.title_en || "HASHPOOL — Maintenance");
+          var msg = de
+            ? (status.message_de || "Wir arbeiten gerade an der Seite. Bitte schau bald wieder vorbei.")
+            : (status.message_en || "We're improving the game. Please check back soon.");
+          var eta = status.eta
+            ? ("<p style=\"color:#8b95a5;font-size:13px;margin-top:18px\">" + (de ? "Voraussichtlich wieder: " : "Back around: ") + status.eta + "</p>")
+            : "";
+          document.title = title;
+          document.body.innerHTML =
+            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui,-apple-system,sans-serif;text-align:center">' +
+            '<div style="max-width:420px">' +
+            '<div style="font-size:42px;margin-bottom:12px">⛏️</div>' +
+            '<h1 style="font-size:22px;margin:0 0 10px;font-weight:800">' + title + '</h1>' +
+            '<p style="color:#c0c6d0;line-height:1.5;margin:0">' + msg + '</p>' + eta +
+            '<p style="margin-top:28px;font-size:12px;color:#5a6575">hashpool.pages.dev</p>' +
+            '</div></div>';
           return;
         }
       }
     } catch (_st) {}
+
     var r = await fetch(GAME, { cache: "no-store" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     var html = await r.text();
     if (html.indexOf("mine-btn") === -1) throw new Error("Game HTML incomplete");
+
     st.textContent = "Loading Parts Shop…";
     var cssText = "", catText = "", shopText = "", parts3dText = "", tutText = "";
     try {
@@ -65,6 +83,7 @@
       tutText = rc[5] || "";
       parts3dText = rc.slice(7).filter(Boolean).join("\n");
     } catch (e) { console.warn("Parts Shop modules", e); }
+
     if (cssText) {
       if (html.indexOf("<" + "/style>") !== -1) html = html.replace("<" + "/style>", "\n" + cssText + "\n<" + "/style>");
       else html = html.replace("<" + "/head>", "<style>" + cssText + "</style><" + "/head>");
@@ -72,10 +91,15 @@
     if (html.indexOf("id=\"ps-open-btn\"") === -1) {
       var _psLang = ((typeof navigator!=="undefined"&&(navigator.language||"")).slice(0,2)==="de")?"de":"en";
       var btn = '<button type="button" id="ps-open-btn" class="ps-open-btn">🛒 <span id="ps-open-label">'+(_psLang==="de"?"Teile-Shop":"Parts Shop")+'</span></button>';
-      if (html.indexOf("id=\"open-build-btn\"") !== -1) html = html.replace(/<button([^>]*id="open-build-btn")/, btn + "<button$1");
+      if (html.indexOf("id=\"open-build-btn\"") !== -1) {
+        html = html.replace(/<button([^>]*id="open-build-btn")/, btn + "<button$1");
+      }
       var ov = '<div class="ps-overlay" id="ps-overlay"><div class="ps-top"><button type="button" class="ps-back" id="ps-back" style="visibility:hidden">←</button><h2 id="ps-title">Teile-Shop</h2><div class="ps-sats" id="ps-sats">0 sats</div><button type="button" class="ps-close" id="ps-close">✕</button></div><div class="ps-body" id="ps-body"></div></div><div class="ps-toast" id="ps-toast"></div>';
-      if (html.indexOf("id=\"build-overlay\"") !== -1) html = html.replace('<div class="build-overlay" id="build-overlay"', ov + '<div class="build-overlay" id="build-overlay"');
-      else html = html.replace("<" + "/body>", ov + "<" + "/body>");
+      if (html.indexOf("id=\"build-overlay\"") !== -1) {
+        html = html.replace('<div class="build-overlay" id="build-overlay"', ov + '<div class="build-overlay" id="build-overlay"');
+      } else {
+        html = html.replace("<" + "/body>", ov + "<" + "/body>");
+      }
     }
     if (catText && shopText && html.indexOf("PART_CATALOG") === -1) {
       var js = "\n" + catText + "\n" + shopText + "\n" + (tutText || "") + "\n";
@@ -85,7 +109,9 @@
     } else if (tutText && html.indexOf("HashpoolTutorial") === -1) {
       html = html.replace("<" + "/scr" + "ipt>", "\n" + tutText + "\n<" + "/scr" + "ipt>");
     }
-    if (html.indexOf("tutorialDone") === -1) html = html.replace("buildBought: {},", "buildBought: {}, tutorialDone: false,");
+    if (html.indexOf("tutorialDone") === -1) {
+      html = html.replace("buildBought: {},", "buildBought: {}, tutorialDone: false,");
+    }
     if (parts3dText && html.indexOf("Parts3DBind") === -1) {
       var p3 = "\n" + parts3dText + "\n try{ if(window.Parts3D){ if(Parts3D.buildCpu) buildCpu=Parts3D.buildCpu; if(Parts3D.buildGpu) buildGpu=Parts3D.buildGpu; if(Parts3D.buildRam) buildRamStick=function(c){return Parts3D.buildRam(c);}; if(Parts3D.buildSsd) buildSsd=Parts3D.buildSsd; if(Parts3D.buildPsu) buildPsu=Parts3D.buildPsu; if(Parts3D.buildCooler) buildCooler=Parts3D.buildCooler; } }catch(_p3){} /*Parts3DBind*/\n";
       var mark2 = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
@@ -96,21 +122,31 @@
       html = html.replace("function sellRig(reward){", "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); else if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_e){} /*PartShopConsumeHook*/");
     }
     if (html.indexOf("PartShopCostHook") === -1) {
-      html = html.replace("function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }", "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }");
+      html = html.replace(
+        "function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }",
+        "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }"
+      );
       html = html.replace("buildTotalCost() * 1.38 * pasteMul", "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)");
     }
-    if (html.indexOf("XR7K-M9PQ") === -1) html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }');
+    if (html.indexOf("XR7K-M9PQ") === -1) {
+      html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }');
+    }
     if (html.indexOf("PartInvPersist") === -1) {
       html = html.replace(/buildBought: \{\},/g, "buildBought: {}, partInv: {}, buildPick: {},");
       html = html.replace(/buildBought:state\.buildBought,/g, "partInv:state.partInv||{},buildPick:state.buildPick||{},buildBought:state.buildBought,");
       html = html.replace(/state\.buildBought = saved\.buildBought \|\| state\.buildBought;/g, "state.partInv = saved.partInv || state.partInv || {}; state.buildPick = saved.buildPick || state.buildPick || {}; state.buildBought = saved.buildBought || state.buildBought; /*PartInvPersist*/");
     }
+
     if (html.indexOf("NoZoomViewport") === -1) {
       html = html.replace(/<meta name="viewport"[^>]*>/, '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><!--NoZoomViewport-->');
-      var noZoomCss = "\nhtml,body{touch-action:manipulation;overscroll-behavior:none;}\n#mine-btn,button,.shop-row,.ps-open-btn,.ps-buy-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}\n";
+      var noZoomCss = "\nhtml,body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;}\n#mine-btn,button,.shop-row,.ps-open-btn,.ps-buy-btn,.ps-acc-head,.ps-row{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", noZoomCss + "</style>");
+      var noZoomJs = "\ntry{(function(){document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();}catch(_z){}\n";
+      html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
     }
+
     html = html.replace(/function fmtSats\(n\)\{[\s\S]*?\n  \}/, "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 0.01) return (Math.round(n * 10000) / 10000).toFixed(4);\n    if(abs < 1) return (Math.round(n * 1000) / 1000).toFixed(3);\n    if(abs < 100) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }");
+
     if (html.indexOf("EconomyNerf") === -1) {
       html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:45, mult:1.08');
       html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:700, mult:1.12');
@@ -129,43 +165,38 @@
       html = html.replace('var crit = Math.random() < 0.08;', 'var crit = Math.random() < 0.025;');
       html = html.replace('var gain = crit ? state.perClick * 8 : state.perClick;', 'var gain = crit ? state.perClick * 2.2 : state.perClick;');
     }
+
     if (html.indexOf("BuildPickClearHook") === -1) {
       html = html.replace('document.getElementById("build-overlay").style.display = "none";', 'document.getElementById("build-overlay").style.display = "none"; try{ if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_c){} /*BuildPickClearHook*/');
     }
+
     if (html.indexOf("MineBtnWide") === -1) {
-      var mineCss = "\n/* MineBtnWide */\n.rig{width:100%;display:flex;flex-direction:column;align-items:center;margin:16px auto 20px;}\n#mine-btn{width:100% !important;max-width:100% !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n/*MineBtnWide*/\n";
+      var mineCss = "\n/* MineBtnWide */\n.rig{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:16px auto 20px;padding:0;box-sizing:border-box;}\n#mine-btn{width:100% !important;max-width:100% !important;margin-left:auto !important;margin-right:auto !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n#mine-btn svg{width:48px;height:48px;}\n@media (min-width:700px){#mine-btn{min-height:130px;font-size:16px;}#mine-btn svg{width:56px;height:56px;}}\n/*MineBtnWide*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", mineCss + "</style>");
     }
+
     if (html.indexOf("FixedFloat") === -1) {
-      html = html.replace('function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";', 'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";');
-      var floatCss = "\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n";
+      html = html.replace(
+        'function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";',
+        'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";'
+      );
+      var floatCss = "\n/* FixedFloat: original design, fixed center */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;white-space:nowrap;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n/*FixedFloat*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", floatCss + "</style>");
     }
+
     if (html.indexOf("HeaderStable") === -1) {
+      var headCss = "\n/* HeaderStable */\nheader{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:nowrap !important;gap:10px;margin-bottom:18px;min-height:36px;}\n.logo{flex-shrink:0;}\n.head-right{display:flex !important;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:right;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderStable*/\n";
+      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headCss + "</style>");
       html = html.replace('priceEl.textContent = "$" + state.price.toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
       html = html.replace('priceEl.textContent = "$" + Math.round(state.price).toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
     }
-    if (html.indexOf("HeaderFarmPlay") === -1) {
-      html = html.replace(/<header>[\s\S]*?<\/header>/, '<header class="hp-header"><div class="logo">HASH<span>POOL</span></div><div class="head-row2"><div class="rate"><span id="rate-label">BTC/USD</span> <b id="price">—</b></div><div class="head-tools"><span class="play-clock" id="play-clock" title="Play time">⏱ 0:00</span><div class="lang-switch"><button class="lang-btn" data-lang="de" id="lang-de">DE</button><button class="lang-btn" data-lang="en" id="lang-en">EN</button></div><button class="icon-btn" id="mute-btn">🔊</button></div></div></header>');
-      var headFarmCss = "\nheader.hp-header,header{display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:8px;margin-bottom:16px;}\n.logo{width:100%;text-align:center;font-weight:800;font-size:20px;}\n.head-row2{display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;min-width:12ch;font-variant-numeric:tabular-nums;}\n.head-tools{display:flex;align-items:center;gap:8px;margin-left:auto;}\n.play-clock{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:7ch;}\n";
-      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headFarmCss + "</style>");
-      html = html.replace("ex.farm.push({cost: cost, dust: 0});", "ex.farm.push({cost: cost, dust: 0, placedAt: Date.now()});");
-    }
-    if (html.indexOf("SavePlayFix") === -1) {
-      html = html.replace("function currentSaveData(){\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, rigsSold:state.rigsSold, lastSeen:Date.now()\n    };\n  }", "function currentSaveData(){ /*SavePlayFix*/\n    var _pm=0; try{ _pm=(Number(localStorage.getItem('hashpool-play-ms'))||0)+(Date.now()-(window.__hpSessionStart||Date.now())); }catch(_e){}\n    return {\n      balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang,\n      username:state.username, redeemed:state.redeemed, lifetime:state.lifetime,\n      halvings:state.halvings, muted:state.muted,\n      buildBought:state.buildBought, buildInstalled:state.buildInstalled,\n      buildCablesDone:state.buildCablesDone, buildMode:state.buildMode,\n      moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone,\n      biosDone:state.biosDone, biosQuality:state.biosQuality,\n      ex:state.ex, rigsSold:state.rigsSold,\n      partInv:state.partInv||{}, buildPick:state.buildPick||{},\n      tutorialDone:!!state.tutorialDone, totalPlayMs:_pm, lastSeen:Date.now()\n    };\n  }");
-      html = html.replace("localStorage.setItem(KEY, JSON.stringify({balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang, username:state.username, redeemed:state.redeemed, lifetime:state.lifetime, halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, buildCablesDone:state.buildCablesDone, buildMode:state.buildMode, moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone, biosDone:state.biosDone, biosQuality:state.biosQuality, ex:state.ex, rigsSold:state.rigsSold, lastSeen:Date.now()}));", "localStorage.setItem(KEY, JSON.stringify({balance:state.balance, owned:state.owned, clickOwned:state.clickOwned, lang:state.lang, username:state.username, redeemed:state.redeemed, lifetime:state.lifetime, halvings:state.halvings, muted:state.muted, buildBought:state.buildBought, buildInstalled:state.buildInstalled, buildCablesDone:state.buildCablesDone, buildMode:state.buildMode, moboCased:state.moboCased, pasteQuality:state.pasteQuality, pasteDone:state.pasteDone, biosDone:state.biosDone, biosQuality:state.biosQuality, ex:state.ex, rigsSold:state.rigsSold, partInv:state.partInv||{}, buildPick:state.buildPick||{}, tutorialDone:!!state.tutorialDone, totalPlayMs:(function(){try{return (Number(localStorage.getItem('hashpool-play-ms'))||0)+(Date.now()-(window.__hpSessionStart||Date.now()));}catch(e){return 0;}})(), lastSeen:Date.now()})); /*SavePlayFix*/");
-      html = html.replace("state.buildInstalled = saved.buildInstalled || state.buildInstalled;", "state.buildInstalled = saved.buildInstalled || state.buildInstalled; /*SavePlayFix*/\n    if(saved.partInv) state.partInv = saved.partInv;\n    if(saved.buildPick) state.buildPick = saved.buildPick;\n    if(typeof saved.tutorialDone===\"boolean\") state.tutorialDone = saved.tutorialDone;\n    if(typeof saved.totalPlayMs===\"number\"){ try{ localStorage.setItem(\"hashpool-play-ms\", String(saved.totalPlayMs)); window.__hpSessionStart=Date.now(); }catch(_e){} }\n    if(saved.ex) state.ex = saved.ex;");
-    }
-    /* Clock: separate marker so it is not skipped when hashpool-play-ms appears in save code */
-    if (html.indexOf("SavePlayClockMark") === -1) {
-      var playBody = "<script>(function(){var KEY='hashpool-play-ms';window.__hpSessionStart=Date.now();function commit(){try{var a=Number(localStorage.getItem(KEY))||0;var n=a+(Date.now()-(window.__hpSessionStart||Date.now()));localStorage.setItem(KEY,String(n));window.__hpSessionStart=Date.now();}catch(e){}}function total(){return (Number(localStorage.getItem(KEY))||0)+(Date.now()-(window.__hpSessionStart||Date.now()));}function fmt(ms){ms=Math.max(0,ms|0);var s=Math.floor(ms/1000);var d=Math.floor(s/86400);var h=Math.floor((s%86400)/3600);var m=Math.floor((s%3600)/60);var sec=s%60;function p(n){return (n<10?'0':'')+n;}if(d>0)return d+'d '+h+'h '+m+'m';if(h>0)return h+'h '+p(m)+'m';return m+':'+p(sec);}function tick(){var el=document.getElementById('play-clock');if(el)el.textContent='⏱ '+fmt(total());}setInterval(tick,1000);tick();document.addEventListener('visibilitychange',function(){if(document.hidden)commit();else window.__hpSessionStart=Date.now();});window.addEventListener('pagehide',commit);})();<\/script><!--SavePlayClockMark-->";
-      html = html.replace("</body>", playBody + "</body>");
-    }
+
     document.open();
     document.write(html);
     document.close();
   } catch (e) {
-    st.innerHTML = "Load failed: " + e.message;
+    st.innerHTML = "Load failed: " + e.message +
+      "<br><br><a style=\"color:#f7931a\" href=\"https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html\">Direct game link</a>";
     console.error(e);
   }
 })();
