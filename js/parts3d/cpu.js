@@ -25,6 +25,8 @@
     var id = "";
     try {
       if(window.Parts3D && Parts3D.pickInfo) id = (Parts3D.pickInfo("cpu").id || "");
+      if(!id && Parts3D._forceId && Parts3D._forceId.cpu) id = Parts3D._forceId.cpu;
+      console.log("[HASHPOOL CPU]", id);
     } catch(e){}
     var g = new THREE.Group();
 
