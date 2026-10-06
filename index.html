@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006h"; /* allParts cheat fix */
+    var HP_CB = "?v=20261006i"; /* dramatic ID meshes + late bind */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -197,12 +197,17 @@
       var headCss = "\n/* HeaderStable */\nheader{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:nowrap !important;gap:10px;margin-bottom:18px;min-height:36px;}\n.logo{flex-shrink:0;}\n.head-right{display:flex !important;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:right;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderStable*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headCss + "</style>");
       html = html.replace('priceEl.textContent = "$" + state.price.toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
-      html = html.replace('priceEl.textContent = "$" + Math.round(state.price).toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
     }
 
     if (html.indexOf("HardPickOnly") === -1) {
       var hardPick = "\ntry{(function(){function force(){if(!window.PartShop||!PartShop.openPicker)return;var op=PartShop.openPicker;if(op._hard)return;PartShop.openPicker=function(){try{var ov=document.getElementById('ps-overlay');if(ov)ov.classList.remove('open');}catch(e){}return op.apply(this,arguments);};PartShop.openPicker._hard=true;var btn=document.getElementById('open-build-btn');if(btn&&!btn._hard){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();try{var s=document.getElementById('ps-overlay');if(s)s.classList.remove('open');}catch(x){}if(window.PartShop&&PartShop.openPicker)PartShop.openPicker();},true);btn._hard=true;}}force();setTimeout(force,300);setTimeout(force,1000);setTimeout(force,2500);})();}catch(_h){} /*HardPickOnly*/\n";
       html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
+    }
+
+    /*Parts3DLateBind — after game defines function buildCpu/buildGpu */
+    if(html.indexOf("Parts3DLateBind") === -1){
+      var late = "\ntry{(function(){function re(){if(!window.Parts3D)return;try{if(Parts3D.buildCpu)buildCpu=Parts3D.buildCpu;if(Parts3D.buildGpu)buildGpu=Parts3D.buildGpu;if(Parts3D.buildRam)buildRamStick=function(c){return Parts3D.buildRam(c);};if(Parts3D.buildSsd)buildSsd=Parts3D.buildSsd;if(Parts3D.buildPsu)buildPsu=Parts3D.buildPsu;if(Parts3D.buildCooler)buildCooler=Parts3D.buildCooler;}catch(e){}}re();setTimeout(re,200);setTimeout(re,800);setTimeout(re,2000);})();}catch(_l){} /*Parts3DLateBind*/\n";
+      html = html.replace("<"+"/scr"+"ipt>", late + "<"+"/scr"+"ipt>");
     }
 
     document.open();
