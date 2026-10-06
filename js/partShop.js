@@ -152,10 +152,8 @@
         '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
         '<div class="ps-row-main"><div class="ps-row-brand">'+it.brand+'</div><div class="ps-row-model">'+it.model+'</div><div class="ps-row-tier">'+partTierBadge(it)+(own? ' <span class="ps-row-owned">x'+own+'</span>':'')+'</div></div>' +
         '<div class="ps-row-price">'+fmt(it.cost)+'</div></div>';
-    });
-    if(view.selected){
-      var it = PART_BY_ID[view.selected];
-      if(it){
+      /* Detail direkt unter dem gewählten Produkt */
+      if(sel){
         var canBuy = state.balance >= (it.cost||0);
         html += '<div class="ps-detail open"><div class="ps-detail-name">'+partBaseName(it)+'</div><div class="ps-detail-brand">'+partTierBadge(it)+'</div>' +
           scaleRow(state.lang==="de"?"Leistung":"Performance", it.power, "") +
@@ -163,7 +161,7 @@
           scaleRow(state.lang==="de"?"Preis/Leistung":"Value", it.value, "val") +
           '<div class="ps-detail-actions"><div class="ps-price-big">'+fmt(it.cost)+' sats</div><button class="ps-buy-btn" id="ps-buy"'+(canBuy?"":" disabled")+'>'+(state.lang==="de"?"Kaufen":"Buy")+'</button></div></div>';
       }
-    }
+    });
     html += '</div>';
     body.innerHTML = html;
     body.querySelectorAll(".ps-row").forEach(function(el){
