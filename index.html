@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006i"; /* dramatic ID meshes + late bind */
+    var HP_CB = "?v=20261006j"; /* BUILDERS rebind + case picker */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -204,9 +204,9 @@
       html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
     }
 
-    /*Parts3DLateBind — after game defines function buildCpu/buildGpu */
+    /*Parts3DLateBind — update BUILDERS + rebuild partMeshes */
     if(html.indexOf("Parts3DLateBind") === -1){
-      var late = "\ntry{(function(){function re(){if(!window.Parts3D)return;try{if(Parts3D.buildCpu)buildCpu=Parts3D.buildCpu;if(Parts3D.buildGpu)buildGpu=Parts3D.buildGpu;if(Parts3D.buildRam)buildRamStick=function(c){return Parts3D.buildRam(c);};if(Parts3D.buildSsd)buildSsd=Parts3D.buildSsd;if(Parts3D.buildPsu)buildPsu=Parts3D.buildPsu;if(Parts3D.buildCooler)buildCooler=Parts3D.buildCooler;}catch(e){}}re();setTimeout(re,200);setTimeout(re,800);setTimeout(re,2000);})();}catch(_l){} /*Parts3DLateBind*/\n";
+      var late = "\ntry{(function(){\n  function rebind3d(){\n    if(!window.Parts3D) return;\n    try{\n      if(Parts3D.buildCpu){ buildCpu = Parts3D.buildCpu; if(typeof BUILDERS!=='undefined') BUILDERS.cpu = Parts3D.buildCpu; }\n      if(Parts3D.buildGpu){ buildGpu = Parts3D.buildGpu; if(typeof BUILDERS!=='undefined') BUILDERS.gpu = Parts3D.buildGpu; }\n      if(Parts3D.buildRam){ if(typeof BUILDERS!=='undefined') BUILDERS.ram = function(){ return Parts3D.buildRam(); }; }\n      if(Parts3D.buildSsd){ buildSsd = Parts3D.buildSsd; if(typeof BUILDERS!=='undefined') BUILDERS.ssd = Parts3D.buildSsd; }\n      if(Parts3D.buildPsu){ buildPsu = Parts3D.buildPsu; if(typeof BUILDERS!=='undefined') BUILDERS.psu = Parts3D.buildPsu; }\n      if(Parts3D.buildCooler){ buildCooler = Parts3D.buildCooler; if(typeof BUILDERS!=='undefined') BUILDERS.cooler = Parts3D.buildCooler; }\n      if(typeof partMeshes!=='undefined' && typeof BUILDERS!=='undefined' && typeof PARTS!=='undefined'){\n        PARTS.forEach(function(p){\n          if(!BUILDERS[p.id] || !partMeshes[p.id]) return;\n          var old = partMeshes[p.id];\n          var parent = old.parent;\n          var vis = old.visible;\n          var pos = old.position.clone();\n          var rot = {x:old.rotation.x,y:old.rotation.y,z:old.rotation.z};\n          var neu = BUILDERS[p.id]();\n          neu.visible = vis;\n          neu.position.copy(pos);\n          neu.rotation.set(rot.x,rot.y,rot.z);\n          if(parent){ parent.remove(old); parent.add(neu); }\n          partMeshes[p.id] = neu;\n        });\n      }\n    }catch(e){ console.warn('Parts3D rebind', e); }\n  }\n  rebind3d();\n  setTimeout(rebind3d, 300);\n  setTimeout(rebind3d, 1000);\n  setTimeout(rebind3d, 2500);\n  document.addEventListener('click', function(ev){\n    var t = ev.target;\n    if(!t) return;\n    if((t.id==='open-build-btn') || (t.closest && t.closest('#open-build-btn')) || (t.id==='ps-picker-go') || (t.closest && t.closest('#ps-picker-go'))){\n      setTimeout(rebind3d, 50);\n      setTimeout(rebind3d, 400);\n    }\n  }, true);\n})();}catch(_l){} /*Parts3DLateBind*/\n";
       html = html.replace("<"+"/scr"+"ipt>", late + "<"+"/scr"+"ipt>");
     }
 
