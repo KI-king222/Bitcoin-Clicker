@@ -1,8 +1,8 @@
 /* partShop.js — restored; see also partShopFix.js for clearBuildSelectionUI */
-/* Full file restored from last good + selection clear on sell + case in picker only */
+/* Full file restored from last good + selection clear on sell */
 (function(){
   if(typeof PART_CATALOG === "undefined") return;
-  var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler","case"]; /*CaseInPicker*/
+  var REQUIRED_FOR_BUILD = ["cpu","gpu","ram","ssd","psu","mobo","cooler"];
   function fmt(n){
     if(typeof fmtSats === "function") return fmtSats(n);
     n = Math.floor(Number(n)||0);
@@ -291,7 +291,7 @@
   }
   function openPicker(){
     if(!canBuildPC()){
-      showToast(state.lang==="de"?"Zuerst je 1 Teil pro Kategorie kaufen (inkl. Gehäuse)":"Buy 1 part per category first (incl. case)");
+      showToast(state.lang==="de"?"Zuerst je 1 Teil pro Kategorie kaufen":"Buy 1 part per category first");
       openShop(); return;
     }
     ensureInv();
