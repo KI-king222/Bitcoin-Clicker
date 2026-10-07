@@ -21,7 +21,6 @@
 </head>
 <body style="margin:0;background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
 <p id="st">Loading HASHPOOL — Bitcoin Miner…</p>
-<noscript><h1>HASHPOOL — Bitcoin Miner</h1><p>Free idle Bitcoin mining clicker. Play at <a href="https://hashpool.pages.dev/">hashpool.pages.dev</a>.</p></noscript>
 <script>
 (async function () {
   var st = document.getElementById("st");
@@ -29,7 +28,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261007a"; /* Web3D workshop: mobo left-biased */
+    var HP_CB = "?v=20261007b"; /* mobo flush to I/O wall */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -38,10 +37,9 @@
         if (status && status.maintenance) {
           var de = (typeof navigator !== "undefined" && /^de/i.test(navigator.language || "")) || status.lang === "de";
           var title = de ? (status.title_de || "HASHPOOL — Wartung") : (status.title_en || "HASHPOOL — Maintenance");
-          var msg = de ? (status.message_de || "Wir arbeiten gerade an der Seite. Bitte schau bald wieder vorbei.") : (status.message_en || "We're improving the game. Please check back soon.");
-          var eta = status.eta ? ("<p style=\"color:#8b95a5;font-size:13px;margin-top:18px\">" + (de ? "Voraussichtlich wieder: " : "Back around: ") + status.eta + "</p>") : "";
+          var msg = de ? (status.message_de || "Wir arbeiten gerade an der Seite.") : (status.message_en || "We're improving the game.");
           document.title = title;
-          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui,-apple-system,sans-serif;text-align:center"><div style="max-width:420px"><div style="font-size:42px;margin-bottom:12px">⛏️</div><h1 style="font-size:22px;margin:0 0 10px;font-weight:800">' + title + '</h1><p style="color:#c0c6d0;line-height:1.5;margin:0">' + msg + '</p>' + eta + '<p style="margin-top:28px;font-size:12px;color:#5a6575">hashpool.pages.dev</p></div></div>';
+          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui,sans-serif;text-align:center"><div style="max-width:420px"><h1>' + title + '</h1><p>' + msg + '</p></div></div>';
           return;
         }
       }
@@ -102,15 +100,7 @@
       else html = html.replace("<" + "/scr" + "ipt>", p3 + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("PartShopConsumeHook") === -1) html = html.replace("function sellRig(reward){", "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); else if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_e){} /*PartShopConsumeHook*/");
-    if (html.indexOf("PartShopCostHook") === -1) {
-      html = html.replace("function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }", "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }");
-      html = html.replace("buildTotalCost() * 1.38 * pasteMul", "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)");
-    }
     if (html.indexOf("XR7K-M9PQ") === -1) html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
-    else if (html.indexOf("PARTKIT-26") === -1) html = html.replace('"N0DE-INV-01": { allParts: 1 }', '"N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
-    if (html.indexOf("CheatPartsHook") === -1) {
-      html = html.replace("state.redeemed[code] = true;\n    state.balance += reward.sats;\n    state.lifetime += reward.sats;\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    showCheatMsg(t(\"cheatOk\") + \" +\" + fmtSats(reward.sats) + \" sats\", true);", "state.redeemed[code] = true; /*CheatPartsHook*/\n    var addSats = Number(reward.sats)||0;\n    if(addSats){ state.balance += addSats; state.lifetime += addSats; }\n    var partsN = 0;\n    if(reward.allParts){\n      try{\n        if(window.PartShop && PartShop.grantAllParts) partsN = PartShop.grantAllParts(Number(reward.allParts)||1);\n        else if(typeof PART_BY_ID !== \"undefined\"){\n          if(!state.partInv) state.partInv = {};\n          Object.keys(PART_BY_ID).forEach(function(id){ state.partInv[id]=(state.partInv[id]||0)+(Number(reward.allParts)||1); partsN++; });\n        }\n      }catch(_ap){}\n    }\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    var msg = t(\"cheatOk\");\n    if(addSats) msg += \" +\" + fmtSats(addSats) + \" sats\";\n    if(partsN) msg += (addSats?\" · \":\" \") + partsN + (state.lang===\"de\"?\" Teile\":\" parts\");\n    showCheatMsg(msg, true);");
-    }
     if (html.indexOf("PartInvPersist") === -1) {
       html = html.replace(/buildBought: \{\},/g, "buildBought: {}, partInv: {}, buildPick: {},");
       html = html.replace(/buildBought:state\.buildBought,/g, "partInv:state.partInv||{},buildPick:state.buildPick||{},buildBought:state.buildBought,");
@@ -118,68 +108,21 @@
     }
     if (html.indexOf("NoZoomViewport") === -1) {
       html = html.replace(/<meta name="viewport"[^>]*>/, '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><!--NoZoomViewport-->');
-      var noZoomCss = "\nhtml,body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;}\n#mine-btn,button,.shop-row,.ps-open-btn,.ps-buy-btn,.ps-acc-head,.ps-row{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}\n";
+      var noZoomCss = "\nhtml,body{touch-action:manipulation;overscroll-behavior:none;}\n#mine-btn,button{touch-action:manipulation;-webkit-user-select:none;}\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", noZoomCss + "</style>");
-      var noZoomJs = "\ntry{(function(){document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();}catch(_z){}\n";
-      html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
-    }
-    html = html.replace(/function fmtSats\(n\)\{[\s\S]*?\n  \}/, "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 0.01) return (Math.round(n * 10000) / 10000).toFixed(4);\n    if(abs < 1) return (Math.round(n * 1000) / 1000).toFixed(3);\n    if(abs < 100) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }");
-    if (html.indexOf("EconomyNerf") === -1) {
-      html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:45, mult:1.08');
-      html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:700, mult:1.12');
-      html = html.replace('id:"asicpen", base:5500, mult:1.75', 'id:"asicpen", base:9000, mult:1.16');
-      html = html.replace('id:"quantum", base:75000, mult:2.1', 'id:"quantum", base:130000, mult:1.22');
-      html = html.replace('id:"usb", base:15,  hr:0.08', 'id:"usb", base:22,  hr:0.035');
-      html = html.replace('id:"gpu", base:160, hr:0.55', 'id:"gpu", base:220, hr:0.22');
-      html = html.replace('id:"fpga",base:1400, hr:3.5', 'id:"fpga",base:2400, hr:0.75');
-      html = html.replace('id:"asic",base:11000, hr:22', 'id:"asic",base:18000, hr:2.2');
-      html = html.replace('id:"farm",base:85000, hr:140', 'id:"farm",base:130000, hr:7');
-      html = html.replace('id:"plant",base:650000, hr:900', 'id:"plant",base:1100000, hr:22');
-      html = html.replace('return u.base * Math.pow(1.19, n);', 'return u.base * Math.pow(1.32, n); /*EconomyNerf*/');
-      html = html.replace('function globalMult(){\n    return 1 + state.halvings * 0.5;\n  }', 'function globalMult(){ /*EconomyNerf*/ return 1 + state.halvings * 0.05; }');
-      html = html.replace('function currentPerClick(){\n    var v = 1;\n    CLICK_UPGRADES.forEach(function(u){ v *= Math.pow(u.mult, state.clickOwned[u.id]); });\n    return Math.round(v * globalMult());\n  }', 'function currentPerClick(){ /*EconomyNerf*/ var v=1; CLICK_UPGRADES.forEach(function(u){ var n=state.clickOwned[u.id]||0; if(n<=0) return; if(n<=10){ v*=Math.pow(u.mult,n); } else { v*=Math.pow(u.mult, 10+(n-10)*0.5); } }); return Math.max(0.01, Math.round(v*globalMult()*1000)/1000); }');
-      html = html.replace('function passiveRate(){\n    var r = 0;\n    UPGRADES.forEach(function(u){ r += u.hr * state.owned[u.id]; });\n    return (r * globalMult() + exFarmBase()) * exMult();\n  }', 'function passiveRate(){ /*EconomyNerf*/ var r=0; UPGRADES.forEach(function(u){ var n=state.owned[u.id]||0; var soft=n/(1+0.07*Math.max(0,n-2)); r += u.hr * soft; }); return (r * globalMult() + exFarmBase()) * exMult(); }');
-      html = html.replace('var crit = Math.random() < 0.08;', 'var crit = Math.random() < 0.025;');
-      html = html.replace('var gain = crit ? state.perClick * 8 : state.perClick;', 'var gain = crit ? state.perClick * 2.2 : state.perClick;');
-    }
-    if (html.indexOf("BuildPickClearHook") === -1) html = html.replace('document.getElementById("build-overlay").style.display = "none";', 'document.getElementById("build-overlay").style.display = "none"; try{ if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_c){} /*BuildPickClearHook*/');
-    if (html.indexOf("MineBtnWide") === -1) {
-      var mineCss = "\n/* MineBtnWide */\n.rig{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:16px auto 20px;padding:0;box-sizing:border-box;}\n#mine-btn{width:100% !important;max-width:100% !important;margin-left:auto !important;margin-right:auto !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n#mine-btn svg{width:48px;height:48px;}\n@media (min-width:700px){#mine-btn{min-height:130px;font-size:16px;}#mine-btn svg{width:56px;height:56px;}}\n/*MineBtnWide*/\n";
-      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", mineCss + "</style>");
-    }
-    if (html.indexOf("FixedFloat") === -1) {
-      html = html.replace('function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";', 'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";');
-      var floatCss = "\n/* FixedFloat */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;white-space:nowrap;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n/*FixedFloat*/\n";
-      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", floatCss + "</style>");
-    }
-    if (html.indexOf("HeaderStable") === -1) {
-      var headCss = "\n/* HeaderStable */\nheader{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:nowrap !important;gap:10px;margin-bottom:18px;min-height:36px;}\n.logo{flex-shrink:0;}\n.head-right{display:flex !important;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:right;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderStable*/\n";
-      if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headCss + "</style>");
-    }
-    if (html.indexOf("HardPickOnly") === -1) {
-      var hardPick = "\ntry{(function(){function force(){if(!window.PartShop||!PartShop.openPicker)return;var op=PartShop.openPicker;if(op._hard)return;PartShop.openPicker=function(){try{var ov=document.getElementById('ps-overlay');if(ov)ov.classList.remove('open');}catch(e){}return op.apply(this,arguments);};PartShop.openPicker._hard=true;var btn=document.getElementById('open-build-btn');if(btn&&!btn._hard){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();try{var s=document.getElementById('ps-overlay');if(s)s.classList.remove('open');}catch(x){}if(window.PartShop&&PartShop.openPicker)PartShop.openPicker();},true);btn._hard=true;}}force();setTimeout(force,300);setTimeout(force,1000);setTimeout(force,2500);})();}catch(_h){} /*HardPickOnly*/\n";
-      html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("BENCH_LAYOUT") === -1) {
       html = html.replace("var BENCH = { mobo: [2.6, -0.93, 0.2] };", "var BENCH = { mobo: [2.80, -1.05, 0.0] }; /*BENCH_LAYOUT*/");
-      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-1.72, 1.00, 0.08] }");
-      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-2.28,-0.35, 0.15] }");
-      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-2.38,-0.95, 0.22] }");
-      html = html.replace("if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }", "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.5; camTarget.y = 0.5; camTarget.z = 10.5; framingDoneCase = true; } /*BENCH_LAYOUT*/");
-      html = html.replace("if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }", "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 1.6; camTarget.y = 0.35; camTarget.z = 12; framingDone = true; } /*BENCH_LAYOUT*/");
+      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-1.92, 1.00, 0.05] }");
+      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-2.35,-0.40, 0.12] }");
+      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-2.40,-0.95, 0.20] }");
     }
-    if (html.indexOf("BUILDERS_P3D") === -1) {
-      html = html.replace("BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };", "BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };\n  try{ if(window.Parts3D){ if(Parts3D.buildCpu) BUILDERS.cpu=Parts3D.buildCpu; if(Parts3D.buildGpu) BUILDERS.gpu=Parts3D.buildGpu; if(Parts3D.buildSsd) BUILDERS.ssd=Parts3D.buildSsd; if(Parts3D.buildPsu) BUILDERS.psu=Parts3D.buildPsu; if(Parts3D.buildCooler) BUILDERS.cooler=Parts3D.buildCooler; if(Parts3D.buildRam) BUILDERS.ram=function(){return Parts3D.buildRam();}; } }catch(_bp){} /*BUILDERS_P3D*/");
-    }
-    if (html.indexOf("InPlaceMeshFill") === -1) {
-      html = html.replace("function setPartVisual(id, installed){\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      mesh.visible = true;", "function setPartVisual(id, installed){ /*InPlaceMeshFill*/\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      try{\n        if(id !== 'mobo' && typeof BUILDERS !== 'undefined' && BUILDERS[id] && window.Parts3D){\n          try{\n            if(!Parts3D._forceId) Parts3D._forceId = {};\n            if(state && state.buildPick && state.buildPick[id]) Parts3D._forceId[id] = state.buildPick[id];\n            if(Parts3D.buildCpu) BUILDERS.cpu = Parts3D.buildCpu;\n            if(Parts3D.buildGpu) BUILDERS.gpu = Parts3D.buildGpu;\n            if(Parts3D.buildPsu) BUILDERS.psu = Parts3D.buildPsu;\n          }catch(_f){}\n          while(mesh.children.length){ mesh.remove(mesh.children[0]); }\n          var tmp = BUILDERS[id]();\n          while(tmp.children.length){ mesh.add(tmp.children[0]); }\n          if(id === 'psu' && tmp.rotation) mesh.rotation.y = tmp.rotation.y;\n        }\n      }catch(_ip){ console.warn('inplace mesh', _ip); }\n      mesh.visible = true;");
-    }
-    if(html.indexOf("Parts3DLateBind") === -1){
-      var late = "\ntry{(function(){\n  function rebind3d(){\n    if(!window.Parts3D) return;\n    try{\n      if(Parts3D.buildTable){ buildTable = Parts3D.buildTable; }\n      if(Parts3D.buildFrame){ buildFrame = Parts3D.buildFrame; }\n      if(Parts3D.buildCpu){ buildCpu = Parts3D.buildCpu; if(typeof BUILDERS!=='undefined') BUILDERS.cpu = Parts3D.buildCpu; }\n      if(Parts3D.buildGpu){ buildGpu = Parts3D.buildGpu; if(typeof BUILDERS!=='undefined') BUILDERS.gpu = Parts3D.buildGpu; }\n      if(Parts3D.buildRam){ if(typeof BUILDERS!=='undefined') BUILDERS.ram = function(){ return Parts3D.buildRam(); }; }\n      if(Parts3D.buildSsd){ buildSsd = Parts3D.buildSsd; if(typeof BUILDERS!=='undefined') BUILDERS.ssd = Parts3D.buildSsd; }\n      if(Parts3D.buildPsu){ buildPsu = Parts3D.buildPsu; if(typeof BUILDERS!=='undefined') BUILDERS.psu = Parts3D.buildPsu; }\n      if(Parts3D.buildCooler){ buildCooler = Parts3D.buildCooler; if(typeof BUILDERS!=='undefined') BUILDERS.cooler = Parts3D.buildCooler; }\n    }catch(e){ console.warn('Parts3D rebind', e); }\n  }\n  rebind3d();\n  setTimeout(rebind3d, 200);\n  setTimeout(rebind3d, 800);\n  setTimeout(rebind3d, 2000);\n})();}catch(_l){} /*Parts3DLateBind*/\n";
+    if (html.indexOf("Parts3DLateBind") === -1) {
+      var late = "\ntry{(function(){function rebind3d(){if(!window.Parts3D)return;try{if(Parts3D.buildTable)buildTable=Parts3D.buildTable;if(Parts3D.buildFrame)buildFrame=Parts3D.buildFrame;if(Parts3D.buildCpu){buildCpu=Parts3D.buildCpu;if(typeof BUILDERS!=='undefined')BUILDERS.cpu=Parts3D.buildCpu;}if(Parts3D.buildGpu){buildGpu=Parts3D.buildGpu;if(typeof BUILDERS!=='undefined')BUILDERS.gpu=Parts3D.buildGpu;}if(Parts3D.buildPsu){buildPsu=Parts3D.buildPsu;if(typeof BUILDERS!=='undefined')BUILDERS.psu=Parts3D.buildPsu;}}catch(e){}}rebind3d();setTimeout(rebind3d,300);setTimeout(rebind3d,1200);})();}catch(_l){} /*Parts3DLateBind*/\n";
       html = html.replace("<"+"/scr"+"ipt>", late + "<"+"/scr"+"ipt>");
     }
-    if(html.indexOf("LayoutForce") === -1){
-      var lf = "\ntry{(function(){\n  function applyLayout(){\n    if(!window.Parts3D || !Parts3D.LAYOUT) return;\n    var L = Parts3D.LAYOUT;\n    try{\n      if(typeof PART3D !== 'undefined'){\n        if(L.caseMobo) PART3D.mobo.pos = L.caseMobo.slice();\n        if(L.gpu) PART3D.gpu.pos = L.gpu.slice();\n        if(L.psu) PART3D.psu.pos = L.psu.slice();\n      }\n      if(typeof BENCH !== 'undefined' && L.benchMobo) BENCH.mobo = L.benchMobo.slice();\n      if(typeof partMeshes !== 'undefined' && partMeshes){\n        if(partMeshes.mobo && L.caseMobo && state && state.moboCased){\n          partMeshes.mobo.position.set(L.caseMobo[0], L.caseMobo[1], L.caseMobo[2]);\n        }\n        if(partMeshes.gpu && L.gpu){\n          partMeshes.gpu.position.set(L.gpu[0], L.gpu[1], L.gpu[2]);\n        }\n        if(partMeshes.psu && L.psu){\n          partMeshes.psu.position.set(L.psu[0], L.psu[1], L.psu[2]);\n          if(L.psuRotY != null) partMeshes.psu.rotation.y = L.psuRotY;\n        }\n      }\n    }catch(e){ console.warn('LayoutForce', e); }\n  }\n  applyLayout();\n  setTimeout(applyLayout, 300);\n  setTimeout(applyLayout, 1000);\n  setTimeout(applyLayout, 2500);\n})();}catch(_lf){} /*LayoutForce*/\n";
+    if (html.indexOf("LayoutForce") === -1) {
+      var lf = "\ntry{(function(){function applyLayout(){if(!window.Parts3D||!Parts3D.LAYOUT)return;var L=Parts3D.LAYOUT;try{if(typeof PART3D!=='undefined'){if(L.caseMobo)PART3D.mobo.pos=L.caseMobo.slice();if(L.gpu)PART3D.gpu.pos=L.gpu.slice();if(L.psu)PART3D.psu.pos=L.psu.slice();}if(typeof partMeshes!=='undefined'&&partMeshes){if(partMeshes.mobo&&L.caseMobo&&state&&state.moboCased)partMeshes.mobo.position.set(L.caseMobo[0],L.caseMobo[1],L.caseMobo[2]);if(partMeshes.gpu&&L.gpu)partMeshes.gpu.position.set(L.gpu[0],L.gpu[1],L.gpu[2]);if(partMeshes.psu&&L.psu){partMeshes.psu.position.set(L.psu[0],L.psu[1],L.psu[2]);if(L.psuRotY!=null)partMeshes.psu.rotation.y=L.psuRotY;}}}catch(e){}}applyLayout();setTimeout(applyLayout,300);setTimeout(applyLayout,1000);setTimeout(applyLayout,2500);})();}catch(_lf){} /*LayoutForce*/\n";
       html = html.replace("<"+"/scr"+"ipt>", lf + "<"+"/scr"+"ipt>");
     }
 
@@ -187,7 +130,7 @@
     document.write(html);
     document.close();
   } catch (e) {
-    st.innerHTML = "Load failed: " + e.message + "<br><br><a style=\"color:#f7931a\" href=\"https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html\">Direct game link</a>";
+    st.textContent = "Load failed: " + e.message;
     console.error(e);
   }
 })();
