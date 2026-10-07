@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006s"; /* PSU rear bay + open shroud */
+    var HP_CB = "?v=20261006t"; /* open ATX rear I/O layout */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -211,19 +211,19 @@
       );
       html = html.replace(
         "mobo:   { pos:[-0.3, 0,   -0.62] }",
-        "mobo:   { pos:[-1.35, 0.85, -0.50] }"
+        "mobo:   { pos:[-1.35, 0.85, -0.35] }"
       );
       html = html.replace(
         "gpu:    { pos:[-0.45,-0.95,-0.35] }",
-        "gpu:    { pos:[-1.50,-0.12,-0.28] }"
+        "gpu:    { pos:[-1.40,-0.15,-0.15] }"
       );
       html = html.replace(
         "psu:    { pos:[ 1.0, -0.7,  0.0] }",
-        "psu:    { pos:[-1.35,-0.72,-0.28] }"
+        "psu:    { pos:[-1.35,-0.70,-0.15] }"
       );
       html = html.replace(
         "if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }",
-        "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.9; camTarget.y = 0.5; camTarget.z = 9.5; framingDoneCase = true; } /*BENCH_LAYOUT*/"
+        "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.6; camTarget.y = 0.4; camTarget.z = 9.0; framingDoneCase = true; } /*BENCH_LAYOUT*/"
       );
       html = html.replace(
         "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }",
