@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261007b";
+    var HP_CB = "?v=20261007d";
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
       if (sr.ok) {
@@ -83,16 +83,16 @@
       var js = "\n" + catText + "\n" + shopText + "\n" + (tutText || "") + "\n";
       var mark = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(mark) !== -1) html = html.replace(mark, mark + js);
-      else html = html.replace("</script>", js + "</script>");
+      else html = html.replace("<" + "/scr" + "ipt>", js + "<" + "/scr" + "ipt>");
     } else if (tutText && html.indexOf("HashpoolTutorial") === -1) {
-      html = html.replace("</script>", "\n" + tutText + "\n</script>");
+      html = html.replace("<" + "/scr" + "ipt>", "\n" + tutText + "\n" + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("tutorialDone") === -1) html = html.replace("buildBought: {},", "buildBought: {}, tutorialDone: false,");
     if (parts3dText && html.indexOf("Parts3DBind") === -1) {
       var p3 = "\n" + parts3dText + "\n try{ if(window.Parts3D){ if(Parts3D.buildTable) buildTable=Parts3D.buildTable; if(Parts3D.buildFrame) buildFrame=Parts3D.buildFrame; if(Parts3D.buildCpu) buildCpu=Parts3D.buildCpu; if(Parts3D.buildGpu) buildGpu=Parts3D.buildGpu; if(Parts3D.buildRam) buildRamStick=function(c){return Parts3D.buildRam(c);}; if(Parts3D.buildSsd) buildSsd=Parts3D.buildSsd; if(Parts3D.buildPsu) buildPsu=Parts3D.buildPsu; if(Parts3D.buildCooler) buildCooler=Parts3D.buildCooler; } }catch(_p3){} /*Parts3DBind*/\n";
       var mark2 = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(mark2) !== -1) html = html.replace(mark2, mark2 + p3);
-      else html = html.replace("</script>", p3 + "</script>");
+      else html = html.replace("<" + "/scr" + "ipt>", p3 + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("PartShopConsumeHook") === -1) html = html.replace("function sellRig(reward){", "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); else if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_e){} /*PartShopConsumeHook*/");
     if (html.indexOf("PartShopCostHook") === -1) {
@@ -143,7 +143,7 @@
     }
     if (html.indexOf("HardPickOnly") === -1) {
       var hardPick = "\ntry{(function(){function force(){if(!window.PartShop||!PartShop.openPicker)return;var op=PartShop.openPicker;if(op._hard)return;PartShop.openPicker=function(){try{var ov=document.getElementById('ps-overlay');if(ov)ov.classList.remove('open');}catch(e){}return op.apply(this,arguments);};PartShop.openPicker._hard=true;}force();setTimeout(force,500);setTimeout(force,2000);})();}catch(_h){} /*HardPickOnly*/\n";
-      html = html.replace("</script>", hardPick + "</script>");
+      html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("BENCH_LAYOUT") === -1) {
       html = html.replace("var BENCH = { mobo: [2.6, -0.93, 0.2] };", "var BENCH = { mobo: [2.80, -1.05, 0.0] }; /*BENCH_LAYOUT*/");
@@ -153,11 +153,11 @@
     }
     if (html.indexOf("Parts3DLateBind") === -1) {
       var late = "\ntry{(function(){function rebind3d(){if(!window.Parts3D)return;try{if(Parts3D.buildTable)buildTable=Parts3D.buildTable;if(Parts3D.buildFrame)buildFrame=Parts3D.buildFrame;if(Parts3D.buildCpu){buildCpu=Parts3D.buildCpu;if(typeof BUILDERS!=='undefined')BUILDERS.cpu=Parts3D.buildCpu;}if(Parts3D.buildGpu){buildGpu=Parts3D.buildGpu;if(typeof BUILDERS!=='undefined')BUILDERS.gpu=Parts3D.buildGpu;}if(Parts3D.buildPsu){buildPsu=Parts3D.buildPsu;if(typeof BUILDERS!=='undefined')BUILDERS.psu=Parts3D.buildPsu;}if(Parts3D.buildCooler){buildCooler=Parts3D.buildCooler;if(typeof BUILDERS!=='undefined')BUILDERS.cooler=Parts3D.buildCooler;}}catch(e){}}rebind3d();setTimeout(rebind3d,300);setTimeout(rebind3d,1200);})();}catch(_l){} /*Parts3DLateBind*/\n";
-      html = html.replace("</script>", late + "</script>");
+      html = html.replace("<" + "/scr" + "ipt>", late + "<" + "/scr" + "ipt>");
     }
     if (html.indexOf("LayoutForce") === -1) {
       var lf = "\ntry{(function(){function applyLayout(){if(!window.Parts3D||!Parts3D.LAYOUT)return;var L=Parts3D.LAYOUT;try{if(typeof PART3D!=='undefined'){if(L.caseMobo)PART3D.mobo.pos=L.caseMobo.slice();if(L.gpu)PART3D.gpu.pos=L.gpu.slice();if(L.psu)PART3D.psu.pos=L.psu.slice();}if(typeof partMeshes!=='undefined'&&partMeshes){if(partMeshes.mobo&&L.caseMobo&&state&&state.moboCased)partMeshes.mobo.position.set(L.caseMobo[0],L.caseMobo[1],L.caseMobo[2]);if(partMeshes.gpu&&L.gpu)partMeshes.gpu.position.set(L.gpu[0],L.gpu[1],L.gpu[2]);if(partMeshes.psu&&L.psu){partMeshes.psu.position.set(L.psu[0],L.psu[1],L.psu[2]);if(L.psuRotY!=null)partMeshes.psu.rotation.y=L.psuRotY;}}}catch(e){}}applyLayout();setTimeout(applyLayout,300);setTimeout(applyLayout,1000);setTimeout(applyLayout,2500);})();}catch(_lf){} /*LayoutForce*/\n";
-      html = html.replace("</script>", lf + "</script>");
+      html = html.replace("<" + "/scr" + "ipt>", lf + "<" + "/scr" + "ipt>");
     }
     document.open();
     document.write(html);
