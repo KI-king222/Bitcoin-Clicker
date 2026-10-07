@@ -1,4 +1,4 @@
-/* parts3d/sceneLayout.js — real ATX layout: no shroud, rear I/O panel, PSU bottom rear */
+/* parts3d/sceneLayout.js — solid REAR; I/O + PCIe + PSU ports on LEFT side */
 (function(){
   function mat(c, o){
     o = o || {};
@@ -69,61 +69,53 @@
     var bottom = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 - 0.04, 0.04, halfD * 2 - 0.04), panel);
     bottom.position.set(cx, yBot + 0.02, cz); g.add(bottom);
 
-    var rz = cz - halfD - 0.01;
-
-    var topVent = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 - 0.1, 0.35, 0.04), meshMat);
-    topVent.position.set(cx, yTop - 0.25, rz); g.add(topVent);
-    for(var tv=0; tv<6; tv++){
-      var slit = new THREE.Mesh(new THREE.BoxGeometry(halfW * 1.7, 0.025, 0.02), darkPanel);
-      slit.position.set(cx, yTop - 0.12 - tv * 0.05, rz - 0.02); g.add(slit);
+    /* REAR fully closed */
+    var rear = new THREE.Mesh(new THREE.BoxGeometry(halfW * 2 - 0.05, halfH * 2 - 0.08, 0.05), panel);
+    rear.position.set(cx, cy, cz - halfD - 0.01); g.add(rear);
+    for(var er=0; er<4; er++){
+      var line = new THREE.Mesh(new THREE.BoxGeometry(halfW * 1.6, 0.02, 0.02), darkPanel);
+      line.position.set(cx, yTop - 0.4 - er * 0.7, cz - halfD - 0.04); g.add(line);
     }
 
-    var ioShield = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.15, 0.05), mat(0x0a0c10, { metal:0.3, rough:0.5 }));
-    ioShield.position.set(cx - 0.55, cy + 0.55, rz); g.add(ioShield);
+    /* LEFT side: I/O + PCIe + PSU */
+    var lx = cx - halfW - 0.01;
+    var ioShield = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.15, 0.55), mat(0x0a0c10, { metal:0.3, rough:0.5 }));
+    ioShield.position.set(lx, cy + 0.55, cz + 0.15); g.add(ioShield);
     var portColors = [0x111111, 0x222222, 0x8b0000, 0x8b0000, 0x1a1a1a, 0x1a1a1a, 0xc9a227, 0xc9a227];
     for(var ip=0; ip<8; ip++){
-      var po = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.04), mat(portColors[ip], { metal:0.4 }));
-      po.position.set(cx - 0.55 + (ip%2)*0.18 - 0.08, cy + 0.95 - Math.floor(ip/2)*0.22, rz - 0.03);
+      var po = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.12), mat(portColors[ip], { metal:0.4 }));
+      po.position.set(lx - 0.03, cy + 0.95 - Math.floor(ip/2)*0.22, cz + 0.15 + (ip%2)*0.18 - 0.08);
       g.add(po);
     }
-
     for(var es=0; es<7; es++){
       var slotY = cy - 0.15 - es * 0.18;
-      var bracket = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.14, 0.04), mat(0x2a2e34, { metal:0.5, rough:0.35 }));
-      bracket.position.set(cx + 0.15, slotY, rz); g.add(bracket);
-      var opening = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.06, 0.03), darkPanel);
-      opening.position.set(cx + 0.15, slotY, rz - 0.02); g.add(opening);
+      var bracket = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.14, 1.35), mat(0x2a2e34, { metal:0.5, rough:0.35 }));
+      bracket.position.set(lx, slotY, cz - 0.05); g.add(bracket);
+      var opening = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.06, 1.15), darkPanel);
+      opening.position.set(lx - 0.02, slotY, cz - 0.05); g.add(opening);
     }
     for(var gp=0; gp<3; gp++){
-      var gport = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.05), mat(0x1a1a1a, { metal:0.6 }));
-      gport.position.set(cx - 0.2 + gp * 0.18, cy - 0.15, rz - 0.04); g.add(gport);
+      var gport = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.12), mat(0x1a1a1a, { metal:0.6 }));
+      gport.position.set(lx - 0.04, cy - 0.15, cz + 0.25 - gp * 0.18); g.add(gport);
     }
-
-    var fanCut = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.03, 24), meshMat);
-    fanCut.rotation.x = Math.PI/2;
-    fanCut.position.set(cx + 0.55, cy + 0.7, rz); g.add(fanCut);
-    var fanHub = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 12), mat(0x333333, { metal:0.4 }));
-    fanHub.rotation.x = Math.PI/2;
-    fanHub.position.set(cx + 0.55, cy + 0.7, rz - 0.01); g.add(fanHub);
-
-    var psuWin = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.72, 0.04), meshMat);
-    psuWin.position.set(cx, yBot + 0.42, rz); g.add(psuWin);
+    var fanCut = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.04, 24), meshMat);
+    fanCut.rotation.z = Math.PI/2;
+    fanCut.position.set(lx, cy + 0.65, cz - 0.25); g.add(fanCut);
+    var fanHub = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.05, 12), mat(0x333333, { metal:0.4 }));
+    fanHub.rotation.z = Math.PI/2;
+    fanHub.position.set(lx - 0.01, cy + 0.65, cz - 0.25); g.add(fanHub);
+    var psuWin = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.72, 1.1), meshMat);
+    psuWin.position.set(lx, yBot + 0.42, cz); g.add(psuWin);
     for(var hg=0; hg<5; hg++){
-      var hline = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.02, 0.02), darkPanel);
-      hline.position.set(cx, yBot + 0.55 + hg * 0.08, rz - 0.02); g.add(hline);
+      var hline = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.9), darkPanel);
+      hline.position.set(lx - 0.02, yBot + 0.55 + hg * 0.08, cz); g.add(hline);
     }
-    var iecCut = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.18, 0.03), darkPanel);
-    iecCut.position.set(cx - 0.25, yBot + 0.28, rz - 0.02); g.add(iecCut);
-
-    var rearFillL = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.4, 0.03), panel);
-    rearFillL.position.set(cx - halfW + 0.2, cy - 0.4, rz + 0.01); g.add(rearFillL);
-
-    var leftPanel = new THREE.Mesh(new THREE.BoxGeometry(0.04, halfH * 2 - 0.1, halfD * 2 - 0.1), panel);
-    leftPanel.position.set(cx - halfW, cy, cz); g.add(leftPanel);
-    for(var lv=0; lv<8; lv++){
-      var lvent = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.18, 0.9), darkPanel);
-      lvent.position.set(cx - halfW - 0.02, yBot + 0.9 + lv * 0.28, cz); g.add(lvent);
-    }
+    var iecCut = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.18, 0.28), darkPanel);
+    iecCut.position.set(lx - 0.02, yBot + 0.28, cz + 0.2); g.add(iecCut);
+    var psuSw = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.1, 0.06), mat(0x222222));
+    psuSw.position.set(lx - 0.02, yBot + 0.28, cz - 0.05); g.add(psuSw);
+    var leftTop = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.5, halfD * 2 - 0.1), panel);
+    leftTop.position.set(lx + 0.02, yTop - 0.3, cz); g.add(leftTop);
 
     var rightPanel = new THREE.Mesh(new THREE.BoxGeometry(0.04, halfH * 2 - 0.1, halfD * 2 - 0.1), panel);
     rightPanel.position.set(cx + halfW, cy, cz); g.add(rightPanel);
@@ -157,11 +149,11 @@
   window.Parts3D.buildFrame = buildFrameDetailed;
   window.Parts3D.LAYOUT = {
     benchMobo: [2.40, -0.90, 0.0],
-    caseMobo:  [-1.35, 0.85, -0.35],
-    gpu:       [-1.40, -0.15, -0.15],
-    psu:       [-1.35, -0.70, -0.15],
-    psuRotY:   Math.PI,
+    caseMobo:  [-1.35, 0.85, 0.05],
+    gpu:       [-1.45, -0.15, 0.0],
+    psu:       [-1.55, -0.70, 0.0],
+    psuRotY:   -Math.PI / 2,
     camPrep:   { x: 1.4, y: 0.3, z: 11 },
-    camCase:   { x: -0.6, y: 0.4, z: 9.0 }
+    camCase:   { x: -0.4, y: 0.4, z: 9.0 }
   };
 })();
