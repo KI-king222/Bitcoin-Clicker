@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006t"; /* open ATX rear I/O layout */
+    var HP_CB = "?v=20261006u"; /* left I/O, solid rear */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -38,21 +38,10 @@
         if (status && status.maintenance) {
           var de = (typeof navigator !== "undefined" && /^de/i.test(navigator.language || "")) || status.lang === "de";
           var title = de ? (status.title_de || "HASHPOOL — Wartung") : (status.title_en || "HASHPOOL — Maintenance");
-          var msg = de
-            ? (status.message_de || "Wir arbeiten gerade an der Seite. Bitte schau bald wieder vorbei.")
-            : (status.message_en || "We're improving the game. Please check back soon.");
-          var eta = status.eta
-            ? ("<p style=\"color:#8b95a5;font-size:13px;margin-top:18px\">" + (de ? "Voraussichtlich wieder: " : "Back around: ") + status.eta + "</p>")
-            : "";
+          var msg = de ? (status.message_de || "Wir arbeiten gerade an der Seite. Bitte schau bald wieder vorbei.") : (status.message_en || "We're improving the game. Please check back soon.");
+          var eta = status.eta ? ("<p style=\"color:#8b95a5;font-size:13px;margin-top:18px\">" + (de ? "Voraussichtlich wieder: " : "Back around: ") + status.eta + "</p>") : "";
           document.title = title;
-          document.body.innerHTML =
-            '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui,-apple-system,sans-serif;text-align:center">' +
-            '<div style="max-width:420px">' +
-            '<div style="font-size:42px;margin-bottom:12px">⛏️</div>' +
-            '<h1 style="font-size:22px;margin:0 0 10px;font-weight:800">' + title + '</h1>' +
-            '<p style="color:#c0c6d0;line-height:1.5;margin:0">' + msg + '</p>' + eta +
-            '<p style="margin-top:28px;font-size:12px;color:#5a6575">hashpool.pages.dev</p>' +
-            '</div></div>';
+          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0d10;color:#e7e9ec;font-family:system-ui,-apple-system,sans-serif;text-align:center"><div style="max-width:420px"><div style="font-size:42px;margin-bottom:12px">⛏️</div><h1 style="font-size:22px;margin:0 0 10px;font-weight:800">' + title + '</h1><p style="color:#c0c6d0;line-height:1.5;margin:0">' + msg + '</p>' + eta + '<p style="margin-top:28px;font-size:12px;color:#5a6575">hashpool.pages.dev</p></div></div>';
           return;
         }
       }
@@ -92,15 +81,10 @@
     if (html.indexOf("id=\"ps-open-btn\"") === -1) {
       var _psLang = ((typeof navigator!=="undefined"&&(navigator.language||"")).slice(0,2)==="de")?"de":"en";
       var btn = '<button type="button" id="ps-open-btn" class="ps-open-btn">🛒 <span id="ps-open-label">'+(_psLang==="de"?"Teile-Shop":"Parts Shop")+'</span></button>';
-      if (html.indexOf("id=\"open-build-btn\"") !== -1) {
-        html = html.replace(/<button([^>]*id="open-build-btn")/, btn + "<button$1");
-      }
+      if (html.indexOf("id=\"open-build-btn\"") !== -1) html = html.replace(/<button([^>]*id="open-build-btn")/, btn + "<button$1");
       var ov = '<div class="ps-overlay" id="ps-overlay"><div class="ps-top"><button type="button" class="ps-back" id="ps-back" style="visibility:hidden">←</button><h2 id="ps-title">Teile-Shop</h2><div class="ps-sats" id="ps-sats">0 sats</div><button type="button" class="ps-close" id="ps-close">✕</button></div><div class="ps-body" id="ps-body"></div></div><div class="ps-toast" id="ps-toast"></div>';
-      if (html.indexOf("id=\"build-overlay\"") !== -1) {
-        html = html.replace('<div class="build-overlay" id="build-overlay"', ov + '<div class="build-overlay" id="build-overlay"');
-      } else {
-        html = html.replace("<" + "/body>", ov + "<" + "/body>");
-      }
+      if (html.indexOf("id=\"build-overlay\"") !== -1) html = html.replace('<div class="build-overlay" id="build-overlay"', ov + '<div class="build-overlay" id="build-overlay"');
+      else html = html.replace("<" + "/body>", ov + "<" + "/body>");
     }
     if (catText && shopText && html.indexOf("PART_CATALOG") === -1) {
       var js = "\n" + catText + "\n" + shopText + "\n" + (tutText || "") + "\n";
@@ -110,42 +94,28 @@
     } else if (tutText && html.indexOf("HashpoolTutorial") === -1) {
       html = html.replace("<" + "/scr" + "ipt>", "\n" + tutText + "\n<" + "/scr" + "ipt>");
     }
-    if (html.indexOf("tutorialDone") === -1) {
-      html = html.replace("buildBought: {},", "buildBought: {}, tutorialDone: false,");
-    }
+    if (html.indexOf("tutorialDone") === -1) html = html.replace("buildBought: {},", "buildBought: {}, tutorialDone: false,");
     if (parts3dText && html.indexOf("Parts3DBind") === -1) {
       var p3 = "\n" + parts3dText + "\n try{ if(window.Parts3D){ if(Parts3D.buildTable) buildTable=Parts3D.buildTable; if(Parts3D.buildFrame) buildFrame=Parts3D.buildFrame; if(Parts3D.buildCpu) buildCpu=Parts3D.buildCpu; if(Parts3D.buildGpu) buildGpu=Parts3D.buildGpu; if(Parts3D.buildRam) buildRamStick=function(c){return Parts3D.buildRam(c);}; if(Parts3D.buildSsd) buildSsd=Parts3D.buildSsd; if(Parts3D.buildPsu) buildPsu=Parts3D.buildPsu; if(Parts3D.buildCooler) buildCooler=Parts3D.buildCooler; } }catch(_p3){} /*Parts3DBind*/\n";
       var mark2 = "PARTS.forEach(function(p){ PARTS_BY_ID[p.id] = p; });";
       if (html.indexOf(mark2) !== -1) html = html.replace(mark2, mark2 + p3);
       else html = html.replace("<" + "/scr" + "ipt>", p3 + "<" + "/scr" + "ipt>");
     }
-    if (html.indexOf("PartShopConsumeHook") === -1) {
-      html = html.replace("function sellRig(reward){", "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); else if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_e){} /*PartShopConsumeHook*/");
-    }
+    if (html.indexOf("PartShopConsumeHook") === -1) html = html.replace("function sellRig(reward){", "function sellRig(reward){ try{ if(window.PartShop&&PartShop.consumeBuildParts) PartShop.consumeBuildParts(); else if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_e){} /*PartShopConsumeHook*/");
     if (html.indexOf("PartShopCostHook") === -1) {
-      html = html.replace(
-        "function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }",
-        "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }"
-      );
+      html = html.replace("function buildTotalCost(){\n    var total = 0;\n    PARTS.forEach(function(p){ total += buildPartCost(p); });\n    return total;\n  }", "function buildTotalCost(){ /*PartShopCostHook*/ try{ if(window.PartShop&&PartShop.selectedBuildCost){ var c=PartShop.selectedBuildCost(); if(c>0) return c; } }catch(_e){} var total=0; PARTS.forEach(function(p){ total+=buildPartCost(p); }); return total; }");
       html = html.replace("buildTotalCost() * 1.38 * pasteMul", "(buildTotalCost() * ((window.PartShop&&PartShop.sellMult)?PartShop.sellMult():1.22) * pasteMul)");
     }
-    if (html.indexOf("XR7K-M9PQ") === -1) {
-      html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
-    } else if (html.indexOf("PARTKIT-26") === -1) {
-      html = html.replace('"N0DE-INV-01": { allParts: 1 }', '"N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
-    }
+    if (html.indexOf("XR7K-M9PQ") === -1) html = html.replace('"HODLGANG": { sats: 25000000 }', '"HODLGANG": { sats: 25000000 }, "XR7K-M9PQ": { allParts: 1 }, "N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
+    else if (html.indexOf("PARTKIT-26") === -1) html = html.replace('"N0DE-INV-01": { allParts: 1 }', '"N0DE-INV-01": { allParts: 1 }, "PARTKIT-26": { allParts: 1 }');
     if (html.indexOf("CheatPartsHook") === -1) {
-      html = html.replace(
-        "state.redeemed[code] = true;\n    state.balance += reward.sats;\n    state.lifetime += reward.sats;\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    showCheatMsg(t(\"cheatOk\") + \" +\" + fmtSats(reward.sats) + \" sats\", true);",
-        "state.redeemed[code] = true; /*CheatPartsHook*/\n    var addSats = Number(reward.sats)||0;\n    if(addSats){ state.balance += addSats; state.lifetime += addSats; }\n    var partsN = 0;\n    if(reward.allParts){\n      try{\n        if(window.PartShop && PartShop.grantAllParts) partsN = PartShop.grantAllParts(Number(reward.allParts)||1);\n        else if(typeof PART_BY_ID !== \"undefined\"){\n          if(!state.partInv) state.partInv = {};\n          Object.keys(PART_BY_ID).forEach(function(id){ state.partInv[id]=(state.partInv[id]||0)+(Number(reward.allParts)||1); partsN++; });\n        }\n      }catch(_ap){}\n    }\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    var msg = t(\"cheatOk\");\n    if(addSats) msg += \" +\" + fmtSats(addSats) + \" sats\";\n    if(partsN) msg += (addSats?\" · \":\" \") + partsN + (state.lang===\"de\"?\" Teile\":\" parts\");\n    showCheatMsg(msg, true);"
-      );
+      html = html.replace("state.redeemed[code] = true;\n    state.balance += reward.sats;\n    state.lifetime += reward.sats;\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    showCheatMsg(t(\"cheatOk\") + \" +\" + fmtSats(reward.sats) + \" sats\", true);", "state.redeemed[code] = true; /*CheatPartsHook*/\n    var addSats = Number(reward.sats)||0;\n    if(addSats){ state.balance += addSats; state.lifetime += addSats; }\n    var partsN = 0;\n    if(reward.allParts){\n      try{\n        if(window.PartShop && PartShop.grantAllParts) partsN = PartShop.grantAllParts(Number(reward.allParts)||1);\n        else if(typeof PART_BY_ID !== \"undefined\"){\n          if(!state.partInv) state.partInv = {};\n          Object.keys(PART_BY_ID).forEach(function(id){ state.partInv[id]=(state.partInv[id]||0)+(Number(reward.allParts)||1); partsN++; });\n        }\n      }catch(_ap){}\n    }\n    save();\n    render();\n    input.value = \"\";\n    balanceEl.classList.remove(\"flash\");\n    void balanceEl.offsetWidth;\n    balanceEl.classList.add(\"flash\");\n    var msg = t(\"cheatOk\");\n    if(addSats) msg += \" +\" + fmtSats(addSats) + \" sats\";\n    if(partsN) msg += (addSats?\" · \":\" \") + partsN + (state.lang===\"de\"?\" Teile\":\" parts\");\n    showCheatMsg(msg, true);");
     }
     if (html.indexOf("PartInvPersist") === -1) {
       html = html.replace(/buildBought: \{\},/g, "buildBought: {}, partInv: {}, buildPick: {},");
       html = html.replace(/buildBought:state\.buildBought,/g, "partInv:state.partInv||{},buildPick:state.buildPick||{},buildBought:state.buildBought,");
       html = html.replace(/state\.buildBought = saved\.buildBought \|\| state\.buildBought;/g, "state.partInv = saved.partInv || state.partInv || {}; state.buildPick = saved.buildPick || state.buildPick || {}; state.buildBought = saved.buildBought || state.buildBought; /*PartInvPersist*/");
     }
-
     if (html.indexOf("NoZoomViewport") === -1) {
       html = html.replace(/<meta name="viewport"[^>]*>/, '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><!--NoZoomViewport-->');
       var noZoomCss = "\nhtml,body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;}\n#mine-btn,button,.shop-row,.ps-open-btn,.ps-buy-btn,.ps-acc-head,.ps-row{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}\n";
@@ -153,9 +123,7 @@
       var noZoomJs = "\ntry{(function(){document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});})();}catch(_z){}\n";
       html = html.replace("<" + "/scr" + "ipt>", noZoomJs + "<" + "/scr" + "ipt>");
     }
-
     html = html.replace(/function fmtSats\(n\)\{[\s\S]*?\n  \}/, "function fmtSats(n){\n    n = Number(n) || 0;\n    if(n === 0) return \"0\";\n    var abs = Math.abs(n);\n    if(abs < 0.01) return (Math.round(n * 10000) / 10000).toFixed(4);\n    if(abs < 1) return (Math.round(n * 1000) / 1000).toFixed(3);\n    if(abs < 100) return (Math.round(n * 100) / 100).toFixed(2);\n    if(abs < 1e6) return String(Math.floor(n));\n    if(abs < 1e9) return (Math.floor(n / 1e4) / 100).toFixed(2) + \"M\";\n    return (Math.floor(n / 1e7) / 100).toFixed(2) + \"B\";\n  }");
-
     if (html.indexOf("EconomyNerf") === -1) {
       html = html.replace('id:"pick", base:35, mult:1.35', 'id:"pick", base:45, mult:1.08');
       html = html.replace('id:"cool", base:480, mult:1.5', 'id:"cool", base:700, mult:1.12');
@@ -174,77 +142,39 @@
       html = html.replace('var crit = Math.random() < 0.08;', 'var crit = Math.random() < 0.025;');
       html = html.replace('var gain = crit ? state.perClick * 8 : state.perClick;', 'var gain = crit ? state.perClick * 2.2 : state.perClick;');
     }
-
-    if (html.indexOf("BuildPickClearHook") === -1) {
-      html = html.replace('document.getElementById("build-overlay").style.display = "none";', 'document.getElementById("build-overlay").style.display = "none"; try{ if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_c){} /*BuildPickClearHook*/');
-    }
-
+    if (html.indexOf("BuildPickClearHook") === -1) html = html.replace('document.getElementById("build-overlay").style.display = "none";', 'document.getElementById("build-overlay").style.display = "none"; try{ if(window.PartShop&&PartShop.clearBuildSelectionUI) PartShop.clearBuildSelectionUI(); }catch(_c){} /*BuildPickClearHook*/');
     if (html.indexOf("MineBtnWide") === -1) {
       var mineCss = "\n/* MineBtnWide */\n.rig{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:16px auto 20px;padding:0;box-sizing:border-box;}\n#mine-btn{width:100% !important;max-width:100% !important;margin-left:auto !important;margin-right:auto !important;height:auto !important;min-height:112px;padding:20px 16px;border-radius:16px;box-sizing:border-box;}\n#mine-btn svg{width:48px;height:48px;}\n@media (min-width:700px){#mine-btn{min-height:130px;font-size:16px;}#mine-btn svg{width:56px;height:56px;}}\n/*MineBtnWide*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", mineCss + "</style>");
     }
-
     if (html.indexOf("FixedFloat") === -1) {
-      html = html.replace(
-        'function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";',
-        'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";'
-      );
+      html = html.replace('function spawnFloat(amount, x, crit){\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = (50 + x) + "%";', 'function spawnFloat(amount, x, crit){ /*FixedFloat*/\n    var f = document.createElement("div");\n    f.className = "float" + (crit ? " crit" : "");\n    f.style.left = "50%";');
       var floatCss = "\n/* FixedFloat */\n.floaters{position:relative;height:0;width:100%;pointer-events:none;}\n.float{position:absolute;left:50% !important;top:-48px;transform:translateX(-50%);color:var(--btc);font-weight:700;font-size:15px;pointer-events:none;white-space:nowrap;animation:rise .9s ease-out forwards;}\n.float.crit{color:#78d505;}\n@keyframes rise{to{transform:translate(-50%,-46px);opacity:0;}}\n/*FixedFloat*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", floatCss + "</style>");
     }
-
     if (html.indexOf("HeaderStable") === -1) {
       var headCss = "\n/* HeaderStable */\nheader{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:nowrap !important;gap:10px;margin-bottom:18px;min-height:36px;}\n.logo{flex-shrink:0;}\n.head-right{display:flex !important;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:right;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderStable*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headCss + "</style>");
       html = html.replace('priceEl.textContent = "$" + state.price.toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
     }
-
     if (html.indexOf("HardPickOnly") === -1) {
       var hardPick = "\ntry{(function(){function force(){if(!window.PartShop||!PartShop.openPicker)return;var op=PartShop.openPicker;if(op._hard)return;PartShop.openPicker=function(){try{var ov=document.getElementById('ps-overlay');if(ov)ov.classList.remove('open');}catch(e){}return op.apply(this,arguments);};PartShop.openPicker._hard=true;var btn=document.getElementById('open-build-btn');if(btn&&!btn._hard){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();try{var s=document.getElementById('ps-overlay');if(s)s.classList.remove('open');}catch(x){}if(window.PartShop&&PartShop.openPicker)PartShop.openPicker();},true);btn._hard=true;}}force();setTimeout(force,300);setTimeout(force,1000);setTimeout(force,2500);})();}catch(_h){} /*HardPickOnly*/\n";
       html = html.replace("<" + "/scr" + "ipt>", hardPick + "<" + "/scr" + "ipt>");
     }
-
     if (html.indexOf("BENCH_LAYOUT") === -1) {
-      html = html.replace(
-        "var BENCH = { mobo: [2.6, -0.93, 0.2] };",
-        "var BENCH = { mobo: [2.40, -0.90, 0.0] }; /*BENCH_LAYOUT*/"
-      );
-      html = html.replace(
-        "mobo:   { pos:[-0.3, 0,   -0.62] }",
-        "mobo:   { pos:[-1.35, 0.85, -0.35] }"
-      );
-      html = html.replace(
-        "gpu:    { pos:[-0.45,-0.95,-0.35] }",
-        "gpu:    { pos:[-1.40,-0.15,-0.15] }"
-      );
-      html = html.replace(
-        "psu:    { pos:[ 1.0, -0.7,  0.0] }",
-        "psu:    { pos:[-1.35,-0.70,-0.15] }"
-      );
-      html = html.replace(
-        "if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }",
-        "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.6; camTarget.y = 0.4; camTarget.z = 9.0; framingDoneCase = true; } /*BENCH_LAYOUT*/"
-      );
-      html = html.replace(
-        "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }",
-        "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 1.4; camTarget.y = 0.3; camTarget.z = 11; framingDone = true; } /*BENCH_LAYOUT*/"
-      );
+      html = html.replace("var BENCH = { mobo: [2.6, -0.93, 0.2] };", "var BENCH = { mobo: [2.40, -0.90, 0.0] }; /*BENCH_LAYOUT*/");
+      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-1.35, 0.85, 0.05] }");
+      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-1.45,-0.15, 0.00] }");
+      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-1.55,-0.70, 0.00] }");
+      html = html.replace("if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }", "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.4; camTarget.y = 0.4; camTarget.z = 9.0; framingDoneCase = true; } /*BENCH_LAYOUT*/");
+      html = html.replace("if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }", "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 1.4; camTarget.y = 0.3; camTarget.z = 11; framingDone = true; } /*BENCH_LAYOUT*/");
     }
-
     if (html.indexOf("BUILDERS_P3D") === -1) {
-      html = html.replace(
-        "BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };",
-        "BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };\n  try{ if(window.Parts3D){ if(Parts3D.buildCpu) BUILDERS.cpu=Parts3D.buildCpu; if(Parts3D.buildGpu) BUILDERS.gpu=Parts3D.buildGpu; if(Parts3D.buildSsd) BUILDERS.ssd=Parts3D.buildSsd; if(Parts3D.buildPsu) BUILDERS.psu=Parts3D.buildPsu; if(Parts3D.buildCooler) BUILDERS.cooler=Parts3D.buildCooler; if(Parts3D.buildRam) BUILDERS.ram=function(){return Parts3D.buildRam();}; } }catch(_bp){} /*BUILDERS_P3D*/"
-      );
+      html = html.replace("BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };", "BUILDERS = { mobo:buildMobo, cpu:buildCpu, ram:buildRam, ssd:buildSsd, cooler:buildCooler, gpu:buildGpu, psu:buildPsu };\n  try{ if(window.Parts3D){ if(Parts3D.buildCpu) BUILDERS.cpu=Parts3D.buildCpu; if(Parts3D.buildGpu) BUILDERS.gpu=Parts3D.buildGpu; if(Parts3D.buildSsd) BUILDERS.ssd=Parts3D.buildSsd; if(Parts3D.buildPsu) BUILDERS.psu=Parts3D.buildPsu; if(Parts3D.buildCooler) BUILDERS.cooler=Parts3D.buildCooler; if(Parts3D.buildRam) BUILDERS.ram=function(){return Parts3D.buildRam();}; } }catch(_bp){} /*BUILDERS_P3D*/");
     }
-
     if (html.indexOf("InPlaceMeshFill") === -1) {
-      html = html.replace(
-        "function setPartVisual(id, installed){\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      mesh.visible = true;",
-        "function setPartVisual(id, installed){ /*InPlaceMeshFill*/\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      try{\n        if(id !== 'mobo' && typeof BUILDERS !== 'undefined' && BUILDERS[id] && window.Parts3D){\n          try{\n            if(!Parts3D._forceId) Parts3D._forceId = {};\n            if(state && state.buildPick && state.buildPick[id]) Parts3D._forceId[id] = state.buildPick[id];\n            if(Parts3D.buildCpu) BUILDERS.cpu = Parts3D.buildCpu;\n            if(Parts3D.buildGpu) BUILDERS.gpu = Parts3D.buildGpu;\n            if(Parts3D.buildPsu) BUILDERS.psu = Parts3D.buildPsu;\n          }catch(_f){}\n          while(mesh.children.length){ mesh.remove(mesh.children[0]); }\n          var tmp = BUILDERS[id]();\n          while(tmp.children.length){ mesh.add(tmp.children[0]); }\n          if(id === 'psu' && tmp.rotation) mesh.rotation.y = tmp.rotation.y;\n        }\n      }catch(_ip){ console.warn('inplace mesh', _ip); }\n      mesh.visible = true;"
-      );
+      html = html.replace("function setPartVisual(id, installed){\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      mesh.visible = true;", "function setPartVisual(id, installed){ /*InPlaceMeshFill*/\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      try{\n        if(id !== 'mobo' && typeof BUILDERS !== 'undefined' && BUILDERS[id] && window.Parts3D){\n          try{\n            if(!Parts3D._forceId) Parts3D._forceId = {};\n            if(state && state.buildPick && state.buildPick[id]) Parts3D._forceId[id] = state.buildPick[id];\n            if(Parts3D.buildCpu) BUILDERS.cpu = Parts3D.buildCpu;\n            if(Parts3D.buildGpu) BUILDERS.gpu = Parts3D.buildGpu;\n            if(Parts3D.buildPsu) BUILDERS.psu = Parts3D.buildPsu;\n          }catch(_f){}\n          while(mesh.children.length){ mesh.remove(mesh.children[0]); }\n          var tmp = BUILDERS[id]();\n          while(tmp.children.length){ mesh.add(tmp.children[0]); }\n          if(id === 'psu' && tmp.rotation) mesh.rotation.y = tmp.rotation.y;\n        }\n      }catch(_ip){ console.warn('inplace mesh', _ip); }\n      mesh.visible = true;");
     }
-
     if(html.indexOf("Parts3DLateBind") === -1){
       var late = "\ntry{(function(){\n  function rebind3d(){\n    if(!window.Parts3D) return;\n    try{\n      if(Parts3D.buildTable){ buildTable = Parts3D.buildTable; }\n      if(Parts3D.buildFrame){ buildFrame = Parts3D.buildFrame; }\n      if(Parts3D.buildCpu){ buildCpu = Parts3D.buildCpu; if(typeof BUILDERS!=='undefined') BUILDERS.cpu = Parts3D.buildCpu; }\n      if(Parts3D.buildGpu){ buildGpu = Parts3D.buildGpu; if(typeof BUILDERS!=='undefined') BUILDERS.gpu = Parts3D.buildGpu; }\n      if(Parts3D.buildRam){ if(typeof BUILDERS!=='undefined') BUILDERS.ram = function(){ return Parts3D.buildRam(); }; }\n      if(Parts3D.buildSsd){ buildSsd = Parts3D.buildSsd; if(typeof BUILDERS!=='undefined') BUILDERS.ssd = Parts3D.buildSsd; }\n      if(Parts3D.buildPsu){ buildPsu = Parts3D.buildPsu; if(typeof BUILDERS!=='undefined') BUILDERS.psu = Parts3D.buildPsu; }\n      if(Parts3D.buildCooler){ buildCooler = Parts3D.buildCooler; if(typeof BUILDERS!=='undefined') BUILDERS.cooler = Parts3D.buildCooler; }\n    }catch(e){ console.warn('Parts3D rebind', e); }\n  }\n  rebind3d();\n  setTimeout(rebind3d, 200);\n  setTimeout(rebind3d, 800);\n  setTimeout(rebind3d, 2000);\n})();}catch(_l){} /*Parts3DLateBind*/\n";
       html = html.replace("<"+"/scr"+"ipt>", late + "<"+"/scr"+"ipt>");
@@ -254,8 +184,7 @@
     document.write(html);
     document.close();
   } catch (e) {
-    st.innerHTML = "Load failed: " + e.message +
-      "<br><br><a style=\"color:#f7931a\" href=\"https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html\">Direct game link</a>";
+    st.innerHTML = "Load failed: " + e.message + "<br><br><a style=\"color:#f7931a\" href=\"https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html\">Direct game link</a>";
     console.error(e);
   }
 })();
