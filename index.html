@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006v"; /* larger case left mobo PSU */
+    var HP_CB = "?v=20261006w"; /* mobo inside, GPU left */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -163,9 +163,9 @@
     }
     if (html.indexOf("BENCH_LAYOUT") === -1) {
       html = html.replace("var BENCH = { mobo: [2.6, -0.93, 0.2] };", "var BENCH = { mobo: [2.80, -1.05, 0.0] }; /*BENCH_LAYOUT*/");
-      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-2.15, 1.05, 0.05] }");
-      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-2.05, 0.05, 0.05] }");
-      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-2.25,-0.85, 0.25] }");
+      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-1.85, 1.00, 0.05] }");
+      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-2.45, 0.00, 0.12] }");
+      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-2.35,-0.90, 0.20] }");
       html = html.replace("if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }", "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.5; camTarget.y = 0.5; camTarget.z = 10.5; framingDoneCase = true; } /*BENCH_LAYOUT*/");
       html = html.replace("if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }", "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 1.6; camTarget.y = 0.35; camTarget.z = 12; framingDone = true; } /*BENCH_LAYOUT*/");
     }
