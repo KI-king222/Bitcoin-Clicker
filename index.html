@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006r"; /* larger case + GPU/PSU align */
+    var HP_CB = "?v=20261006s"; /* PSU rear bay + open shroud */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -219,7 +219,7 @@
       );
       html = html.replace(
         "psu:    { pos:[ 1.0, -0.7,  0.0] }",
-        "psu:    { pos:[-1.35,-0.55, 0.08] }"
+        "psu:    { pos:[-1.35,-0.72,-0.28] }"
       );
       html = html.replace(
         "if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }",
@@ -241,7 +241,7 @@
     if (html.indexOf("InPlaceMeshFill") === -1) {
       html = html.replace(
         "function setPartVisual(id, installed){\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      mesh.visible = true;",
-        "function setPartVisual(id, installed){ /*InPlaceMeshFill*/\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      try{\n        if(id !== 'mobo' && typeof BUILDERS !== 'undefined' && BUILDERS[id] && window.Parts3D){\n          try{\n            if(!Parts3D._forceId) Parts3D._forceId = {};\n            if(state && state.buildPick && state.buildPick[id]) Parts3D._forceId[id] = state.buildPick[id];\n            if(Parts3D.buildCpu) BUILDERS.cpu = Parts3D.buildCpu;\n            if(Parts3D.buildGpu) BUILDERS.gpu = Parts3D.buildGpu;\n          }catch(_f){}\n          while(mesh.children.length){ mesh.remove(mesh.children[0]); }\n          var tmp = BUILDERS[id]();\n          while(tmp.children.length){ mesh.add(tmp.children[0]); }\n        }\n      }catch(_ip){ console.warn('inplace mesh', _ip); }\n      mesh.visible = true;"
+        "function setPartVisual(id, installed){ /*InPlaceMeshFill*/\n    var mesh = partMeshes[id];\n    if(!mesh) return;\n    if(installed){\n      try{\n        if(id !== 'mobo' && typeof BUILDERS !== 'undefined' && BUILDERS[id] && window.Parts3D){\n          try{\n            if(!Parts3D._forceId) Parts3D._forceId = {};\n            if(state && state.buildPick && state.buildPick[id]) Parts3D._forceId[id] = state.buildPick[id];\n            if(Parts3D.buildCpu) BUILDERS.cpu = Parts3D.buildCpu;\n            if(Parts3D.buildGpu) BUILDERS.gpu = Parts3D.buildGpu;\n            if(Parts3D.buildPsu) BUILDERS.psu = Parts3D.buildPsu;\n          }catch(_f){}\n          while(mesh.children.length){ mesh.remove(mesh.children[0]); }\n          var tmp = BUILDERS[id]();\n          while(tmp.children.length){ mesh.add(tmp.children[0]); }\n          if(id === 'psu' && tmp.rotation) mesh.rotation.y = tmp.rotation.y;\n        }\n      }catch(_ip){ console.warn('inplace mesh', _ip); }\n      mesh.visible = true;"
       );
     }
 
