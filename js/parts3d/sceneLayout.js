@@ -1,4 +1,4 @@
-/* parts3d/sceneLayout.js — large case; mobo left-biased inside; GPU left */
+/* parts3d/sceneLayout.js — mobo flush to left I/O wall */
 (function(){
   function mat(c, o){
     o = o || {};
@@ -109,7 +109,7 @@
       hline.position.set(lx - 0.02, yBot + 0.62 + hg * 0.09, cz + 0.15); g.add(hline);
     }
     var iecCut = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.18, 0.28), darkPanel);
-      iecCut.position.set(lx - 0.02, yBot + 0.30, cz + 0.35); g.add(iecCut);
+    iecCut.position.set(lx - 0.02, yBot + 0.30, cz + 0.35); g.add(iecCut);
     var psuSw = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.10, 0.06), mat(0x222222));
     psuSw.position.set(lx - 0.02, yBot + 0.30, cz + 0.10); g.add(psuSw);
     var leftTop = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.55, halfD * 2 - 0.1), panel);
@@ -146,11 +146,11 @@
   window.Parts3D.buildTable = buildTableDetailed;
   window.Parts3D.buildFrame = buildFrameDetailed;
   window.Parts3D.LAYOUT = {
-    /* left wall ≈ -2.75; mobo halfW=0.8 → center -1.72 = left edge -2.52 (inside, not centered) */
+    /* left wall ≈ -2.76; mobo halfW=0.8 → center -1.92 = left edge -2.72 (flush to I/O wall) */
     benchMobo: [2.80, -1.05, 0.0],
-    caseMobo:  [-1.72, 1.00, 0.08],
-    gpu:       [-2.28, -0.35, 0.15],
-    psu:       [-2.38, -0.95, 0.22],
+    caseMobo:  [-1.92, 1.00, 0.05],
+    gpu:       [-2.35, -0.40, 0.12],
+    psu:       [-2.40, -0.95, 0.20],
     psuRotY:   -Math.PI / 2,
     camPrep:   { x: 1.6, y: 0.35, z: 12 },
     camCase:   { x: -0.5, y: 0.5, z: 10.5 }
