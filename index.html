@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261006x"; /* mobo inside, GPU left, LayoutForce */
+    var HP_CB = "?v=20261007a"; /* Web3D workshop: mobo left-biased */
 
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
@@ -155,7 +155,6 @@
     if (html.indexOf("HeaderStable") === -1) {
       var headCss = "\n/* HeaderStable */\nheader{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:nowrap !important;gap:10px;margin-bottom:18px;min-height:36px;}\n.logo{flex-shrink:0;}\n.head-right{display:flex !important;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}\n.rate{color:var(--muted);font-size:13px;white-space:nowrap;flex-shrink:0;min-width:12ch;text-align:right;font-variant-numeric:tabular-nums;}\n.rate b,#price{display:inline-block;min-width:9ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--text);}\n.lang-switch,.icon-btn{flex-shrink:0;}\n/*HeaderStable*/\n";
       if (html.indexOf("</style>") !== -1) html = html.replace("</style>", headCss + "</style>");
-      html = html.replace('priceEl.textContent = "$" + state.price.toLocaleString();', 'priceEl.textContent = "$" + Math.round(state.price).toLocaleString(); /*HeaderStable*/');
     }
     if (html.indexOf("HardPickOnly") === -1) {
       var hardPick = "\ntry{(function(){function force(){if(!window.PartShop||!PartShop.openPicker)return;var op=PartShop.openPicker;if(op._hard)return;PartShop.openPicker=function(){try{var ov=document.getElementById('ps-overlay');if(ov)ov.classList.remove('open');}catch(e){}return op.apply(this,arguments);};PartShop.openPicker._hard=true;var btn=document.getElementById('open-build-btn');if(btn&&!btn._hard){btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();try{var s=document.getElementById('ps-overlay');if(s)s.classList.remove('open');}catch(x){}if(window.PartShop&&PartShop.openPicker)PartShop.openPicker();},true);btn._hard=true;}}force();setTimeout(force,300);setTimeout(force,1000);setTimeout(force,2500);})();}catch(_h){} /*HardPickOnly*/\n";
@@ -163,9 +162,9 @@
     }
     if (html.indexOf("BENCH_LAYOUT") === -1) {
       html = html.replace("var BENCH = { mobo: [2.6, -0.93, 0.2] };", "var BENCH = { mobo: [2.80, -1.05, 0.0] }; /*BENCH_LAYOUT*/");
-      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-1.45, 1.00, 0.08] }");
-      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-2.10,-0.40, 0.18] }");
-      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-2.30,-0.95, 0.25] }");
+      html = html.replace("mobo:   { pos:[-0.3, 0,   -0.62] }", "mobo:   { pos:[-1.72, 1.00, 0.08] }");
+      html = html.replace("gpu:    { pos:[-0.45,-0.95,-0.35] }", "gpu:    { pos:[-2.28,-0.35, 0.15] }");
+      html = html.replace("psu:    { pos:[ 1.0, -0.7,  0.0] }", "psu:    { pos:[-2.38,-0.95, 0.22] }");
       html = html.replace("if(state.moboCased && !framingDoneCase){ camTarget.x = 0; camTarget.y = 0; camTarget.z = 8; framingDoneCase = true; }", "if(state.moboCased && !framingDoneCase){ camTarget.x = -0.5; camTarget.y = 0.5; camTarget.z = 10.5; framingDoneCase = true; } /*BENCH_LAYOUT*/");
       html = html.replace("if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 0.95; camTarget.y = 0; camTarget.z = 12.5; framingDone = true; }", "if(!state.moboCased && !moboCaseAnim && !framingDone){ camTarget.x = 1.6; camTarget.y = 0.35; camTarget.z = 12; framingDone = true; } /*BENCH_LAYOUT*/");
     }
