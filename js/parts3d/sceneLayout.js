@@ -1,4 +1,4 @@
-/* parts3d/sceneLayout.js — large case; mobo inside; GPU left against wall */
+/* parts3d/sceneLayout.js — large case; mobo fully inside; GPU left */
 (function(){
   function mat(c, o){
     o = o || {};
@@ -146,11 +146,11 @@
   window.Parts3D.buildTable = buildTableDetailed;
   window.Parts3D.buildFrame = buildFrameDetailed;
   window.Parts3D.LAYOUT = {
-    /* left wall ≈ -2.75; keep full ATX inside with margin */
+    /* left wall ≈ -2.75; mobo halfW=0.8 → center >= -1.45 keeps board fully inside */
     benchMobo: [2.80, -1.05, 0.0],
-    caseMobo:  [-1.85, 1.00, 0.05],
-    gpu:       [-2.45, 0.00, 0.12],
-    psu:       [-2.35, -0.90, 0.20],
+    caseMobo:  [-1.45, 1.00, 0.08],
+    gpu:       [-2.10, -0.40, 0.18],
+    psu:       [-2.30, -0.95, 0.25],
     psuRotY:   -Math.PI / 2,
     camPrep:   { x: 1.6, y: 0.35, z: 12 },
     camCase:   { x: -0.5, y: 0.5, z: 10.5 }
