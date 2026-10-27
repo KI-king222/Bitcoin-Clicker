@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-10-27 — Port-Montage, Kompatibilität, System-Kabel
+
+### 3D Zusammenbau (Claude-Mechanik + Kabel)
+- `js/parts3d/ports.js`: Port-Mathe (mate/place/mountPart) aus Web3D-Projekt Claude
+- `js/parts3d/assemble.js`:
+  - `Parts3D.compat(spec)` — Ausschlussregeln (Sockel, DDR, Formfaktor Case↔Board, AIO-Radiator, M.2/SATA)
+  - `Parts3D.buildAssembledPC(spec)` — baut PC aus buildPick + LAYOUT
+  - `Parts3D.addSystemCables()` — 24-Pin, CPU-8-Pin, PCIe-GPU, SATA
+- Loader lädt `ports` + `assemble` vor `patch`
+- AssembleHook: Klick auf Build prüft Kompatibilität und zeigt Fehler
+- Cache-Bust `?v=20261027a`
+
+### Hinweis
+- Mesh-Qualität der Einzelteile bleibt vorerst bei bestehenden `parts3d/*`-Buildern
+- Claude-Meshes (`projects/Claude` in web3d-connector) = Referenz für nächste Mesh-Stufe
+
+---
+
 ## 2026-10-06 (Header 2-Zeilen + Spielzeit + Farm-Laufzeit)
 
 ### UI Header
@@ -14,38 +32,4 @@
 - Gesamt-Spielzeit (`totalPlayMs`) gespeichert, oben als ⏱
 
 ### Farm
-- `placedAt` beim Stellen in die Farm
-- Laufzeit pro Rig sichtbar
-- Verkaufen: Wert sinkt mit Farm-Zeit
-  - Formel: `cost × (0.12 + 0.43 × 0.5^(h/8)) × (1 − dust/200)`
-  - ~55 % frisch → ~34 % / 8 h → ~17 % / 24 h → Boden ~12 %
-
-### Dateien
-- `index.html` (HeaderFarmPlay)
-
----
-
-## 2026-10-06 (Header stabil)
-
-- BTC/USD feste Breite, DE/EN/Mute springen nicht
-
----
-
-## 2026-10-06 (Float + Mine-Button + Economy + Tutorial …)
-
-- FixedFloat, MineBtnWide, EconomyNerf, fmtSats, Tutorial, NoZoom
-
----
-
-## Sound-Katalog (SFX)
-
-| Name | Einsatz |
-|------|--------|
-| click | Mine |
-| crit | Crit |
-| buy | Upgrade |
-| install | PC-Bau |
-| select / shop_buy | Teile-Shop |
-| halving | Halving |
-
----
+- `placedAt`
