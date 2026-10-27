@@ -29,7 +29,7 @@
     st.textContent = "Fetching game…";
     var GAME = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@0611b74af3c121ca0e69c5b0f8d6bb56bd105e46/index.html";
     var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var HP_CB = "?v=20261008a";
+    var HP_CB = "?v=20261027a";
     try {
       var sr = await fetch(RAW + "/status.json" + HP_CB, { cache: "no-store" });
       if (sr.ok) {
@@ -51,7 +51,7 @@
     st.textContent = "Loading Parts Shop…";
     var cssText = "", catText = "", shopText = "", parts3dText = "", tutText = "";
     try {
-      var p3d = ["registry","sceneLayout","cpu","gpu","ram","ssd","psu","cooler","patch"];
+      var p3d = ["registry","sceneLayout","cpu","gpu","ram","ssd","psu","cooler","ports","assemble","patch"];
       var rc = await Promise.all([
         fetch(RAW + "/css/partShop.css" + HP_CB, {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
         fetch(RAW + "/js/partCatalog.js" + HP_CB, {cache:"no-store"}).then(function(x){ return x.ok ? x.text() : ""; }),
@@ -167,6 +167,31 @@
     console.error(e);
   }
 })();
+</script>
+<script>
+/*AssembleHook*/
+try{(function(){
+  function showCompat(rep){
+    if(!rep||!rep.errors||!rep.errors.length) return true;
+    var msg = rep.errors.map(function(e){return (e.part||"") + ": " + e.msg;}).join("\n");
+    try{ if(typeof toast==="function") toast(msg, "err"); else alert(msg); }catch(x){ alert(msg); }
+    return false;
+  }
+  window.Parts3D = window.Parts3D || {};
+  window.Parts3D.checkBuildPick = function(){
+    if(!Parts3D.compat||!Parts3D.specFromBuildPick) return {ok:true,errors:[]};
+    return Parts3D.compat(Parts3D.specFromBuildPick());
+  };
+  document.addEventListener("click", function(ev){
+    var t = ev.target && (ev.target.closest ? ev.target.closest("[data-action=build-pc],#btnBuildPc,.btn-build-pc,#buildStartBtn,#open-build-btn") : null);
+    if(!t) return;
+    if(window.Parts3D && Parts3D.checkBuildPick){
+      var r = Parts3D.checkBuildPick();
+      if(r && r.ok===false){ ev.preventDefault(); ev.stopPropagation(); showCompat(r); }
+    }
+  }, true);
+  console.log("[HASHPOOL] AssembleHook active");
+})();}catch(e){console.warn("AssembleHook",e);}
 </script>
 </body>
 </html>
