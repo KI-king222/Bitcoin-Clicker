@@ -3,7 +3,7 @@
   function hasActiveAssembly(){
     try {
       if(typeof state === "undefined") return false;
-      if(state.moboCased || state.pasteDone || state.biosDone) return true;
+      if(state._assemblyActive || state.moboCased || state.pasteDone || state.biosDone) return true;
       if(state.buildInstalled){
         for(var k in state.buildInstalled){ if(state.buildInstalled[k]) return true; }
       }
@@ -14,6 +14,7 @@
     try {
       if(typeof state === "undefined") return;
       if(hasActiveAssembly()) return; /* soft: don't wipe mid-build */
+      state._assemblyActive = false;
       state.buildPick = {};
       if(state.buildBought){
         ["cpu","gpu","ram","ssd","psu","mobo","cooler","case"].forEach(function(cat){
@@ -33,6 +34,7 @@
   function forceClearBuildSelectionUI(){
     try {
       if(typeof state === "undefined") return;
+      state._assemblyActive = false;
       state.buildPick = {};
       if(state.buildBought){
         ["cpu","gpu","ram","ssd","psu","mobo","cooler","case"].forEach(function(cat){

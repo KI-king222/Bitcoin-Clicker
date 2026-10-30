@@ -54,6 +54,7 @@
   }
   function clearBuildSelectionUI(){
     ensureInv();
+    try{ state._assemblyActive = false; }catch(_a){}
     state.buildPick = {};
     pickerExpand = {};
     if(state.buildBought){
@@ -263,7 +264,11 @@
     });
     var go = document.getElementById("ps-picker-go");
     if(go) go.addEventListener("click", function(){
-      REQUIRED_FOR_BUILD.forEach(function(c){ if(state.buildBought) state.buildBought[c] = true; });
+      ensureInv();
+      if(!state.buildBought) state.buildBought = {};
+      REQUIRED_FOR_BUILD.forEach(function(c){ state.buildBought[c] = true; });
+      try{ if(typeof PARTS !== "undefined"){ PARTS.forEach(function(p){ state.buildBought[p.id] = true; }); } }catch(_p){}
+      state._assemblyActive = true;
       if(typeof save === "function") save();
       closePicker();
       if(typeof openBuildOverlay === "function") openBuildOverlay();
