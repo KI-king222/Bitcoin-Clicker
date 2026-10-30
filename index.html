@@ -1,1 +1,32 @@
-SEE_FILE
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>HASHPOOL — Bitcoin Miner | Free Idle Clicker Game</title>
+<meta name="description" content="HASHPOOL is a free Bitcoin mining idle clicker. Tap to mine sats, build your PC rig in 3D, buy upgrades and grow passive income. Play in the browser — no download.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hashpool.pages.dev/">
+<meta name="theme-color" content="#0b0d10">
+<meta name="google-site-verification" content="sYkWrS_we8Jk4FLYVooMlC1dXe9EfFcoV9jjkXXntVw" />
+</head>
+<body style="margin:0;background:#0b0d10;color:#e7e9ec;font-family:monospace;padding:40px;text-align:center">
+<p id="st">Loading HASHPOOL — Bitcoin Miner…</p>
+<script>
+(async function(){
+  var st = document.getElementById("st");
+  try {
+    st.textContent = "Fetching loader…";
+    var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
+    var r = await fetch(RAW + "/loader-main.js?v=20261030b", {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    var code = await r.text();
+    (0, eval)(code);
+  } catch(e) {
+    st.textContent = "Load failed: " + e.message;
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>
