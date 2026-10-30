@@ -11,7 +11,7 @@ y"));
           html += '<div class="ps-row ps-muted">'+(state.lang==="de"?"Keine Teile — im Shop kaufen":"No parts — buy in shop")+'</div>';
         } else {
           owned.forEach(function(it){
-            var picked = pickedId === it.id;
+            var picked = state.buildPick[cat] === it.id;
             var chip = brandChipClass(it.brand, it.tier);
             html += '<div class="ps-row'+(picked?" selected":"")+'" data-pick-cat="'+cat+'" data-pick-id="'+it.id+'">' +
               '<div class="ps-row-icon '+chip+'">'+chipLabel(it).replace("\n","<br>")+'</div>' +
