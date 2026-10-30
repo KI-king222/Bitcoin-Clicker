@@ -16,11 +16,18 @@
 (async function(){
   var st = document.getElementById("st");
   try {
-    st.textContent = "Fetching loader…";
-    var RAW = "https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main";
-    var r = await fetch(RAW + "/loader-main.js?v=20261030b", {cache:"no-store"});
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    var code = await r.text();
+    st.textContent = "Unpacking…";
+    var b64 = "PLACEHOLDER_B64";
+    function b64ToU8(s){
+      var bin = atob(s);
+      var u8 = new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+      return u8;
+    }
+    var ds = new DecompressionStream("gzip");
+    var stream = new Blob([b64ToU8(b64)]).stream().pipeThrough(ds);
+    var code = await new Response(stream).text();
+    st.textContent = "Starting…";
     (0, eval)(code);
   } catch(e) {
     st.textContent = "Load failed: " + e.message;
