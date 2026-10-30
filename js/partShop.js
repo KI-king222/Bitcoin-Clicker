@@ -1,6 +1,6 @@
 /* partShop.js — catalog on window + chunk assemble */
 (function(){
-  var N=11, base="https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main/js/", v="?v=20261030k";
+  var N=11, base="https://raw.githubusercontent.com/KI-king222/Bitcoin-Clicker/main/js/", v="?v=20261030m";
   var booted=false;
   function boot(){
     if(booted) return;
@@ -10,7 +10,7 @@
       function go(){
         if(done<N) return;
         try{
-          (0,eval)("var PART_CATALOG=window.PART_CATALOG;var PART_CATEGORIES=window.PART_CATEGORIES;var PART_BY_ID=window.PART_BY_ID;"+parts.join(""));
+          (0,eval)("var PART_CATALOG=window.PART_CATALOG;var PART_CATEGORIES=window.PART_CATEGORIES;var PART_BY_ID=window.PART_BY_ID;var state=window.state;var save=window.save;var fmtSats=window.fmtSats;var updateBalanceUI=window.updateBalanceUI;var openBuildOverlay=window.openBuildOverlay;var renderBuildOverlay=window.renderBuildOverlay;"+parts.join(""));
           console.log("[HASHPOOL] partShop open=", !!(window.PartShop&&window.PartShop.open));
         }catch(e){console.error("[HASHPOOL] partShop",e);}
       }
