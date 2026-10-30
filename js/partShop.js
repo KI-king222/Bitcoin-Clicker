@@ -73,3 +73,118 @@
     clearTimeout(showToast._t);
     showToast._t = setTimeout(function(){ el.classList.remove("show"); }, 3200);
   }
+  var view = { mode: "shelves", cat: null, selected: null };
+  var pickerExpand = {};
+  function ensurePickerDom(){
+    if(document.getElementById("ps-picker")) return;
+    var el = document.createElement("div");
+    el.id = "ps-picker";
+    el.innerHTML = '<div class="ps-picker-panel"><div class="ps-picker-head"><span id="ps-picker-title">Build</span><button type="button" id="ps-picker-close">✕</button></div><div class="ps-picker-body" id="ps-picker-body"></div></div>';
+    document.body.appendChild(el);
+    document.getElementById("ps-picker-close").addEventListener("click", closePicker);
+  }
+  function renderPicker(){
+    ensurePickerDom();
+    ensureInv();
+    var body = document.getElementById("ps-picker-body");
+    if(!body) return;
+    var title = document.getElementById("ps-picker-title");
+    if(title) title.textContent = (state.lang==="de") ? "PC zusammenstellen" : "Assemble PC";
+    var html = "";
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var catDef = PART_CATALOG[cat];
+      if(!catDef) return;
+      var items = ownedItemsInCat(cat);
+      var picked = state.buildPick[cat];
+      var exp = !!pickerExpand[cat];
+      html += '<div class="ps-picker-cat">';
+      html += '<button type="button" class="ps-picker-cat-btn" data-acc-cat="'+cat+'">'+(catDef.name||cat)+(picked?" ✓":"")+(exp?" ▾":" ▸")+'</button>';
+      if(exp){
+        html += '<div class="ps-picker-items">';
+        if(!items.length){
+          html += '<div class="ps-picker-empty">'+(state.lang==="de"?"Keine Teile im Inventar":"No parts in inventory")+'</div>';
+        } else {
+          items.forEach(function(it){
+            var sel = picked === it.id;
+            html += '<button type="button" class="ps-picker-item'+(sel?" selected":"")+'" data-pick-cat="'+cat+'" data-pick-id="'+it.id+'">'+it.name+'</button>';
+          });
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    if(allPicked()){
+      html += '<button type="button" class="ps-buy-btn" id="ps-picker-go" style="width:100%;margin-top:12px">'+(state.lang==="de"?"Zusammenbauen starten":"Start assembly")+'</button>';
+    } else {
+      html += '<button type="button" class="ps-buy-btn" disabled style="width:100%;margin-top:12px">'+(state.lang==="de"?"Noch nicht alle Kategorien gewählt":"Select all categories first")+'</button>';
+    }
+    body.innerHTML = html;
+    body.querySelectorAll("[data-acc-cat]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var c = el.getAttribute("data-acc-cat");
+        pickerExpand[c] = !pickerExpand[c];
+        renderPicker();
+      });
+    });
+    body.querySelectorAll("[data-pick-id]").forEach(function(el){
+      el.addEventListener("click", function(){
+        state.buildPick[el.getAttribute("data-pick-cat")] = el.getAttribute("data-pick-id");
+        try{ if(window.PartShop && PartShop.sfxSelect) PartShop.sfxSelect(); }catch(e){}
+        renderPicker();
+      });
+    });
+    var go = document.getElementById("ps-picker-go");
+    if(go) go.addEventListener("click", function(){
+      ensureInv();
+      if(!state.buildBought) state.buildBought = {};
+      REQUIRED_FOR_BUILD.forEach(function(c){ state.buildBought[c] = true; });
+      try{ if(typeof PARTS !== "undefined"){ PARTS.forEach(function(p){ state.buildBought[p.id] = true; }); } }catch(_p){}
+      state._assemblyActive = true;
+      if(typeof save === "function") save();
+      closePicker();
+      if(typeof openBuildOverlay === "function") openBuildOverlay();
+      try{
+        var sp = document.getElementById("bo-shop");
+        var rp = document.getElementById("bo-rig-area");
+        if(sp) sp.style.display = "none";
+        if(rp) rp.style.display = "flex";
+        if(typeof renderBuildOverlay === "function") renderBuildOverlay();
+        if(sp) sp.style.display = "none";
+        if(rp) rp.style.display = "flex";
+      }catch(_force){}
+    });
+  }
+  function openPicker(){
+    if(!canBuildPC()){
+      showToast(state.lang==="de"
+        ? "Zuerst im Teile-Shop je 1 Teil pro Kategorie kaufen"
+        : "First buy 1 part per category in the Parts Shop");
+    }
+    ensureInv();
+    REQUIRED_FOR_BUILD.forEach(function(cat){
+      var id = state.buildPick[cat];
+      if(id && !(state.partInv[id] > 0)) delete state.buildPick[cat];
+    });
+    ensurePickerDom();
+    document.getElementById("ps-picker").classList.add("open");
+    renderPicker();
+  }
+  function closePicker(){
+    var el = document.getElementById("ps-picker");
+    if(el) el.classList.remove("open");
+  }
+  function updateOpenBtnLabel(){
+    var el = document.getElementById("ps-open-label");
+    if(el) el.textContent = (state.lang==="de") ? "Teile-Shop" : "Parts Shop";
+    else {
+      var btn = document.getElementById("ps-open-btn");
+      if(btn) btn.innerHTML = (state.lang==="de") ? "🛒 Teile-Shop" : "🛒 Parts Shop";
+    }
+  }
+  function openShop(){
+    updateOpenBtnLabel();
+    var ov = document.getElementById("ps-overlay");
+    if(!ov) return;
+    view.mode = "shelves"; view.cat = null; view.selected = null;
+    ov.classList.add("open");
+  }
