@@ -184,7 +184,7 @@
   if (!/[?&]nobench(=|&|$)/.test(String(W.location && W.location.search))) setInterval(function () {
     try {
       var bp = (typeof bootPlayed !== "undefined") ? !!bootPlayed : null; if (bp === null) return;
-      if (prevBoot === true && !bp) benchRan = false;                       // neuer Rig (nach Verkauf) -> wieder erlaubt
+      if (!bp) benchRan = false;
       if (prevBoot === false && bp === true && !benchRan) {
         var pick = state.buildPick || {}, ids = {}; Object.keys(pick).forEach(function (k) { ids[k] = one(pick[k]); });
         if (ids.cpu) runBench(ids, function () {});
