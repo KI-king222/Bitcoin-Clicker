@@ -13,19 +13,20 @@
   function T(a, b) { return de() ? a : b; }
 
   /* ---------- Original-Daten (aus js/data-1.js) ---------- */
+  /* EconomyNerf 2026-10: Werte 1:1 aus dem Live-Shop (nicht data-1.js) */
   var UP = [
-    { id: "usb", icon: "🔌", hr: 0.08, name: { en: "USB Miner", de: "USB-Miner" }, desc: { en: "A novelty stick that gets warm.", de: "Ein Spielzeug-Stick, der warm wird." } },
-    { id: "gpu", icon: "🖥️", hr: 0.55, name: { en: "GPU Rig", de: "GPU-Rig" }, desc: { en: "One graphics card, six fans.", de: "Eine Grafikkarte, sechs Lüfter." } },
-    { id: "fpga", icon: "🧩", hr: 3.5, name: { en: "FPGA Board", de: "FPGA-Board" }, desc: { en: "Purpose-built silicon, quiet and cold.", de: "Speziell gebauter Chip, leise und kühl." } },
-    { id: "asic", icon: "📦", hr: 22, name: { en: "ASIC Unit", de: "ASIC-Einheit" }, desc: { en: "Sounds like a jet engine. Mines like one too.", de: "Klingt wie ein Düsentriebwerk. Mint auch wie eins." } },
-    { id: "farm", icon: "🏭", hr: 140, name: { en: "Container Farm", de: "Container-Farm" }, desc: { en: "A shipping container full of ASICs.", de: "Ein Schiffscontainer voller ASICs." } },
-    { id: "plant", icon: "☀️", hr: 900, name: { en: "Solar Mining Plant", de: "Solar-Miningpark" }, desc: { en: "Your own power grid, dedicated to hashes.", de: "Dein eigenes Stromnetz, nur für Hashes." } }
+    { id: "usb", icon: "🔌", hr: 0.035, name: { en: "USB Miner", de: "USB-Miner" }, desc: { en: "A novelty stick that gets warm.", de: "Ein Spielzeug-Stick, der warm wird." } },
+    { id: "gpu", icon: "🖥️", hr: 0.22, name: { en: "GPU Rig", de: "GPU-Rig" }, desc: { en: "One graphics card, six fans.", de: "Eine Grafikkarte, sechs Lüfter." } },
+    { id: "fpga", icon: "🧩", hr: 0.75, name: { en: "FPGA Board", de: "FPGA-Board" }, desc: { en: "Purpose-built silicon, quiet and cold.", de: "Speziell gebauter Chip, leise und kühl." } },
+    { id: "asic", icon: "📦", hr: 2.2, name: { en: "ASIC Unit", de: "ASIC-Einheit" }, desc: { en: "Sounds like a jet engine. Mines like one too.", de: "Klingt wie ein Düsentriebwerk. Mint auch wie eins." } },
+    { id: "farm", icon: "🏭", hr: 7, name: { en: "Container Farm", de: "Container-Farm" }, desc: { en: "A shipping container full of ASICs.", de: "Ein Schiffscontainer voller ASICs." } },
+    { id: "plant", icon: "☀️", hr: 22, name: { en: "Solar Mining Plant", de: "Solar-Miningpark" }, desc: { en: "Your own power grid, dedicated to hashes.", de: "Dein eigenes Stromnetz, nur für Hashes." } }
   ];
   var CL = [
-    { id: "pick", icon: "⛏️", mult: 1.35, name: { en: "Sharper Pickaxe", de: "Schärfere Spitzhacke" }, desc: { en: "Cuts through hashes a bit faster.", de: "Schneidet etwas schneller durch Hashes." } },
-    { id: "cool", icon: "❄️", mult: 1.5, name: { en: "Liquid Cooling", de: "Wasserkühlung" }, desc: { en: "Overclock without melting anything.", de: "Übertakten, ohne dass etwas schmilzt." } },
-    { id: "asicpen", icon: "🖊️", mult: 1.75, name: { en: "ASIC Pen", de: "ASIC-Stift" }, desc: { en: "A handheld chip, just for tapping.", de: "Ein Handheld-Chip, nur zum Tippen." } },
-    { id: "quantum", icon: "✨", mult: 2.1, name: { en: "Quantum Tap", de: "Quanten-Tap" }, desc: { en: "Mines a little bit of tomorrow too.", de: "Mint ein bisschen von morgen mit." } }
+    { id: "pick", icon: "⛏️", mult: 1.08, name: { en: "Sharper Pickaxe", de: "Schärfere Spitzhacke" }, desc: { en: "Cuts through hashes a bit faster.", de: "Schneidet etwas schneller durch Hashes." } },
+    { id: "cool", icon: "❄️", mult: 1.12, name: { en: "Liquid Cooling", de: "Wasserkühlung" }, desc: { en: "Overclock without melting anything.", de: "Übertakten, ohne dass etwas schmilzt." } },
+    { id: "asicpen", icon: "🖊️", mult: 1.16, name: { en: "ASIC Pen", de: "ASIC-Stift" }, desc: { en: "A handheld chip, just for tapping." , de: "Ein Handheld-Chip, nur zum Tippen." } },
+    { id: "quantum", icon: "✨", mult: 1.22, name: { en: "Quantum Tap", de: "Quanten-Tap" }, desc: { en: "Mines a little bit of tomorrow too.", de: "Mint ein bisschen von morgen mit." } }
   ];
   var S2 = { pressT: 0, leds: [], spin: [], orb: [], sig: "", clicks: 0, mode: -1, fails: 0 };
   function st() { return W.state || {}; }
@@ -81,17 +82,13 @@
     var wood = mat(0x4a3526, { roughness: 0.6, metalness: 0.05 }), steel = mat(0xb0b8c4, { metalness: 0.9, roughness: 0.3 });
     var nPick = cown("pick"), nCool = cown("cool"), nPen = cown("asicpen"), nQ = cown("quantum");
     var tier = (nPick > 0) + (nCool > 0) + (nPen > 0) + (nQ > 0);
-    // Tisch + Buzzer (Look waechst mit der Anzahl verschiedener Klick-Upgrades)
     grp.add(box(2.0, 0.1, 0.9, mat(0x6e5740, { metalness: 0.05 }), -2.3, 0.95, -0.55)); [[-3.25, -0.95], [-1.35, -0.95], [-3.25, -0.15], [-1.35, -0.15]].forEach(function (p) { grp.add(box(0.08, 0.95, 0.08, wood, p[0] + 0.05, 0.47, p[1] + 0.05)); });
     var t = TIERS[tier], sc = 1 + 0.07 * tier;
     grp.add(cyl(0.24 * sc, 0.26 * sc, 0.09, mat(0x1d2230, { metalness: 0.6 }), -2.3, 1.05, -0.55, 24));
     if (tier >= 2) { var ring = new THREE.Mesh(new THREE.TorusGeometry(0.235 * sc, 0.02, 8, 28), mat(t.c, { metalness: 0.95, roughness: 0.2 })); ring.rotation.x = Math.PI / 2; ring.position.set(-2.3, 1.1, -0.55); grp.add(ring); }
     buzMesh = cyl(0.18 * sc, 0.19 * sc, 0.1, mat(t.c, { metalness: t.m, roughness: 0.35, emissive: t.e, emissiveIntensity: 0.9 }), -2.3, 1.16, -0.55, 24); grp.add(buzMesh);
-    // Tablet
     grp.add(box(0.5, 0.03, 0.34, mat(0x20262f, { metalness: 0.6 }), -1.55, 1.01, -0.4)); grp.add(box(0.46, 0.02, 0.3, new THREE.MeshBasicMaterial({ map: tabTex() }), -1.55, 1.035, -0.4));
-    // Wand-Bildschirm
     var wz = -1.19; grp.add(box(2.5, 1.45, 0.05, mat(0x0b0f16, { metalness: 0.6 }), -2.3, 2.0, wz)); var sp = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.35), new THREE.MeshBasicMaterial({ map: scrTex })); sp.position.set(-2.3, 2.0, wz + 0.03); grp.add(sp);
-    /* ----- Klick-Upgrades ----- */
     if (nPick > 0) { var pc = nPick >= 15 ? 3 : nPick >= 5 ? 2 : 1; for (var i = 0; i < pc; i++) { var hx = -3.5 - i * 0.18, h = cyl(0.025, 0.025, 1.1, mat(0x7a5230), hx, 0.62, -0.1 + i * 0.1, 8); h.rotation.z = 0.18; grp.add(h); var hd = box(0.42, 0.06, 0.06, steel, hx + 0.1, 1.17, -0.1 + i * 0.1); hd.rotation.z = 0.18; grp.add(hd); } }
     if (nCool > 0) {
       var cc = nCool >= 15 ? 3 : nCool >= 5 ? 2 : 1, bl = mat(0x40a0ff, { emissive: 0x1060c0, emissiveIntensity: 0.9, transparent: true, opacity: 0.85 });
@@ -104,7 +101,6 @@
       var qs = 0.12 + Math.min(nQ, 10) * 0.012, orb = new THREE.Mesh(new THREE.SphereGeometry(qs, 20, 14), new THREE.MeshStandardMaterial({ color: 0xb06aff, emissive: 0x7a2bd8, emissiveIntensity: 1.2, roughness: 0.2 })); orb.position.set(-2.3, 1.85, -0.55); grp.add(orb); S2.orb.push(orb);
       [0, 1].forEach(function (r) { var rg = new THREE.Mesh(new THREE.TorusGeometry(qs * 1.9, 0.012, 8, 32), glow(r ? 0x6ad4ff : 0xff6af0)); rg.position.set(-2.3, 1.85, -0.55); rg.rotation.x = r ? 1.0 : 0.3; grp.add(rg); S2.spin.push({ m: rg, ax: r ? "z" : "y", s: r ? 1.6 : -1.1 }); });
     }
-    /* ----- Miner-Racks an der linken Wand ----- */
     var frame = mat(0x151a22, { metalness: 0.5 });
     grp.add(box(0.5, 1.9, 0.95, frame, -4.1, 0.95, 1.0)); grp.add(box(0.5, 1.9, 0.9, frame, -4.1, 0.95, 2.0));
     var shelf = mat(0x2d3646, { metalness: 0.4 }); [0.05, 0.55, 1.1, 1.65].forEach(function (y) { grp.add(box(0.46, 0.04, 0.9, shelf, -3.97, y + 0.03, 1.0)); grp.add(box(0.46, 0.04, 0.86, shelf, -3.97, y + 0.03, 2.0)); });
@@ -115,7 +111,6 @@
     for (var a = 0; a < Math.min(nA, 6); a++) { var arow = Math.floor(a / 2), az = 1.7 + (a % 2) * 0.42, ay = 0.3 + arow * 0.55; grp.add(box(0.36, 0.34, 0.38, mat(0x2b3140, { metalness: 0.6 }), -4.02, ay + 0.18, az)); var af = cyl(0.12, 0.12, 0.02, mat(0x0b0d11), -3.83, ay + 0.2, az, 18); af.rotation.z = Math.PI / 2; grp.add(af); S2.spin.push({ m: af, ax: "x", s: 14 }); grp.add(box(0.01, 0.04, 0.3, glow(0xff7a1a), -3.83, ay + 0.04, az)); }
     grp.add(plate(["🔌 " + (de() ? UP[0].name.de : UP[0].name.en) + " ×" + nU, "🖥️ GPU ×" + nG + "   🧩 FPGA ×" + nF], 1.0, 0.34, -4.29, 2.15, 1.0, Math.PI / 2));
     grp.add(plate(["📦 " + (de() ? UP[3].name.de : UP[3].name.en) + " ×" + nA], 0.9, 0.24, -4.29, 2.15, 2.0, Math.PI / 2));
-    /* ----- Draussen: Container-Farm + Solar-Miningpark (durch die Schaufenster sichtbar) ----- */
     if (nFarm > 0) {
       var cx = -7.6, cz2 = 3.7; grp.add(box(3.4, 1.5, 1.3, mat(0x2a6bd1, { roughness: 0.6 }), cx, 0.85, cz2));
       for (var r = 0; r < 12; r++) grp.add(box(0.05, 1.4, 1.34, mat(0x1f55ab), cx - 1.55 + r * 0.28, 0.85, cz2));
@@ -131,7 +126,6 @@
     S2.sig = ownSig();
   }
 
-  /* ---------- Bedienung ---------- */
   var actx = null;
   function beep(f) { try { actx = actx || new (W.AudioContext || W.webkitAudioContext)(); var o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = f; o.type = "square"; g.gain.value = 0.03; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.05); } catch (e) {} }
   function fmtG(n) { n = Number(n) || 0; if (n < 10 && n % 1 !== 0) return (Math.round(n * 10) / 10).toFixed(1); return String(Math.floor(n)); }
@@ -162,14 +156,27 @@
   function closeUpg() { if (panel) panel.classList.remove("show"); S.invOpen = false; }
   function costOf(kind, i) { var r = rows(kind)[i]; return r ? Number(r.dataset.cost) || 0 : 0; }
   function fmtCost(n) { n = Math.ceil(n); return (n < 100000 ? n.toLocaleString(de() ? "de-DE" : "en-US") : n.toLocaleString(de() ? "de-DE" : "en-US", { notation: "compact", maximumFractionDigits: 2 })) + " sats"; }
+  function liveSpec(kind, i, fallback) {
+    try {
+      var r = rows(kind)[i]; if (!r) return fallback;
+      var d = r.querySelector(".desc") || r.querySelector("small") || r;
+      var t = (d.textContent || "").trim();
+      var m = t.match(/[·•]\s*(.+)$/);
+      if (m) return m[1].trim();
+      var m2 = t.match(/(×[\d.,]+\s*pro\s*\w+|\+[\d.,]+\s*H\/s|[×+][\d.,]+\s*(per click|H\/s))/i);
+      if (m2) return m2[1].trim();
+    } catch (e) {}
+    return fallback;
+  }
   function renderUpg() {
     var lang = de() ? "de" : "en", h = "<h4>⬆️ Upgrades</h4><p class='nx-sub'>💰 " + txt("balance") + " · " + txt("hashrate") + "</p><div class='nx-qty'>";
     var qs = document.querySelectorAll(".qty-btn"); Array.prototype.forEach.call(qs, function (b) { var q = b.getAttribute("data-qty"); h += '<button type="button" data-qty="' + q + '"' + (Number(st().buyQty) === Number(q) ? ' class="on"' : "") + ">×" + q + "</button>"; }); h += "</div>";
-    function sect(title, list, kind, ownFn, spec) {
+    function sect(title, list, kind, ownFn, specFn) {
       h += "<div class='nx-sec'>" + title + "</div>";
       list.forEach(function (u, i) {
         var n = ownFn(u.id), c = costOf(kind, i), r = rows(kind)[i], can = r && !r.disabled;
-        h += '<div class="nx-up"><div><b>' + u.icon + " " + u.name[lang] + "</b>" + (n > 0 ? " <span class='nx-pip'>×" + n + "</span>" : "") + "<br><small>" + u.desc[lang] + " · " + spec(u) + "</small></div>" +
+        var effect = liveSpec(kind, i, specFn(u));
+        h += '<div class="nx-up"><div><b>' + u.icon + " " + u.name[lang] + "</b>" + (n > 0 ? " <span class='nx-pip'>×" + n + "</span>" : "") + "<br><small>" + u.desc[lang] + " · " + effect + "</small></div>" +
           '<button type="button" data-buy="' + kind + i + '"' + (can ? "" : " disabled") + ">" + fmtCost(c) + "</button></div>";
       });
     }
@@ -186,10 +193,10 @@
     s.textContent = ".nx-float{position:absolute;transform:translate(-50%,0);color:#ffd36a;font:700 20px monospace;text-shadow:0 1px 4px #000;pointer-events:none;transition:transform .75s ease-out,opacity .75s;z-index:4}" +
       "#nx-upg{position:absolute;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);background:#12161c;border:1px solid #f7931a;border-radius:16px;padding:12px 14px;color:#e7e9ec;font:13px sans-serif;display:none;z-index:6;max-height:80%;overflow:auto;box-shadow:0 8px 30px #000a}#nx-upg.show{display:block}" +
       "#nx-upg h4{margin:0 0 4px;font-size:15px}.nx-sub{margin:0 0 8px;color:#aeb6c2;font-size:12px}.nx-sec{margin:10px 0 2px;color:#f7931a;font-weight:700;font-size:12px;text-transform:uppercase}" +
-      ".nx-qty{display:flex;gap:6px;margin-bottom:4px}.nx-qty button{flex:1;font:700 12px monospace;padding:7px;border-radius:8px;border:1px solid #2c3646;background:#161c24;color:#e7e9ec}.nx-qty button.on{background:#f7931a;border-color:#f7931a;color:#1a1206}" +
+      ".nx-qty{display:flex;gap:6px;margin-bottom:6px}.nx-qty button{font:700 12px monospace;padding:6px 10px;border-radius:8px;border:1px solid #2c3646;background:#161c24;color:#e7e9ec}.nx-qty button.on{background:#f7931a;border-color:#f7931a;color:#1a1206}" +
       ".nx-up{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #222a36;padding:8px 0}.nx-up small{color:#aeb6c2}.nx-pip{color:#f7931a;font-weight:700}" +
       ".nx-up button{font:700 12px monospace;padding:9px 10px;border-radius:9px;border:1px solid #f7931a;background:#f7931a;color:#1a1206;min-width:96px}.nx-up button[disabled]{opacity:.35;background:#161c24;color:#e7e9ec;border-color:#2c3646}" +
-      "#nx-upg .nx-bt{display:flex;margin-top:10px}#nx-upg .nx-bt button{flex:1;font:700 13px sans-serif;padding:11px;border-radius:10px;border:1px solid #2c3646;background:#161c24;color:#e7e9ec}";
+      "#nx-upg .nx-bt{display:flex;margin-top:10px}#nx-upg .nx-bt button{flex:1;font:700 13px sans-serif;padding:11px;border-radius:10px;border:1px solid #2c3646;background:#161c24;color:#e7e9ec";
     document.head.appendChild(s);
   }
   function pushOut(r) {
