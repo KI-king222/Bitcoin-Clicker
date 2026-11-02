@@ -2,6 +2,7 @@
  * Phase 0: Kennzeichnung, Rueckweg zur stabilen Version.
  * Phase 1: laedt world.js (Laden + Hinterraum + Stationen, Erste Person). ?noworld=1 schaltet es ab (dann = 1:1 Kopie).
  * Phase 2: laedt clicker.js (Buzzer-Tisch, Wand-Bildschirm, Upgrades im Raum) + clickfix.js. ?noclicker=1 schaltet es ab.
+ * TEMP 2026-11-02: clicker.js vom Commit aa5dabe via jsDelivr (lokale Datei war kaputt).
  */
 (function () {
   var W = window;
@@ -18,9 +19,17 @@
   function put() { if (document.body && !document.getElementById("hp-next-bar")) document.body.appendChild(bar); }
   put(); setInterval(put, 2000);
   var q = String(W.location && W.location.search);
-  function load(src, next) { var s = document.createElement("script"); s.src = src + "?v=" + Date.now(); s.onload = function () { if (next) next(); }; s.onerror = function () { console.warn("[NEXT] nicht ladbar:", src); if (next) next(); }; document.body.appendChild(s); }
+  function load(src, next) {
+    var s = document.createElement("script");
+    s.src = src + (src.indexOf("?") >= 0 ? "&" : "?") + "v=" + Date.now();
+    s.onload = function () { if (next) next(); };
+    s.onerror = function () { console.warn("[NEXT] nicht ladbar:", src); if (next) next(); };
+    document.body.appendChild(s);
+  }
+  // clicker: feste gute Version (EconomyNerf-Werte + Tisch) bis next/clicker.js wiederhergestellt ist
+  var CLICKER = "https://cdn.jsdelivr.net/gh/KI-king222/Bitcoin-Clicker@aa5dabe/next/clicker.js";
   if (!/[?&]noworld(=|&|$)/.test(q)) load("next/world.js", function () {
-    if (!/[?&]noclicker(=|&|$)/.test(q)) load("next/clicker.js", function () { load("next/clickfix.js"); });
+    if (!/[?&]noclicker(=|&|$)/.test(q)) load(CLICKER, function () { load("next/clickfix.js"); });
   });
-  console.log("[HASHPOOL NEXT] aktiv");
+  console.log("[HASHPOOL NEXT] aktiv (clicker @ aa5dabe)");
 })();
