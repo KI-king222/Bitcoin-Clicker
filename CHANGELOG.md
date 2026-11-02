@@ -14,6 +14,8 @@
 - `next/clicker.js` — Buzzer-Tisch (löst `#mine-btn` aus), Wand-Bildschirm, Upgrade-Tablet mit den **Original-Upgrades 1:1** (Kaufen klickt die echten Shop-Zeilen), jedes Upgrade sichtbar: Klick-Upgrades am Tisch, Miner im Wandregal, Container-Farm + Solarpark im Hof
 - `next/clickfix.js` — Buzzer-Tippen dreht die Kamera nicht mehr
 - `next/next.js` — lädt alles lokal (kein jsDelivr-Pin mehr); Kill-Switches `?noworld ?noenv ?nologi ?noclicker`
+- `next/extras.js` — Ziel-Anzeige mit Pfeil, Minikarte, synthetischer Ton (Knopf 🔊/🔇), Qualität Auto/Hoch/Niedrig, Tag/Nacht-Zyklus (12 min), Position wird gemerkt. Kill-Switch `?noextras=1`
+- `next/world.js` — Buzzer-Tisch/Bildschirm fest im Kern, Tempo erhöht, Modulstatus unten rechts, dauerhafte Fehlerzeile; `next/clicker.js` — mehr Upgrade-Grafiken
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

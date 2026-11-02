@@ -191,7 +191,7 @@
     var sc = new THREE.Scene(); sc.background = new THREE.Color(0x0e1426); sc.fog = new THREE.Fog(0x141b30, 24, 70); S.scene = sc;
     var cam = new THREE.PerspectiveCamera(72, 1, 0.05, 160); cam.rotation.order = "YXZ"; sc.add(cam);
     var rd = new THREE.WebGLRenderer({ antialias: true }); rd.setPixelRatio(Math.min(W.devicePixelRatio || 1, 2)); stage.appendChild(rd.domElement);
-    sc.add(new THREE.HemisphereLight(0xa9bce0, 0x2a2a34, 0.85)); sc.add(new THREE.AmbientLight(0x56627a, 0.5));
+    var hemi = new THREE.HemisphereLight(0xa9bce0, 0x2a2a34, 0.85), amb = new THREE.AmbientLight(0x56627a, 0.5); sc.add(hemi); sc.add(amb); S.lights = { hemi: hemi, amb: amb };
     var l1 = new THREE.PointLight(0xfff0d6, 1.0, 11); l1.position.set(0, 3.1, 1.2); sc.add(l1);
     var l2 = new THREE.PointLight(0xdfe9ff, 0.95, 11); l2.position.set(0, 3.1, -4.2); sc.add(l2);
     var l3 = new THREE.PointLight(0xffc977, 0.8, 10); l3.position.set(0, 3.4, 5.6); sc.add(l3);

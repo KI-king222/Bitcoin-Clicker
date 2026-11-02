@@ -93,7 +93,7 @@
   function lamp(x, z) {
     sc.add(cyl(0.05, 0.08, 4.2, M(0x1b1e24, { metalness: 0.6 }), x, 2.2, z, 8)); var arm = box(0.9, 0.06, 0.06, M(0x1b1e24), x, 4.3, z - 0.4); arm.rotation.z = 0; sc.add(arm);
     sc.add(box(0.4, 0.1, 0.22, new THREE.MeshBasicMaterial({ color: 0xffe3a0 }), x, 4.25, z - 0.82));
-    var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex(), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false })); halo.scale.set(3.2, 3.2, 1); halo.position.set(x, 4.2, z - 0.82); sc.add(halo);
+    var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex(), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false })); halo.scale.set(3.2, 3.2, 1); halo.position.set(x, 4.2, z - 0.82); sc.add(halo); halos.push(halo);
     S.obst.push([x - 0.12, x + 0.12, z - 0.12, z + 0.12]);
   }
   function tree(x, z) {
@@ -115,7 +115,7 @@
   }
 
   /* ---------- Autos ---------- */
-  var cars = [];
+  var cars = [], halos = [];
   function makeCar(col) {
     var g = new THREE.Group(), body = M(col, { metalness: 0.5, roughness: 0.35 }), dark = M(0x10131a, { metalness: 0.2, roughness: 0.2 });
     g.add(box(4.2, 0.55, 1.85, body, 0, 0.6, 0)); g.add(box(2.2, 0.5, 1.7, M(col, { metalness: 0.5, roughness: 0.35 }), -0.2, 1.1, 0)); g.add(box(2.0, 0.38, 1.74, dark, -0.2, 1.1, 0));
@@ -156,10 +156,15 @@
   function init() {
     S = W.Parts3D.nextWorld.S; G = S.G; sc = S.scene;
     var sky = new THREE.Mesh(new THREE.SphereGeometry(110, 24, 16), new THREE.MeshBasicMaterial({ map: skyTex(), side: THREE.BackSide, fog: false, depthWrite: false })); sc.add(sky);
+    var dayTex = G.ctex(512, 512, function (g, w, h) {
+      var gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#2f6fd0"); gr.addColorStop(0.45, "#7fb6f2"); gr.addColorStop(0.72, "#d9ecff"); gr.addColorStop(0.78, "#ffe6b8"); gr.addColorStop(0.8, "#6d7a88"); gr.addColorStop(1, "#4d5560"); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      for (var i = 0; i < 26; i++) { var cx = Math.random() * w, cy = 40 + Math.random() * 190; g.fillStyle = "rgba(255,255,255," + (0.35 + Math.random() * 0.3) + ")"; for (var k = 0; k < 5; k++) { g.beginPath(); g.ellipse(cx + k * 22, cy + (k % 2) * 6, 34 + Math.random() * 20, 12 + Math.random() * 6, 0, 0, 6.3); g.fill(); } }
+    });
+    var skyDay = new THREE.Mesh(new THREE.SphereGeometry(108, 24, 16), new THREE.MeshBasicMaterial({ map: dayTex, side: THREE.BackSide, fog: false, depthWrite: false, transparent: true, opacity: 0 })); sc.add(skyDay);
     ground(); buildings(); furniture(); spawnCars(); spawnPeds();
     S.rects.push([-16.2, 16.2, 3.47, 15.1]);
-    S.ticks.push(function (dt) { sky.position.copy(S.cam.position); tickCars(dt); peds.forEach(function (a) { S.stepActor(a, dt); }); });
-    W.Parts3D.nextEnv = { cars: cars, peds: peds };
+    S.ticks.push(function (dt) { sky.position.copy(S.cam.position); skyDay.position.copy(S.cam.position); tickCars(dt); peds.forEach(function (a) { S.stepActor(a, dt); }); });
+    W.Parts3D.nextEnv = { cars: cars, peds: peds, sky: sky, skyDay: skyDay, halos: halos };
     console.log("[HASHPOOL NEXT] env bereit (Strasse)");
   }
   var n = 0, iv = setInterval(function () {
