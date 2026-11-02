@@ -24,7 +24,7 @@
       n.addEventListener("click", function (e) {
         e.stopPropagation(); if (S.dlg || S.invOpen) return;
         if (near()) { S.auto = null; C.press(); return; }
-        var pts = [], a = S.pz > -1.3; if (a !== (st.sz > -1.3)) { pts.push(a ? [0, -0.4] : [0, -2.2]); pts.push(a ? [0, -2.2] : [0, -0.4]); } pts.push([st.sx, st.sz]); S.auto = { pts: pts, i: 0, id: "buzzer", face: [st.tx, st.tz] };
+        S.useStation("buzzer");
       });
     }
     // Auto-Lauf-Drehung bei Abstand 0 verhindern: Wenn Ziel erreicht ist, Blickrichtung nicht anruehren

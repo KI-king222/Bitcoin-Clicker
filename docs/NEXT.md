@@ -20,6 +20,10 @@ Oben in der Test-Version zeigt ein oranger Balken „NEXT · Test-Version“ mit
 ## Rückweg / Backup
 Die öffentliche Version ist der Stand vor diesen Änderungen (Git-Commit `527c89b` und davor). Zurück: Dateien dieses Commits wiederherstellen (`git revert` / `git checkout 527c89b -- index.html js/`). Die Hauptseite (`index.html`) wurde für NEXT **nicht** verändert.
 
+## Dateien (Ladereihenfolge)
+`next.js` → `world.js` (Laden, Erste Person) → `env.js` (Straße) → `logistics.js` (Abholladen, Lieferung, Einräumen) → `clicker.js` (Buzzer, Upgrades) → `clickfix.js`.
+Erweiterungen hängen sich an `Parts3D.nextWorld.S` (`rects`, `obst`, `ticks`, `addStation`, `invShow`, `G`).
+
 ## Roadmap NEXT
 1. Hinterraum im Laden: Bestell-Computer (Teile-Shop), Regal (Inventar sichtbar), Bautisch (startet Zusammenbau)
 2. Laden als Hauptscreen in NEXT

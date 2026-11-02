@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-11-02 — NEXT: Shop-Simulator (nur unter /next/)
+
+### Neu (alles unter `next/`, öffentliche Version unverändert)
+- `js/parts3d/shopScene.js` — 3D-Laden-Overlay mit Kunden (eigenes Aussehen) als Vorstufe
+- `next/world.js` — Erste-Person-Laden: Laden vorne, Hinterraum (Bestell-Computer, Regal, Bautisch, Farm-Tür), Texturen, Schaufenster, Poster, Podest, Joystick/Wischen, Auto-Lauf über Türen (Raumgraph), Erweiterungs-API `Parts3D.nextWorld.S` (rects/obst/ticks/G/invShow/err)
+- `next/env.js` — begehbare Straße: Bürgersteig, fahrende Autos (halten vor dem Spieler), Passanten, Bäume, Laternen, Bänke, Häuser gegenüber, Nachbarn, Hof mit Zaun, Sternenhimmel. Kill-Switch `?noenv=1`
+- `next/logistics.js` — Lieferung statt Sofort-Lager: Teile im Teile-Shop bestellen → nach ~25 s im Abholladen (Gebäude rechts neben dem Laden) → abholen (tragen, max. 12) → am Regal im Hinterraum einräumen (erst dann in `state.partInv`). Ledger `localStorage hashpool-next-logi-v1`. Kill-Switch `?nologi=1`
+- `next/clicker.js` — Buzzer-Tisch (löst `#mine-btn` aus), Wand-Bildschirm, Upgrade-Tablet mit den **Original-Upgrades 1:1** (Kaufen klickt die echten Shop-Zeilen), jedes Upgrade sichtbar: Klick-Upgrades am Tisch, Miner im Wandregal, Container-Farm + Solarpark im Hof
+- `next/clickfix.js` — Buzzer-Tippen dreht die Kamera nicht mehr
+- `next/next.js` — lädt alles lokal (kein jsDelivr-Pin mehr); Kill-Switches `?noworld ?noenv ?nologi ?noclicker`
+- Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
+
+### Fix
+- `next/clicker.js` im Repo war nur ein 31-Byte-Platzhalter (daher kein Tisch) → neu geschrieben
+
 ## 2026-11-01 — B1 Auftragssystem + farmFix v4
 
 ### Neu
