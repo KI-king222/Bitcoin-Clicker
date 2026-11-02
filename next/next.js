@@ -1,7 +1,7 @@
 /* next.js — nur in /next/ geladen. Spielwiese fuer den Shop-Simulator.
  * Phase 0: Kennzeichnung, Rueckweg zur stabilen Version.
  * Phase 1: laedt world.js (Laden + Hinterraum + Stationen, Erste Person). ?noworld=1 schaltet es ab (dann = 1:1 Kopie).
- * Phase 2: laedt clicker.js (Buzzer-Tisch, Wand-Bildschirm, Upgrades im Raum). ?noclicker=1 schaltet es ab.
+ * Phase 2: laedt clicker.js (Buzzer-Tisch, Wand-Bildschirm, Upgrades im Raum) + clickfix.js. ?noclicker=1 schaltet es ab.
  */
 (function () {
   var W = window;
@@ -19,6 +19,8 @@
   put(); setInterval(put, 2000);
   var q = String(W.location && W.location.search);
   function load(src, next) { var s = document.createElement("script"); s.src = src + "?v=" + Date.now(); s.onload = function () { if (next) next(); }; s.onerror = function () { console.warn("[NEXT] nicht ladbar:", src); if (next) next(); }; document.body.appendChild(s); }
-  if (!/[?&]noworld(=|&|$)/.test(q)) load("next/world.js", function () { if (!/[?&]noclicker(=|&|$)/.test(q)) load("next/clicker.js"); });
+  if (!/[?&]noworld(=|&|$)/.test(q)) load("next/world.js", function () {
+    if (!/[?&]noclicker(=|&|$)/.test(q)) load("next/clicker.js", function () { load("next/clickfix.js"); });
+  });
   console.log("[HASHPOOL NEXT] aktiv");
 })();
