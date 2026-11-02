@@ -254,13 +254,25 @@
     var peg = ctex(256, 160, function (g, w, h) { g.fillStyle = "#3a3f49"; g.fillRect(0, 0, w, h); g.fillStyle = "#222"; for (var x = 8; x < w; x += 16) for (var y = 8; y < h; y += 16) g.fillRect(x, y, 3, 3); g.strokeStyle = "#f7931a"; g.lineWidth = 5; g.strokeRect(40, 30, 70, 14); g.strokeStyle = "#78d505"; g.strokeRect(130, 50, 14, 70); g.strokeStyle = "#6aa8ff"; g.beginPath(); g.arc(190, 80, 24, 0, 6.3); g.stroke(); });
     sc.add(plane(2.4, 1.5, new THREE.MeshBasicMaterial({ map: peg }), 4.3, 2.0, -3.6, -Math.PI / 2));
     var wbt = ctex(256, 128, function (g, w, h) { g.fillStyle = "#e9edf2"; g.fillRect(0, 0, w, h); g.fillStyle = "#c33"; g.font = "bold 22px sans-serif"; g.fillText("TODO:", 14, 28); g.fillStyle = "#223"; g.font = "18px sans-serif"; g.fillText("• Teile abholen", 14, 56); g.fillText("• Regal einräumen", 14, 80); g.fillText("• PC bauen", 14, 104); });
-    sc.add(plane(1.8, 0.9, new THREE.MeshBasicMaterial({ map: wbt }), 0.4, 2.1, -6.6)); sc.add(box(1.86, 0.96, 0.03, frame, 0.4, 2.1, -6.62));
+    sc.add(plane(1.8, 0.9, new THREE.MeshBasicMaterial({ map: wbt }), -2.9, 2.55, -6.6)); sc.add(box(1.86, 0.96, 0.03, frame, -2.9, 2.55, -6.62));
     // Kisten + Paletten im Hinterraum
     var crate = mat(0xb8905c, { roughness: 0.9 }); sc.add(box(0.6, 0.5, 0.6, crate, -1.15, 0.37, -6.2)); sc.add(box(0.55, 0.45, 0.55, crate, -1.15, 0.85, -6.2)); sc.add(box(0.5, 0.4, 0.5, crate, -3.9, 0.32, -1.8)); sc.add(box(0.5, 0.35, 0.5, crate, -3.3, 0.3, -1.65));
     // Farm-Tuer
     sc.add(box(0.12, 2.3, 1.3, mat(0x14181f, { metalness: 0.5 }), -4.3, 1.15, -3.2)); sc.add(box(0.14, 0.1, 1.5, mat(0xf7931a), -4.3, 2.35, -3.2));
     sc.add(plane(1.2, 0.3, new THREE.MeshBasicMaterial({ map: textTex("FARM ▼", 256, 64, "#10151f", "#78d505", "bold 40px sans-serif") }), -4.2, 2.6, -3.2, Math.PI / 2));
     addStation("farm", -4.2, 1.15, -3.2, 0.6, 2.3, 1.4, "🏭 " + T("Farm", "Farm"), -3.3, -3.2, function () { openMenu("farm"); });
+    // Buzzer-Tisch (Grundgeruest; clicker.js setzt Aussehen/Upgrades/Aktion darauf)
+    sc.add(box(2.0, 0.1, 0.9, deskTop, -2.3, 0.95, -0.55)); [[-3.25, -0.95], [-1.35, -0.95], [-3.25, -0.15], [-1.35, -0.15]].forEach(function (p) { sc.add(box(0.08, 0.95, 0.08, wood, p[0] + 0.05, 0.47, p[1] + 0.05)); });
+    sc.add(cyl(0.24, 0.26, 0.09, mat(0x1d2230, { metalness: 0.6 }), -2.3, 1.05, -0.55, 24));
+    S.buzz = cyl(0.18, 0.19, 0.1, mat(0xd32f2f, { metalness: 0.1, roughness: 0.35, emissive: 0x330000, emissiveIntensity: 0.9 }), -2.3, 1.16, -0.55, 24); sc.add(S.buzz);
+    var tabc = ctex(256, 160, function (g, w, h) { g.fillStyle = "#0a1830"; g.fillRect(0, 0, w, h); g.fillStyle = "#78d505"; g.font = "bold 32px sans-serif"; g.textAlign = "center"; g.fillText("UPGRADES", 128, 70); g.fillStyle = "#6aa8ff"; g.font = "24px sans-serif"; g.fillText("tippen", 128, 112); });
+    sc.add(box(0.5, 0.03, 0.34, mat(0x20262f, { metalness: 0.6 }), -1.55, 1.01, -0.4)); sc.add(box(0.46, 0.02, 0.3, new THREE.MeshBasicMaterial({ map: tabc }), -1.55, 1.035, -0.4));
+    var scc = document.createElement("canvas"); scc.width = 768; scc.height = 432; S.scr = { ctx: scc.getContext("2d"), tex: new THREE.CanvasTexture(scc), owned: false };
+    sc.add(box(2.5, 1.45, 0.05, mat(0x0b0f16, { metalness: 0.6 }), -2.3, 2.0, -1.17)); sc.add(plane(2.4, 1.35, new THREE.MeshBasicMaterial({ map: S.scr.tex }), -2.3, 2.0, -1.14));
+    drawScreenBase();
+    S.obst.push([-3.3, -1.3, -1.0, -0.1]);
+    addStation("buzzer", -2.3, 1.15, -0.55, 0.9, 0.5, 0.9, "🔴 Buzzer", -2.3, 0.5, function () { buzzDefault(); });
+    addStation("upg", -1.55, 1.1, -0.4, 0.6, 0.3, 0.45, "⬆️ Upgrades", -1.5, 0.5, function () { toast(T("Upgrade-Modul nicht geladen", "Upgrade module not loaded")); });
     // Theke + Kasse (Laden)
     sc.add(box(3.0, 1.0, 0.8, mat(0x3a2a1f, { roughness: 0.6 }), 2.3, 0.62, 0.2)); sc.add(box(3.1, 0.06, 0.9, deskTop, 2.3, 1.15, 0.2)); sc.add(box(0.5, 0.34, 0.03, dark, 1.6, 1.38, 0.1)); sc.add(box(0.46, 0.3, 0.01, glow(0x2a8cff), 1.6, 1.38, 0.12));
     sc.add(box(0.4, 0.08, 0.3, dark, 1.6, 1.22, 0.25)); sc.add(box(0.12, 0.05, 0.08, mat(0xc0c4cc, { metalness: 0.7 }), 2.6, 1.21, 0.3)); sc.add(cyl(0.05, 0.05, 0.03, mat(0xf0b429, { metalness: 0.8 }), 3.3, 1.2, 0.35, 12));
@@ -331,6 +343,17 @@
       else if (kind === "farm") { if (W.Parts3D && Parts3D.farm) Parts3D.farm.open(); else toast(T("Farm nicht geladen", "Farm not loaded")); }
     } catch (e) { console.warn("[nx] openMenu", kind, e); toast(T("Menü konnte nicht geöffnet werden", "Could not open menu")); }
   }
+  function drawScreenBase() {
+    var g = S.scr && S.scr.ctx; if (!g) return; var w = 768;
+    g.fillStyle = "#07101c"; g.fillRect(0, 0, w, 432); g.fillStyle = "#0e2236"; g.fillRect(0, 0, w, 64); g.fillStyle = "#f7931a"; g.font = "bold 34px monospace"; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText("₿ HASHPOOL", 22, 34);
+    g.fillStyle = "#78d505"; g.textAlign = "right"; g.font = "bold 24px monospace"; g.fillText(txtOf("tick") || "● ONLINE", w - 22, 34);
+    var b = txtOf("balance") || "0 sats", num = b.replace(/\s*sats\s*$/i, ""); g.textAlign = "center"; g.fillStyle = "#ffffff"; g.font = "bold " + (num.length > 9 ? 70 : 92) + "px monospace"; g.fillText(num, w / 2, 150);
+    g.fillStyle = "#6aa8ff"; g.font = "bold 28px monospace"; g.fillText("SATS  " + txtOf("usd-val"), w / 2, 216);
+    var hr = txtOf("hashrate").split("·"); g.textAlign = "left"; g.fillStyle = "#cfd8dc"; g.font = "bold 30px monospace"; g.fillText("▸ " + (hr[0] || "").trim(), 40, 292); g.fillText("▸ " + (hr[1] || "").trim(), 40, 340);
+    g.fillStyle = "#8a93a3"; g.font = "24px monospace"; g.fillText(T("Klicks hier: ", "Clicks here: ") + (S.clicks || 0) + "   " + txtOf("price"), 40, 392); S.scr.tex.needsUpdate = true;
+  }
+  S.drawScreenBase = drawScreenBase;
+  function buzzDefault() { var el = document.getElementById("mine-btn"); if (el) el.click(); S.clicks = (S.clicks || 0) + 1; S.pressT = 0.12; }
   function counterAction() {
     var c = S.cust; if (c && c.state === "wait") { talk(c); return; }
     var O = ORD(); toast(T("Gerade kein Kunde an der Theke. Aufträge:", "No customer at the counter. Orders:")); if (O) O.open();
@@ -340,7 +363,7 @@
     d.textContent = m; document.body.appendChild(d); setTimeout(function () { try { d.remove(); } catch (e) {} }, 3200);
   }
   S.toast = toast;
-  function showErr(m) { S.errN++; var e = document.getElementById("nx-err"); if (e && S.errN <= 3) { e.textContent = "⚠ " + String(m).slice(0, 140); setTimeout(function () { e.textContent = ""; }, 12000); } try { console.warn("[nx]", m); } catch (x) {} }
+  function showErr(m) { S.errN++; S.errs = (S.errs || []); if (S.errs.length < 4 && S.errs.indexOf(String(m)) < 0) S.errs.push(String(m)); var e = document.getElementById("nx-err"); if (e) e.textContent = "⚠ " + S.errs.map(function (x) { return x.slice(0, 90); }).join(" | "); try { console.warn("[nx]", m); } catch (x) {} }
   S.err = showErr;
 
   /* ---------- Regal / Inventar ---------- */
@@ -450,7 +473,7 @@
   S.project = project;
   var cbub = null;
   function move(dt) {
-    var sp = 2.5, mx = 0, mz = 0, blocked = !!(S.dlg || S.invOpen);
+    var sp = 3.9, mx = 0, mz = 0, blocked = !!(S.dlg || S.invOpen);
     if (blocked) return false;
     var jx = S.joy.x, jy = S.joy.y, k = S.keys;
     if (k["w"] || k["arrowup"]) jy -= 1; if (k["s"] || k["arrowdown"]) jy += 1; if (k["a"]) jx -= 1; if (k["d"]) jx += 1; if (k["arrowleft"]) S.yaw += dt * 1.8; if (k["arrowright"]) S.yaw -= dt * 1.8;
@@ -465,7 +488,7 @@
     }
     if (S.auto) {
       var a = S.auto, p = a.pts[a.i]; if (!p) { var id = a.id; S.auto = null; var st = S.stations[id]; if (st) { try { st.action(); } catch (e) { showErr("Station " + id + ": " + e.message); } } return false; }
-      var dx = p[0] - S.px, dz = p[1] - S.pz, d = Math.hypot(dx, dz), step = 2.9 * dt;
+      var dx = p[0] - S.px, dz = p[1] - S.pz, d = Math.hypot(dx, dz), step = 4.6 * dt;
       var ty = Math.atan2(-dx, -dz), df = ty - S.yaw; while (df > Math.PI) df -= 2 * Math.PI; while (df < -Math.PI) df += 2 * Math.PI; S.yaw += df * Math.min(1, dt * 6);
       if (d <= step) { S.px = p[0]; S.pz = p[1]; a.i++; } else { S.px += dx / d * step; S.pz += dz / d * step; }
       if (a.i >= a.pts.length && a.face) { var fx2 = a.face[0] - S.px, fz2 = a.face[1] - S.pz, ty2 = Math.atan2(-fx2, -fz2), d2 = ty2 - S.yaw; while (d2 > Math.PI) d2 -= 2 * Math.PI; while (d2 < -Math.PI) d2 += 2 * Math.PI; S.yaw += d2 * Math.min(1, dt * 8); S.pitch += (-0.1 - S.pitch) * Math.min(1, dt * 6); if (Math.abs(d2) < 0.08) { a.pts = []; a.i = 0; } }
@@ -491,6 +514,8 @@
       var ty = gy(S.px, S.pz); S.py += (ty - S.py) * Math.min(1, dt * 12);
       S.cam.position.set(S.px, S.py + 1.62 + Math.sin(S.bob) * 0.025, S.pz); S.cam.rotation.set(S.pitch, S.yaw, 0);
       S.cam.updateMatrixWorld();
+      S.scT = (S.scT || 0) + dt; if (S.scT > 0.4) { S.scT = 0; if (S.scr && !S.scr.owned) drawScreenBase(); }
+      if (S.buzz && !S.buzzOwned) { S.pressT = Math.max(0, (S.pressT || 0) - dt); S.buzz.position.y = 1.16 - (S.pressT > 0 ? 0.045 : 0); }
       for (var ti = 0; ti < S.ticks.length; ti++) { try { S.ticks[ti](dt, S.t); } catch (e) { showErr("tick: " + e.message); S.ticks.splice(ti, 1); ti--; } }
       Object.keys(S.stations).forEach(function (id) { var st = S.stations[id]; if (!st.el) return; var q = project(st.lx, st.ly, st.lz), dist = Math.hypot(st.lx - S.px, st.lz - S.pz); st.el.style.display = (q[2] < 1 && dist < 9 && !st.hide) ? "block" : "none"; st.el.style.left = q[0] + "px"; st.el.style.top = q[1] + "px"; });
       if (cbub) { if (c && c.state === "wait" && !S.dlg) { var q2 = project(c.g.position.x, 2.5, c.g.position.z); cbub.style.display = q2[2] < 1 ? "block" : "none"; cbub.style.left = q2[0] + "px"; cbub.style.top = q2[1] + "px"; cbub.textContent = c.kind === "pickup" ? "📦 ?" : "💬"; } else cbub.style.display = "none"; }
@@ -501,7 +526,7 @@
   function updHud() {
     var b = document.getElementById("nx-bal"); if (!b) return; var v = 0; try { v = W.state.balance || 0; } catch (e) {}
     var t = txtOf("balance"); b.textContent = "💰 " + (t || ((typeof W.fmtSats === "function" ? W.fmtSats(v) : fmt(v)) + " sats"));
-    var sub = document.getElementById("nx-sub"); if (sub) sub.textContent = S.subText ? S.subText() : "";
+    var sub = document.getElementById("nx-sub"); if (sub) sub.textContent = (S.subText ? S.subText() : ""); var mod = document.getElementById("nx-mod"); if (mod) mod.textContent = "W" + "✓ " + (W.Parts3D.nextEnv ? "E✓ " : "E– ") + (W.Parts3D.nextLogi ? "L✓ " : "L– ") + (W.Parts3D.clicker ? "C✓" : "C–");
   }
   function txtOf(id) { var e = document.getElementById(id); return e ? (e.textContent || "").replace(/\s+/g, " ").trim() : ""; }
 
@@ -509,7 +534,7 @@
   function ensureDom() {
     if (root) return; css();
     root = document.createElement("div"); root.id = "nx-world";
-    root.innerHTML = '<div class="nx-hud"><b id="nx-bal">💰</b><button id="nx-ord" type="button">📋 ' + T("Aufträge", "Orders") + '</button><button id="nx-cls" type="button">🖱️ ' + T("Klassik", "Classic") + '</button></div><div id="nx-sub"></div><div id="nx-err"></div>' +
+    root.innerHTML = '<div class="nx-hud"><b id="nx-bal">💰</b><button id="nx-ord" type="button">📋 ' + T("Aufträge", "Orders") + '</button><button id="nx-cls" type="button">🖱️ ' + T("Klassik", "Classic") + '</button></div><div id="nx-sub"></div><div id="nx-mod" style="position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);color:#6b7686;font:10px monospace;z-index:3;pointer-events:none"></div><div id="nx-err"></div>' +
       '<div class="nx-cross"></div><div class="nx-lbl cust" id="nx-bub" style="display:none">💬</div><div class="nx-hint">' + T("Links: laufen · Wischen: umsehen · Station/Kunde antippen", "Left: walk · Swipe: look · Tap station/customer") + '</div>' +
       '<div id="nx-joy"><div id="nx-knob"></div></div><div id="nx-dlg"></div><div id="nx-inv"></div>';
     document.body.appendChild(root); cbub = document.getElementById("nx-bub");
