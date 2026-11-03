@@ -608,7 +608,7 @@
     try {
       var moving = move(dt); if (moving) S.bob += dt * 8;
       var c = S.cust;
-      S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = rr(8, 16) * (1.5 - S.rep / 120) * (S.raining ? 0.7 : 1); if ((c ? 1 : 0) + S.queue.length < capNow()) spawnCustomer(); }
+      S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = rr(8, 16) * (1.5 - S.rep / 120) * (S.raining ? 0.7 : 1) * (Date.now() < (S.adUntil || 0) ? 0.6 : 1); if ((c ? 1 : 0) + S.queue.length < capNow()) spawnCustomer(); }
       if (!c && S.queue.length) promote();
       for (var qi = 0; qi < S.queue.length; qi++) {
         var q = S.queue[qi]; stepActor(q, dt);

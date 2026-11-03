@@ -31,3 +31,4 @@ Erweiterungen hängen sich an `Parts3D.nextWorld.S` (`rects`, `obst`, `ticks`, `
 4. Laufen mit Joystick (optional)
 
 - `next/sim.js` — Regen, Lieferwagen am Abholladen, Zufalls-Ereignisse (`?nosim` schaltet ab); Ruf/Warteschlange/Statistik liegen in `world.js`.
+- `next/sim2.js` — Chef-Büro (Lagerhilfe, Einrichtung, Werbung), `?nosim2`.
