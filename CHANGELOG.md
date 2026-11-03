@@ -19,6 +19,7 @@
 - NEXT Grafik-Update: abgerundete Kanten (Extrude-Fase) für alle kleinen Quader, feinere Zylinder/Kugeln, Luefter mit Fluegeln, Kabel (Tube), Wanduhr, Rohre/Lueftung, Schreibtisch- und Theken-Details, detailreichere Fassaden/Daecher, Autos mit Reifen/Felgen/Spiegeln, Baeume, Laternen, Fahrrad, Ampel, Briefkasten, Pflanzkuebel; Buzzer als Kuppel, Spitzhacken mit gebogenem Kopf. Niedrig-Qualitaet (Neustart) nutzt wieder glatte Quader
 - NEXT Ton: Schritte neu (Tiefton + dumpfes Schleifen), Kunden-"Blabla" (Silbenton je 2 Buchstaben, eigene Stimme), Dialogtext wird getippt (Antippen ueberspringt), Kunde nickt beim Reden; Minikarte entfernt
 - NEXT Simulator: Warteschlange (bis 3 Kunden, Platz je nach Ruf), Geduld (😠 nach 60 s, genervt = -8 ⭐), Ruf ⭐ 0-100 (+6 Auftrag angenommen, +10 geliefert; hoeher = mehr Kundschaft), Statistik-Tafel an der Trennwand (Besucher/Auftraege/geliefert/veraergert), alles in localStorage
+- NEXT sim.js: Regen (zufaellig, Nebel dichter, mehr Kundschaft), Lieferwagen faehrt am Abholladen vor wenn eine Bestellung abholbereit wird, Zufalls-Ereignisse (Stammkunde, Zeitung, Express-Zustellung). Statistik-Tafel auf freie linke Wand verschoben (hing vor den Postern). Kill-Switch ?nosim
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

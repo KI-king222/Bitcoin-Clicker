@@ -329,7 +329,7 @@
     var scc = document.createElement("canvas"); scc.width = 768; scc.height = 432; S.scr = { ctx: scc.getContext("2d"), tex: new THREE.CanvasTexture(scc), owned: false };
     sc.add(box(2.5, 1.45, 0.05, mat(0x0b0f16, { metalness: 0.6 }), -2.3, 2.0, -1.17)); sc.add(plane(2.4, 1.35, new THREE.MeshBasicMaterial({ map: S.scr.tex }), -2.3, 2.0, -1.14));
     var bc = document.createElement("canvas"); bc.width = 512; bc.height = 320; S.board = { ctx: bc.getContext("2d"), tex: new THREE.CanvasTexture(bc) }; S.boardDirty = true;
-    sc.add(box(1.34, 0.86, 0.05, mat(0x3a2a1c, { roughness: 0.7 }), 2.4, 2.05, -1.17)); sc.add(plane(1.24, 0.76, new THREE.MeshBasicMaterial({ map: S.board.tex }), 2.4, 2.05, -1.14));
+    sc.add(box(0.05, 0.86, 1.34, mat(0x3a2a1c, { roughness: 0.7 }), -4.27, 1.75, 0.9)); sc.add(plane(1.24, 0.76, new THREE.MeshBasicMaterial({ map: S.board.tex }), -4.24, 1.75, 0.9, Math.PI / 2));
     drawScreenBase();
     S.obst.push([-3.3, -1.3, -1.0, -0.1]);
     addStation("buzzer", -2.3, 1.15, -0.55, 0.9, 0.5, 0.9, "🔴 Buzzer", -2.3, 0.5, function () { buzzDefault(); });
@@ -608,7 +608,7 @@
     try {
       var moving = move(dt); if (moving) S.bob += dt * 8;
       var c = S.cust;
-      S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = rr(8, 16) * (1.5 - S.rep / 120); if ((c ? 1 : 0) + S.queue.length < capNow()) spawnCustomer(); }
+      S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = rr(8, 16) * (1.5 - S.rep / 120) * (S.raining ? 0.7 : 1); if ((c ? 1 : 0) + S.queue.length < capNow()) spawnCustomer(); }
       if (!c && S.queue.length) promote();
       for (var qi = 0; qi < S.queue.length; qi++) {
         var q = S.queue[qi]; stepActor(q, dt);

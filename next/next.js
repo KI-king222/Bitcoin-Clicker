@@ -2,7 +2,7 @@
  * Phase 0: Kennzeichnung, Rueckweg zur stabilen Version.
  * Ladereihenfolge (alles lokal aus next/): world.js (Laden, Erste Person) -> env.js (Strasse) -> logistics.js (Abholladen/Lieferung)
  *   -> clicker.js (Buzzer-Tisch, Original-Upgrades im Raum) -> clickfix.js.
- * Kill-Switches: ?noworld ?noenv ?nologi ?noclicker ?noextras (world aus = 1:1 Kopie des Spiels).
+ * Kill-Switches: ?noworld ?noenv ?nologi ?noclicker ?noextras ?nosim (world aus = 1:1 Kopie des Spiels).
  */
 (function () {
   var W = window;
@@ -34,6 +34,7 @@
     if (!off("nologi")) chain.push("next/logistics.js");
     if (!off("noclicker")) { chain.push("next/clicker.js"); chain.push("next/clickfix.js"); }
     if (!off("noextras")) chain.push("next/extras.js");
+    if (!off("nosim")) chain.push("next/sim.js");
   }
   (function nextLoad() { var f = chain.shift(); if (f) load(f, nextLoad); })();
   console.log("[HASHPOOL NEXT] aktiv");

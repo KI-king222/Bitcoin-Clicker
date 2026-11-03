@@ -29,3 +29,5 @@ Erweiterungen hängen sich an `Parts3D.nextWorld.S` (`rects`, `obst`, `ticks`, `
 2. Laden als Hauptscreen in NEXT
 3. Klick-Einkommen eingebettet (Mining-Rig/Kasse/Farm-Terminal)
 4. Laufen mit Joystick (optional)
+
+- `next/sim.js` — Regen, Lieferwagen am Abholladen, Zufalls-Ereignisse (`?nosim` schaltet ab); Ruf/Warteschlange/Statistik liegen in `world.js`.
