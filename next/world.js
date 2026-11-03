@@ -105,7 +105,7 @@
   /* ---------- Raeume / Kollision (Draufsicht: x rechts, z zum Betrachter/Strasse) ---------- */
   var DIV = -1.3;                              // Trennwand z; Tuer in der Mitte (|x| < 0.9)
   var R = 0.28;                                // Koerperradius
-  var S = { ready: false, shown: false, hiddenByOverlay: false, t: 0, last: 0, cust: null, nextCust: 5, hits: [], stations: {}, sig: "", dlg: null, invOpen: false, invGroup: null, raf: 0,
+  var S = { ready: false, shown: false, hiddenByOverlay: false, t: 0, last: 0, cust: null, queue: [], nextCust: 5, hits: [], stations: {}, sig: "", dlg: null, invOpen: false, invGroup: null, raf: 0,
             yaw: Math.PI, pitch: 0, px: 0.3, pz: 1.4, py: 0.12, auto: null, joy: { x: 0, y: 0 }, keys: {}, bob: 0, face: null, ticks: [], invActions: {}, errN: 0,
             // begehbare Rechtecke [x1,x2,z1,z2] (Wandflaeche zu Wandflaeche, Koerperradius wird abgezogen); Tueren sind eigene Rechtecke, die in beide Raeume ragen
             rects: [[-4.31, 4.31, -1.22, 3.47], [-4.31, 4.31, -6.61, -1.38], [-0.85, 0.85, -2.0, -0.5], [-0.85, 0.85, 2.8, 4.3]],
@@ -328,6 +328,8 @@
     sc.add(box(0.5, 0.03, 0.34, mat(0x20262f, { metalness: 0.6 }), -1.55, 1.01, -0.4)); sc.add(box(0.46, 0.02, 0.3, new THREE.MeshBasicMaterial({ map: tabc }), -1.55, 1.035, -0.4));
     var scc = document.createElement("canvas"); scc.width = 768; scc.height = 432; S.scr = { ctx: scc.getContext("2d"), tex: new THREE.CanvasTexture(scc), owned: false };
     sc.add(box(2.5, 1.45, 0.05, mat(0x0b0f16, { metalness: 0.6 }), -2.3, 2.0, -1.17)); sc.add(plane(2.4, 1.35, new THREE.MeshBasicMaterial({ map: S.scr.tex }), -2.3, 2.0, -1.14));
+    var bc = document.createElement("canvas"); bc.width = 512; bc.height = 320; S.board = { ctx: bc.getContext("2d"), tex: new THREE.CanvasTexture(bc) }; S.boardDirty = true;
+    sc.add(box(1.34, 0.86, 0.05, mat(0x3a2a1c, { roughness: 0.7 }), 2.4, 2.05, -1.17)); sc.add(plane(1.24, 0.76, new THREE.MeshBasicMaterial({ map: S.board.tex }), 2.4, 2.05, -1.14));
     drawScreenBase();
     S.obst.push([-3.3, -1.3, -1.0, -0.1]);
     addStation("buzzer", -2.3, 1.15, -0.55, 0.9, 0.5, 0.9, "🔴 Buzzer", -2.3, 0.5, function () { buzzDefault(); });
@@ -495,17 +497,37 @@
       if (ao && rigs.some(function (r) { try { return O.eval(ao, r.partIds).ok; } catch (e) { return false; } })) { kind = "pickup"; order = ao; var sv = specs()[ao.id]; if (sv) { sp = sv.spec; name = sv.name; } }
     }
     if (kind === "browse" && !st.active) { var fo = []; O.list().forEach(function (o) { if (!st.done[o.id]) fo.push(o); }); if (fo.length) { order = rnd(fo); kind = "order"; } }
+    var all = S.queue.concat(S.cust ? [S.cust] : []);
+    if (all.length && kind !== "browse" && all.some(function (x) { return x.order && order && x.order.id === order.id; })) { kind = "browse"; order = null; }
+    if (all.length && kind === "browse") return;   // Laufkundschaft nur, wenn der Laden leer ist
     if (!sp) { sp = D.randomSpec(order ? LOOK[order.id] : null); if (order && kind === "order") saveSpec(order.id, sp, name); }
     var a = makeActor(sp), side = Math.random() < 0.5 ? -1 : 1; a.g.position.set(side * 13, 0.12, 4.9); a.speed = rr(1.5, 1.9);
     var hb = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.2, 0.9), new THREE.MeshBasicMaterial({ visible: false })); hb.position.set(0, 1.1, 0); a.g.add(hb); a.hit = hb;
-    a.voice = { f: (sp && sp.fem) ? rr(250, 340) : rr(120, 200), w: (sp && sp.fem) ? "triangle" : "square", v: rr(0.85, 1.15) }; a.kind = kind; a.order = order; a.name = name; a.side = side; a.state = "in"; a.wait = 0; S.grp.add(a.g); S.cust = a;
+    a.voice = { f: (sp && sp.fem) ? rr(250, 340) : rr(120, 200), w: (sp && sp.fem) ? "triangle" : "square", v: rr(0.85, 1.15) }; a.kind = kind; a.order = order; a.name = name; a.side = side; a.state = "in"; a.wait = 0; S.grp.add(a.g); S.stats.visitors++; saveStats();
+    if (S.cust) { var k = S.queue.length; a.state = "qin"; a.pat = rr(55, 85); S.queue.push(a); a.path = [[0, 4.9], [0, 3.0], QSLOT[k] || QSLOT[1]]; a.pi = 0; a.done = function (x) { x.state = "queue"; }; if (S.onCustomer) { try { S.onCustomer(a); } catch (e) {} } return; }
+    S.cust = a; if (S.onCustomer) { try { S.onCustomer(a); } catch (e) {} }
     a.path = [[0, 4.9], [0, 3.0], [0.7, 2.0]].concat(kind === "browse" ? [[rr(-3, -1), rr(1.4, 2.6)], [rr(-3, 3), rr(1.0, 2.0)], [0, 3.0]] : []); a.pi = 0;
     a.done = function (x) { if (x.kind === "browse") leave(x); else { x.state = "wait"; x.wait = 0; } };
   }
   function leave(c) {
     if (S.dlg === c) closeDlg(); c.state = "out"; c.path = [[0, 3.0], [0, 4.9], [c.side * 13, 4.9]]; c.pi = 0;
-    c.done = function (x) { try { S.grp.remove(x.g); } catch (e) {} if (S.cust === x) { S.cust = null; S.nextCust = rr(8, 16); } };
+    var qi = S.queue.indexOf(c); if (qi >= 0) { S.queue.splice(qi, 1); reflow(); }
+    c.done = function (x) { try { S.grp.remove(x.g); } catch (e) {} if (S.cust === x) { S.cust = null; S.nextCust = Math.min(S.nextCust, rr(2, 5)) ; promote(); } };
   }
+  var QSLOT = [[0.7, 2.9], [1.9, 2.7], [-0.4, 2.9]];
+  function reflow() { S.queue.forEach(function (q, i) { if (q.state === "queue") { q.path = [QSLOT[i] || QSLOT[1]]; q.pi = 0; q.done = function (x) { x.state = "queue"; }; } }); }
+  function promote() {
+    if (S.cust || !S.queue.length) return; var c = S.queue.shift(); S.cust = c; c.state = "in"; c.wait = 0; c.path = [[0.7, 2.0]]; c.pi = 0;
+    c.done = function (x) { x.state = "wait"; x.wait = 0; }; reflow();
+  }
+  /* Ruf + Statistik */
+  function loadJ(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+  S.rep = +loadJ("hashpool-next-rep", 40) || 40; S.stats = loadJ("hashpool-next-stats", { visitors: 0, accepted: 0, delivered: 0, angry: 0 });
+  function saveStats() { try { localStorage.setItem("hashpool-next-stats", JSON.stringify(S.stats)); localStorage.setItem("hashpool-next-rep", String(S.rep)); } catch (e) {} S.boardDirty = true; }
+  function addRep(d) { S.rep = Math.max(0, Math.min(100, S.rep + d)); saveStats(); }
+  S.addRep = addRep;
+  function angry(c) { addRep(-8); S.stats.angry++; saveStats(); toast("😠 " + c.name + T(" ist genervt abgezogen (-8 ⭐)", " left angry (-8 ⭐)")); leave(c); }
+  function capNow() { return S.rep < 30 ? 1 : S.rep < 60 ? 2 : 3; }
   var typeIv = null;
   function stopType() { if (typeIv) { clearInterval(typeIv); typeIv = null; } if (S.cust) S.cust.talking = false; }
   function finishType() {
@@ -535,9 +557,9 @@
   function closeDlg() { stopType(); var d = document.getElementById("nx-dlg"); if (d) d.classList.remove("show"); S.dlg = null; }
   function dlgAction(a) {
     var c = S.dlg, O = ORD(); if (!c) return;
-    if (a === "accept") { O.open(); var b = document.querySelector('#ord-ov [data-accept="' + c.order.id + '"]'); if (b) b.click(); O.close(); toast(T("Auftrag angenommen: ", "Order accepted: ") + (de() ? c.order.de[0] : c.order.en[0])); leave(c); }
+    if (a === "accept") { O.open(); var b = document.querySelector('#ord-ov [data-accept="' + c.order.id + '"]'); if (b) b.click(); O.close(); toast(T("Auftrag angenommen: ", "Order accepted: ") + (de() ? c.order.de[0] : c.order.en[0]) + " (+6 ⭐)"); addRep(6); S.stats.accepted++; saveStats(); leave(c); }
     else if (a === "decline" || a === "later") leave(c);
-    else if (a === "deliver") { closeDlg(); O.open(); S.pendLeave = c; }
+    else if (a === "deliver") { closeDlg(); try { c.doneN = Object.keys(O.state().done || {}).length; } catch (e) { c.doneN = -1; } O.open(); S.pendLeave = c; }
   }
 
   /* ---------- Schleife ---------- */
@@ -586,11 +608,17 @@
     try {
       var moving = move(dt); if (moving) S.bob += dt * 8;
       var c = S.cust;
-      if (!c) { S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = 6; spawnCustomer(); } }
-      else {
+      S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = rr(8, 16) * (1.5 - S.rep / 120); if ((c ? 1 : 0) + S.queue.length < capNow()) spawnCustomer(); }
+      if (!c && S.queue.length) promote();
+      for (var qi = 0; qi < S.queue.length; qi++) {
+        var q = S.queue[qi]; stepActor(q, dt);
+        if (q.state === "queue") { var fq = Math.atan2(S.px - q.g.position.x, S.pz - q.g.position.z), dq = fq - q.g.rotation.y; while (dq > Math.PI) dq -= 2 * Math.PI; while (dq < -Math.PI) dq += 2 * Math.PI; q.g.rotation.y += dq * Math.min(1, dt * 5); q.pat -= dt; if (q.pat <= 0 && !S.dlg) { angry(q); qi--; } }
+      }
+      c = S.cust;
+      if (c) {
         stepActor(c, dt); try { if (c.ch && c.ch.head && c.state === "wait") c.ch.head.rotation.x = c.talking ? Math.sin(S.t * 17) * 0.09 : 0; } catch (e) {}
-        if (c.state === "wait") { c.wait += dt; var fy = Math.atan2(S.px - c.g.position.x, S.pz - c.g.position.z), dd = fy - c.g.rotation.y; while (dd > Math.PI) dd -= 2 * Math.PI; while (dd < -Math.PI) dd += 2 * Math.PI; c.g.rotation.y += dd * Math.min(1, dt * 5); if (c.wait > 90 && !S.dlg) leave(c); }
-        if (S.pendLeave === c && !visible("ord-ov", "show")) { S.pendLeave = null; leave(c); }
+        if (c.state === "wait") { c.wait += dt; var fy = Math.atan2(S.px - c.g.position.x, S.pz - c.g.position.z), dd = fy - c.g.rotation.y; while (dd > Math.PI) dd -= 2 * Math.PI; while (dd < -Math.PI) dd += 2 * Math.PI; c.g.rotation.y += dd * Math.min(1, dt * 5); if (c.wait > 90 && !S.dlg) angry(c); }
+        if (S.pendLeave === c && !visible("ord-ov", "show")) { S.pendLeave = null; var dn = c.doneN; try { dn = Object.keys(ORD().state().done || {}).length - c.doneN; } catch (e) { dn = 0; } if (dn > 0) { addRep(10); S.stats.delivered++; saveStats(); toast("⭐ +10"); } leave(c); }
       }
       var ty = gy(S.px, S.pz); S.py += (ty - S.py) * Math.min(1, dt * 12);
       S.cam.position.set(S.px, S.py + 1.62 + Math.sin(S.bob) * 0.025, S.pz); S.cam.rotation.set(S.pitch, S.yaw, 0);
@@ -599,14 +627,23 @@
       if (S.buzz && !S.buzzOwned) { S.pressT = Math.max(0, (S.pressT || 0) - dt); S.buzz.position.y = 1.16 - (S.pressT > 0 ? 0.045 : 0); }
       for (var ti = 0; ti < S.ticks.length; ti++) { try { S.ticks[ti](dt, S.t); } catch (e) { showErr("tick: " + e.message); S.ticks.splice(ti, 1); ti--; } }
       Object.keys(S.stations).forEach(function (id) { var st = S.stations[id]; if (!st.el) return; var q = project(st.lx, st.ly, st.lz), dist = Math.hypot(st.lx - S.px, st.lz - S.pz); st.el.style.display = (q[2] < 1 && dist < 9 && !st.hide) ? "block" : "none"; st.el.style.left = q[0] + "px"; st.el.style.top = q[1] + "px"; });
-      if (cbub) { if (c && c.state === "wait" && !S.dlg) { var q2 = project(c.g.position.x, 2.5, c.g.position.z); cbub.style.display = q2[2] < 1 ? "block" : "none"; cbub.style.left = q2[0] + "px"; cbub.style.top = q2[1] + "px"; cbub.textContent = c.kind === "pickup" ? "📦 ?" : "💬"; } else cbub.style.display = "none"; }
+      if (cbub) { if (c && c.state === "wait" && !S.dlg) { var q2 = project(c.g.position.x, 2.5, c.g.position.z); cbub.style.display = q2[2] < 1 ? "block" : "none"; cbub.style.left = q2[0] + "px"; cbub.style.top = q2[1] + "px"; cbub.textContent = c.wait > 60 ? "😠" : c.kind === "pickup" ? "📦 ?" : "💬"; } else cbub.style.display = "none"; }
       S.invT = (S.invT || 0) + dt; if (S.invT > 1) { S.invT = 0; rebuildShelf(); updHud(); }
       S.rd.render(S.scene, S.cam);
     } catch (e) { showErr("frame: " + e.message); }
   }
+  function drawBoard() {
+    var g = S.board && S.board.ctx; if (!g) return; var st = S.stats, n = Math.round(S.rep), stars = Math.max(1, Math.min(5, Math.ceil(n / 20)));
+    g.fillStyle = "#16301f"; g.fillRect(0, 0, 512, 320); g.fillStyle = "#f7931a"; g.font = "bold 34px sans-serif"; g.textAlign = "center"; g.fillText(T("LADEN-STATISTIK", "SHOP STATS"), 256, 40);
+    g.font = "40px sans-serif"; g.fillText("★★★★★".slice(0, stars) + "☆☆☆☆☆".slice(0, 5 - stars), 256, 92); g.fillStyle = "#cfe8d6"; g.font = "24px monospace"; g.textAlign = "left";
+    var rows = [[T("Ruf", "Reputation"), n + "/100"], [T("Besucher", "Visitors"), st.visitors], [T("Aufträge", "Orders"), st.accepted], [T("Geliefert", "Delivered"), st.delivered], [T("Verärgert", "Angry"), st.angry]];
+    rows.forEach(function (r, i) { g.fillText(r[0], 40, 140 + i * 36); g.textAlign = "right"; g.fillText(String(r[1]), 472, 140 + i * 36); g.textAlign = "left"; });
+    S.board.tex.needsUpdate = true; S.boardDirty = false;
+  }
   function updHud() {
+    if (S.boardDirty) drawBoard();
     var b = document.getElementById("nx-bal"); if (!b) return; var v = 0; try { v = W.state.balance || 0; } catch (e) {}
-    var t = txtOf("balance"); b.textContent = "💰 " + (t || ((typeof W.fmtSats === "function" ? W.fmtSats(v) : fmt(v)) + " sats"));
+    var t = txtOf("balance"); b.textContent = "💰 " + (t || ((typeof W.fmtSats === "function" ? W.fmtSats(v) : fmt(v)) + " sats")) + "  ⭐" + Math.round(S.rep) + (S.queue.length ? "  👥" + (S.queue.length + 1) : "");
     var sub = document.getElementById("nx-sub"); if (sub) sub.textContent = (S.subText ? S.subText() : ""); var mod = document.getElementById("nx-mod"); if (mod) mod.textContent = "W" + "✓ " + (W.Parts3D.nextEnv ? "E✓ " : "E– ") + (W.Parts3D.nextLogi ? "L✓ " : "L– ") + (W.Parts3D.clicker ? "C✓" : "C–");
   }
   function txtOf(id) { var e = document.getElementById(id); return e ? (e.textContent || "").replace(/\s+/g, " ").trim() : ""; }
