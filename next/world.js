@@ -360,11 +360,11 @@
     if (!S.ready) return; var w = S.stage.clientWidth || 360, h = S.stage.clientHeight || 600; S.rd.setSize(w, h, true); S.cam.aspect = w / h; S.cam.fov = w / h < 0.8 ? 80 : 68; S.cam.updateProjectionMatrix();
   }
   function bindControls(el) {
-    var down = null, moved = 0, lx = 0, ly = 0;
-    el.addEventListener("pointerdown", function (e) { down = e.pointerId; moved = 0; lx = e.clientX; ly = e.clientY; try { el.setPointerCapture(e.pointerId); } catch (x) {} });
+    var down = null, moved = 0, lx = 0, ly = 0, drag = false;
+    el.addEventListener("pointerdown", function (e) { down = e.pointerId; moved = 0; drag = false; lx = e.clientX; ly = e.clientY; try { el.setPointerCapture(e.pointerId); } catch (x) {} });
     el.addEventListener("pointermove", function (e) {
-      if (down !== e.pointerId) return; var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
-      if (S.dlg || S.invOpen) return; S.yaw -= dx * 0.006; S.pitch = Math.max(-0.9, Math.min(0.9, S.pitch - dy * 0.005)); S.face = null;
+      if (down !== e.pointerId) return; if (e.pointerType === "mouse" && !e.buttons) { down = null; return; } var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+      if (S.dlg || S.invOpen) return; if (!drag) { if (moved < 16) return; drag = true; return; } S.yaw -= dx * 0.006; S.pitch = Math.max(-0.9, Math.min(0.9, S.pitch - dy * 0.005)); S.face = null;
     });
     function up(e) { if (down !== e.pointerId) return; down = null; if (e.type === "pointerup" && moved < 10) tap(e.clientX, e.clientY); }
     el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
@@ -562,11 +562,17 @@
       return true;
     }
     if (S.auto) {
-      var a = S.auto, p = a.pts[a.i]; if (!p) { var id = a.id; S.auto = null; var st = S.stations[id]; if (st) { try { st.action(); } catch (e) { showErr("Station " + id + ": " + e.message); } } return false; }
+      var a = S.auto, p = a.pts[a.i];
+      if (!p) {
+        if (a.face && !a.turned) {                                    // am Ziel: erst zur Station drehen (max 0,6 s), dann Aktion
+          var fx3 = a.face[0] - S.px, fz3 = a.face[1] - S.pz, ty3 = Math.atan2(-fx3, -fz3), d3 = ty3 - S.yaw; while (d3 > Math.PI) d3 -= 2 * Math.PI; while (d3 < -Math.PI) d3 += 2 * Math.PI;
+          S.yaw += d3 * Math.min(1, dt * 10); S.pitch += (-0.1 - S.pitch) * Math.min(1, dt * 8); a.tt = (a.tt || 0) + dt; if (Math.abs(d3) < 0.05 || a.tt > 0.6) a.turned = true; return true;
+        }
+        var id = a.id; S.auto = null; var st = S.stations[id]; if (st) { try { st.action(); } catch (e) { showErr("Station " + id + ": " + e.message); } } return false;
+      }
       var dx = p[0] - S.px, dz = p[1] - S.pz, d = Math.hypot(dx, dz), step = 4.6 * dt;
       var ty = Math.atan2(-dx, -dz), df = ty - S.yaw; while (df > Math.PI) df -= 2 * Math.PI; while (df < -Math.PI) df += 2 * Math.PI; S.yaw += df * Math.min(1, dt * 6);
       if (d <= step) { S.px = p[0]; S.pz = p[1]; a.i++; } else { S.px += dx / d * step; S.pz += dz / d * step; }
-      if (a.i >= a.pts.length && a.face) { var fx2 = a.face[0] - S.px, fz2 = a.face[1] - S.pz, ty2 = Math.atan2(-fx2, -fz2), d2 = ty2 - S.yaw; while (d2 > Math.PI) d2 -= 2 * Math.PI; while (d2 < -Math.PI) d2 += 2 * Math.PI; S.yaw += d2 * Math.min(1, dt * 8); S.pitch += (-0.1 - S.pitch) * Math.min(1, dt * 6); if (Math.abs(d2) < 0.08) { a.pts = []; a.i = 0; } }
       return true;
     }
     return false;

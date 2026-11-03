@@ -108,7 +108,16 @@
     goalEl = document.createElement("div"); goalEl.id = "nx-goal"; root.appendChild(goalEl);
     var bs = document.createElement("button"); bs.id = "nx-snd"; bs.type = "button"; bs.textContent = muted ? "🔇" : "🔊"; bs.addEventListener("click", snd.toggle); hud.appendChild(bs);
     var bq = document.createElement("button"); bq.id = "nx-q"; bq.type = "button"; bq.addEventListener("click", cycleQuality); hud.appendChild(bq);
-    ["pointerdown", "touchstart", "keydown"].forEach(function (ev) { W.addEventListener(ev, function () { actx(); }, { once: true, passive: true }); });
+    // iOS: AudioContext muss in touchend/click entsperrt werden (nicht pointerdown) und darf nicht an den Stumm-Schalter gebunden sein
+    var SIL = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAAAAA=", silEl = null;
+    function unlock() {
+      try { if (W.navigator && navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+      var c = actx(); if (c && c.state !== "running" && c.resume) { try { c.resume(); } catch (e) {} }
+      if (!silEl) { try { silEl = document.createElement("audio"); silEl.src = SIL; silEl.loop = true; silEl.setAttribute("playsinline", ""); silEl.volume = 0.02; var pr = silEl.play(); if (pr && pr.catch) pr.catch(function () { silEl = null; }); } catch (e) { silEl = null; } }
+      if (c && c.state === "running") { var b = document.getElementById("nx-snd"); if (b && !muted) b.textContent = "🔊"; }
+    }
+    ["touchend", "click", "pointerup", "keydown", "mousedown"].forEach(function (ev) { W.addEventListener(ev, unlock, { passive: true, capture: true }); });
+    setInterval(function () { if (ac && ac.state === "suspended" && !muted) { var b = document.getElementById("nx-snd"); if (b) b.textContent = "🔈"; } }, 1500);
     // Position wiederherstellen
     try { var p = JSON.parse(ls("hashpool-next-pos") || "null"); if (p && S.free(p.x, p.z)) { S.px = p.x; S.pz = p.z; S.yaw = p.yaw || S.yaw; } } catch (e) {}
     // Pfeil (Bake) ueber dem Ziel
