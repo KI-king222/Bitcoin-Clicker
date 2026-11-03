@@ -27,14 +27,24 @@
   function haloTex() { return G.ctex(64, 64, function (g, w, h) { var r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, "rgba(255,225,150,.95)"); r.addColorStop(0.3, "rgba(255,200,110,.35)"); r.addColorStop(1, "rgba(255,200,110,0)"); g.fillStyle = r; g.fillRect(0, 0, w, h); }); }
   function facadeTex(kind) {
     return G.ctex(512, 512, function (g, w, h) {
-      var base = { a: "#2d2a38", b: "#3a2f2f", c: "#263341", d: "#33382f" }[kind] || "#2d2a38"; g.fillStyle = base; g.fillRect(0, 0, w, h);
-      G.speckle(g, w, h, 1500, ["rgba(255,255,255,.04)", "rgba(0,0,0,.08)"], 2);
-      for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) {
-        var x = c * 128 + 24, y = r * 128 + 22, lit = Math.random() < 0.5;
-        g.fillStyle = "#0b0d12"; g.fillRect(x - 4, y - 4, 88, 96);
-        if (lit) { var gr = g.createLinearGradient(x, y, x, y + 88); gr.addColorStop(0, rnd(["#ffd88a", "#ffe9b8", "#ffc870"])); gr.addColorStop(1, "#c98a3a"); g.fillStyle = gr; } else { g.fillStyle = rnd(["#101828", "#16203a", "#0d1424"]); }
-        g.fillRect(x, y, 80, 88); g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(x + 38, y, 4, 88); g.fillRect(x, y + 42, 80, 4);
-        if (lit && Math.random() < 0.4) { g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(x + 10, y + 50, 24, 38); }
+      var base = { a: "#3a3548", b: "#4a3a36", c: "#2f4152", d: "#3d4236" }[kind] || "#3a3548"; g.fillStyle = base; g.fillRect(0, 0, w, h);
+      if (kind === "b" || kind === "d") { for (var br = 0; br < 32; br++) for (var bc = -1; bc < 16; bc++) { var bx = bc * 34 + (br % 2 ? 17 : 0); g.fillStyle = "rgba(" + (kind === "b" ? "150,80,60" : "110,120,90") + "," + (0.12 + Math.random() * 0.14) + ")"; g.fillRect(bx + 1, br * 16 + 1, 32, 14); } }
+      G.speckle(g, w, h, 1600, ["rgba(255,255,255,.04)", "rgba(0,0,0,.09)"], 2);
+      var vg = g.createLinearGradient(0, 0, 0, h); vg.addColorStop(0, "rgba(255,255,255,.04)"); vg.addColorStop(1, "rgba(0,0,0,.18)"); g.fillStyle = vg; g.fillRect(0, 0, w, h);
+      for (var r = 0; r < 4; r++) {
+        g.fillStyle = "rgba(0,0,0,.28)"; g.fillRect(0, r * 128 + 118, w, 6); g.fillStyle = "rgba(255,255,255,.07)"; g.fillRect(0, r * 128 + 124, w, 3);     // Geschossband
+        for (var c = 0; c < 4; c++) {
+          var x = c * 128 + 24, y = r * 128 + 22, lit = Math.random() < 0.5;
+          g.fillStyle = "#c9c3b8"; g.fillRect(x - 7, y - 8, 94, 8); g.fillRect(x - 5, y + 86, 90, 7);                                                   // Sturz + Fensterbank
+          g.fillStyle = "#15171d"; g.fillRect(x - 3, y - 2, 86, 90);
+          if (lit) { var gr = g.createLinearGradient(x, y, x, y + 88); gr.addColorStop(0, rnd(["#ffe2a0", "#fff0c8", "#ffcf80"])); gr.addColorStop(1, rnd(["#d89a48", "#c98a3a"])); g.fillStyle = gr; } else { var gd = g.createLinearGradient(x, y, x + 80, y + 88); gd.addColorStop(0, "#22304f"); gd.addColorStop(0.5, "#101828"); gd.addColorStop(1, "#1a2540"); g.fillStyle = gd; }
+          g.fillRect(x, y, 80, 88);
+          if (lit && Math.random() < 0.6) { g.fillStyle = "rgba(160,60,50,.5)"; g.fillRect(x, y, 22, 88); g.fillRect(x + 58, y, 22, 88); }                  // Vorhaenge
+          if (lit && Math.random() < 0.4) { g.fillStyle = "rgba(0,0,0,.38)"; g.beginPath(); g.arc(x + 40, y + 60, 12, 0, 6.3); g.fill(); g.fillRect(x + 28, y + 60, 24, 28); }   // Silhouette
+          g.fillStyle = "rgba(0,0,0,.55)"; g.fillRect(x + 38, y, 4, 88); g.fillRect(x, y + 42, 80, 4);
+          if (!lit) { g.fillStyle = "rgba(255,255,255,.07)"; g.beginPath(); g.moveTo(x, y + 88); g.lineTo(x + 30, y); g.lineTo(x + 44, y); g.lineTo(x + 14, y + 88); g.fill(); }
+          if (Math.random() < 0.2) { g.fillStyle = "#2a1c14"; g.fillRect(x - 2, y + 92, 84, 10); g.fillStyle = "#3a8a4a"; for (var pl = 0; pl < 7; pl++) g.fillRect(x + pl * 12, y + 86, 8, 8); }     // Blumenkasten
+        }
       }
     });
   }
@@ -43,8 +53,16 @@
   /* ---------- Haeuser ---------- */
   function building(x, z, w, h, d, kind, face) {   // z = vordere Kante (Fassade zeigt nach +z oder -z)
     var m = M(0xffffff, { map: G.rep(facadeTex(kind), Math.max(1, w / 10.4), Math.max(1, h / 12.8)), roughness: 0.95 });
-    var b = box(w, h, d, m, x, h / 2, z + (face > 0 ? -d / 2 : d / 2)); sc.add(b);
-    sc.add(box(w + 0.3, 0.3, d + 0.3, M(0x15171d, { roughness: 1 }), x, h + 0.15, z + (face > 0 ? -d / 2 : d / 2)));
+    var cz = z + (face > 0 ? -d / 2 : d / 2), fz = z + (face > 0 ? 0.06 : -0.06), sgn = face > 0 ? 1 : -1, b = box(w, h, d, m, x, h / 2, cz); sc.add(b);
+    var st = M(0xb8b2a6, { roughness: 0.9 });
+    sc.add(box(w + 0.4, 0.3, 0.5, st, x, h + 0.1, fz + sgn * 0.1)); sc.add(box(w + 0.2, 0.18, 0.3, st, x, 3.4, fz + sgn * 0.05));            // Dachgesims + Sockelband
+    sc.add(box(w + 0.3, 0.9, d + 0.3, M(0x15171d, { roughness: 1 }), x, h + 0.45, cz));                                                          // Attika
+    for (var k = 0; k < Math.max(1, Math.floor(w / 6)); k++) {                                                                                      // Dachaufbauten: Klimagerate, Schornstein, Antenne
+      var ax = x - w / 2 + 2 + k * 5.4 + rr(0, 1.2);
+      sc.add(box(1.0, 0.6, 0.8, M(0x8a9099, { metalness: 0.4 }), ax, h + 1.2, cz)); var fn = G.fan(0.22, 0x1a1d24, 5); fn.rotation.x = -Math.PI / 2; fn.position.set(ax, h + 1.52, cz); sc.add(fn);
+      if (k % 2) { sc.add(box(0.5, 1.3, 0.5, M(0x4a3030, { roughness: 1 }), ax + 1.6, h + 1.5, cz + 0.6)); } else { sc.add(cyl(0.02, 0.02, 2.2, M(0x222), ax + 1.6, h + 2.0, cz - 0.5, 6)); sc.add(box(0.7, 0.03, 0.03, M(0x222), ax + 1.6, h + 2.6, cz - 0.5)); }
+    }
+    sc.add(cyl(0.07, 0.07, h, M(0x3a3f48, { metalness: 0.6 }), x + w / 2 - 0.3, h / 2, fz + sgn * 0.12, 10));                                       // Regenfallrohr
     return b;
   }
   function shopfront(x, z, w, txt, bg, fg, warm) {   // Ladenfront (Laden-Block, Fassade nach +z)
@@ -91,14 +109,19 @@
 
   /* ---------- Strassenmoebel ---------- */
   function lamp(x, z) {
-    sc.add(cyl(0.05, 0.08, 4.2, M(0x1b1e24, { metalness: 0.6 }), x, 2.2, z, 8)); var arm = box(0.9, 0.06, 0.06, M(0x1b1e24), x, 4.3, z - 0.4); arm.rotation.z = 0; sc.add(arm);
-    sc.add(box(0.4, 0.1, 0.22, new THREE.MeshBasicMaterial({ color: 0xffe3a0 }), x, 4.25, z - 0.82));
-    var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex(), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false })); halo.scale.set(3.2, 3.2, 1); halo.position.set(x, 4.2, z - 0.82); sc.add(halo); halos.push(halo);
-    S.obst.push([x - 0.12, x + 0.12, z - 0.12, z + 0.12]);
+    var pm = M(0x1b1e24, { metalness: 0.7, roughness: 0.4 });
+    sc.add(cyl(0.11, 0.14, 0.3, pm, x, 0.27, z, 14)); sc.add(cyl(0.05, 0.08, 4.0, pm, x, 2.3, z, 14));
+    var arc = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.04, 8, 18, Math.PI / 2), pm); arc.position.set(x, 4.3, z - 0.45); arc.rotation.y = Math.PI / 2; arc.rotation.z = 0; sc.add(arc);
+    sc.add(G.rbox(0.5, 0.12, 0.26, 0.04, pm, x, 4.74, z - 0.45)); sc.add(box(0.4, 0.06, 0.2, new THREE.MeshBasicMaterial({ color: 0xffe3a0 }), x, 4.66, z - 0.45));
+    var halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex(), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false })); halo.scale.set(3.4, 3.4, 1); halo.position.set(x, 4.5, z - 0.45); sc.add(halo); halos.push(halo);
+    S.obst.push([x - 0.14, x + 0.14, z - 0.14, z + 0.14]);
   }
   function tree(x, z) {
-    sc.add(box(0.8, 0.28, 0.8, M(0x3a3f48, { roughness: 0.9 }), x, 0.26, z)); sc.add(cyl(0.1, 0.14, 2.2, M(0x4a3626, { roughness: 1 }), x, 1.4, z, 8));
-    var l1 = M(0x1f6a3a, { roughness: 1 }), l2 = M(0x2a8048, { roughness: 1 }); sc.add(sph(0.9, l1, x, 3.0, z, 10, 8)); sc.add(sph(0.7, l2, x + 0.5, 3.5, z + 0.2, 10, 8)); sc.add(sph(0.65, l2, x - 0.5, 3.3, z - 0.3, 10, 8)); sc.add(sph(0.55, l1, x, 3.9, z, 10, 8));
+    sc.add(G.rbox(0.9, 0.3, 0.9, 0.05, M(0x3a3f48, { roughness: 0.9 }), x, 0.27, z)); sc.add(cyl(0.7 * 0.5, 0.7 * 0.5, 0.04, M(0x2a1d14, { roughness: 1 }), x, 0.43, z, 18));
+    var bark = M(0x4a3626, { roughness: 1 }); sc.add(cyl(0.09, 0.15, 2.3, bark, x, 1.5, z, 12));
+    [[0.5, 0.5], [-0.5, 0.35], [0.1, -0.55]].forEach(function (p, i) { var br = cyl(0.03, 0.05, 0.9, bark, x + p[0] * 0.4, 2.7, z + p[1] * 0.4, 6); br.rotation.z = -p[0] * 0.9; br.rotation.x = p[1] * 0.9; sc.add(br); });
+    var cols = [M(0x1f6a3a, { roughness: 1 }), M(0x2a8048, { roughness: 1 }), M(0x35965a, { roughness: 1 })];
+    for (var i = 0; i < 12; i++) { var a = i * 2.4, r = 0.35 + (i % 3) * 0.28, y = 2.9 + (i % 4) * 0.38; sc.add(G.sph(0.5 + (i % 3) * 0.1, cols[i % 3], x + Math.cos(a) * r, y, z + Math.sin(a) * r, 10, 8)); }
     S.obst.push([x - 0.45, x + 0.45, z - 0.45, z + 0.45]);
   }
   function bench(x, z) {
@@ -112,16 +135,31 @@
     [-9.5, -3.4, 3.4, 12].forEach(function (x) { tree(x, 5.6); });
     bench(-6.2, 5.2); bench(11.5, 4.6); bin(-1.8, 5.5); bin(5.0, 5.5); hydrant(-11, 5.9); hydrant(14, 5.9);
     [-11, 0, 11].forEach(function (x) { tree(x + 3, 13.7); lamp(x - 3, 13.4); });
+    // Pflanzkuebel vor den Schaufenstern, Fahrrad, Ampel, Briefkasten, Strassenschild
+    [-3.2, 3.2].forEach(function (x) { sc.add(G.rbox(1.2, 0.5, 0.45, 0.05, M(0x5a4a3a, { roughness: 0.9 }), x, 0.37, 4.0)); for (var b = 0; b < 8; b++) sc.add(G.sph(0.17, M(b % 2 ? 0x2a8048 : 0x1f6a3a, { roughness: 1 }), x - 0.5 + b * 0.14, 0.78 + (b % 3) * 0.05, 4.0 + (b % 2 ? 0.06 : -0.06), 8, 6)); S.obst.push([x - 0.65, x + 0.65, 3.75, 4.25]); });
+    (function () { var bx = -7.6, bz = 4.4, fm = M(0xd32f2f, { metalness: 0.6, roughness: 0.4 }), rb = M(0x0b0c0f, { roughness: 0.9 });
+      [-0.45, 0.45].forEach(function (dx) { var w = new THREE.Mesh(new THREE.TorusGeometry(0.33, 0.025, 8, 24), rb); w.position.set(bx + dx, 0.45, bz); w.rotation.y = Math.PI / 2; sc.add(w); });
+      var fr = cyl(0.015, 0.015, 0.9, fm, bx, 0.7, bz, 8); fr.rotation.z = 1.3; sc.add(fr); var fr2 = cyl(0.015, 0.015, 0.7, fm, bx - 0.1, 0.65, bz, 8); fr2.rotation.z = -0.9; sc.add(fr2); sc.add(cyl(0.012, 0.012, 0.4, fm, bx + 0.42, 0.8, bz, 8)); sc.add(box(0.03, 0.03, 0.4, M(0x20242b), bx + 0.42, 1.0, bz)); sc.add(G.rbox(0.22, 0.05, 0.1, 0.02, M(0x20242b), bx - 0.4, 0.95, bz)); S.obst.push([bx - 0.8, bx + 0.8, bz - 0.2, bz + 0.2]); })();
+    (function () { var tx = -8.4, tz = 6.0, pm = M(0x1b1e24, { metalness: 0.6 }); sc.add(cyl(0.05, 0.06, 3.2, pm, tx, 1.7, tz, 10)); sc.add(G.rbox(0.28, 0.8, 0.22, 0.05, pm, tx, 3.1, tz)); [[0xff2a2a, 3.38], [0xffb020, 3.1], [0x2aff6a, 2.82]].forEach(function (l, i) { sc.add(G.sph(0.08, new THREE.MeshBasicMaterial({ color: l[0] }), tx, l[1], tz + 0.12, 10, 8)); }); S.obst.push([tx - 0.12, tx + 0.12, tz - 0.12, tz + 0.12]); })();
+    sc.add(G.rbox(0.5, 1.1, 0.4, 0.06, M(0x2a5fb0, { roughness: 0.5 }), 13.2, 0.7, 5.4)); sc.add(box(0.3, 0.04, 0.02, M(0x0b0c0f), 13.2, 1.0, 5.21)); S.obst.push([12.9, 13.5, 5.15, 5.65]);
+    (function () { var sx = 9.4, sz = 6.0, pm = M(0x8a9099, { metalness: 0.6 }); sc.add(cyl(0.03, 0.03, 2.6, pm, sx, 1.4, sz, 8)); sc.add(G.rbox(0.9, 0.3, 0.04, 0.02, M(0x1f6a3a), sx, 2.55, sz)); sc.add(G.plane(0.84, 0.24, new THREE.MeshBasicMaterial({ map: signTex("HASH-STRASSE", "#1f6a3a", "#ffffff") }), sx, 2.55, sz + 0.025)); S.obst.push([sx - 0.1, sx + 0.1, sz - 0.1, sz + 0.1]); })();
   }
 
   /* ---------- Autos ---------- */
   var cars = [], halos = [];
   function makeCar(col) {
-    var g = new THREE.Group(), body = M(col, { metalness: 0.5, roughness: 0.35 }), dark = M(0x10131a, { metalness: 0.2, roughness: 0.2 });
-    g.add(box(4.2, 0.55, 1.85, body, 0, 0.6, 0)); g.add(box(2.2, 0.5, 1.7, M(col, { metalness: 0.5, roughness: 0.35 }), -0.2, 1.1, 0)); g.add(box(2.0, 0.38, 1.74, dark, -0.2, 1.1, 0));
-    [[1.3, 0.9], [-1.3, 0.9], [1.3, -0.9], [-1.3, -0.9]].forEach(function (p) { var wh = cyl(0.36, 0.36, 0.26, M(0x0b0c0f, { roughness: 0.9 }), p[0], 0.36, p[1], 14); wh.rotation.x = Math.PI / 2; g.add(wh); var hub = cyl(0.18, 0.18, 0.28, M(0xb8bcc6, { metalness: 0.9 }), p[0], 0.36, p[1], 10); hub.rotation.x = Math.PI / 2; g.add(hub); });
-    g.add(box(0.05, 0.15, 0.4, new THREE.MeshBasicMaterial({ color: 0xfff4d0 }), 2.1, 0.7, 0.6)); g.add(box(0.05, 0.15, 0.4, new THREE.MeshBasicMaterial({ color: 0xfff4d0 }), 2.1, 0.7, -0.6));
-    g.add(box(0.05, 0.15, 0.4, new THREE.MeshBasicMaterial({ color: 0xff2a2a }), -2.1, 0.7, 0.6)); g.add(box(0.05, 0.15, 0.4, new THREE.MeshBasicMaterial({ color: 0xff2a2a }), -2.1, 0.7, -0.6));
+    var g = new THREE.Group(), body = M(col, { metalness: 0.55, roughness: 0.28 }), dark = M(0x0e1118, { metalness: 0.3, roughness: 0.15 }), rubber = M(0x0b0c0f, { roughness: 0.95 }), chrome = M(0xc4c9d2, { metalness: 1, roughness: 0.2 });
+    g.add(G.rbox(4.2, 0.55, 1.85, 0.2, body, 0, 0.62, 0)); g.add(G.rbox(2.3, 0.52, 1.7, 0.22, body, -0.25, 1.12, 0)); g.add(G.rbox(2.1, 0.4, 1.74, 0.16, dark, -0.25, 1.12, 0));                                  // Karosserie, Kabine, Scheiben
+    g.add(G.rbox(1.1, 0.04, 1.6, 0.02, body, 1.45, 0.92, 0)); g.add(G.rbox(4.3, 0.12, 1.9, 0.05, M(0x1a1c22, { roughness: 0.6 }), 0, 0.34, 0));                                                              // Haube, Stossfaenger-Band
+    [[1.3, 0.92], [-1.3, 0.92], [1.3, -0.92], [-1.3, -0.92]].forEach(function (p) {
+      var tire = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.11, 10, 20), rubber); tire.position.set(p[0], 0.38, p[1]); g.add(tire);
+      var rim = cyl(0.2, 0.2, 0.18, chrome, p[0], 0.38, p[1], 16); rim.rotation.x = Math.PI / 2; g.add(rim); var hub = cyl(0.06, 0.06, 0.2, M(0x333840, { metalness: 0.8 }), p[0], 0.38, p[1], 10); hub.rotation.x = Math.PI / 2; g.add(hub);
+      for (var sp = 0; sp < 5; sp++) { var spk = box(0.03, 0.16, 0.03, chrome, p[0] + Math.cos(sp * 1.2566) * 0.1, 0.38 + Math.sin(sp * 1.2566) * 0.1, p[1] + (p[1] > 0 ? 0.095 : -0.095)); spk.rotation.z = sp * 1.2566 - 1.57; g.add(spk); }
+    });
+    var hl = new THREE.MeshBasicMaterial({ color: 0xfff4d0 }), tl = new THREE.MeshBasicMaterial({ color: 0xff2a2a });
+    [0.6, -0.6].forEach(function (z) { var h1 = cyl(0.09, 0.09, 0.05, hl, 2.12, 0.72, z, 14); h1.rotation.z = Math.PI / 2; g.add(h1); g.add(G.rbox(0.05, 0.12, 0.4, 0.02, tl, -2.12, 0.72, z)); g.add(G.rbox(0.18, 0.1, 0.08, 0.03, body, -0.7, 1.0, z > 0 ? 0.95 : -0.95)); });          // Scheinwerfer, Ruecklichter, Spiegel
+    g.add(box(0.04, 0.12, 0.5, M(0xf2f2f2, { roughness: 0.5 }), 2.14, 0.45, 0)); g.add(box(0.04, 0.1, 0.4, M(0xf2f2f2, { roughness: 0.5 }), -2.14, 0.45, 0));    // Kennzeichen
+    g.add(box(0.04, 0.2, 0.5, chrome, 2.14, 0.58, 0.0)); g.add(box(1.2, 0.015, 0.02, chrome, 0.2, 0.72, 0.93)); g.add(box(1.2, 0.015, 0.02, chrome, 0.2, 0.72, -0.93));                                         // Gitter, Zierleisten
     return g;
   }
   function spawnCars() {

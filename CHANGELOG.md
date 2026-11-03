@@ -16,6 +16,8 @@
 - `next/next.js` — lädt alles lokal (kein jsDelivr-Pin mehr); Kill-Switches `?noworld ?noenv ?nologi ?noclicker`
 - `next/extras.js` — Ziel-Anzeige mit Pfeil, Minikarte, synthetischer Ton (Knopf 🔊/🔇), Qualität Auto/Hoch/Niedrig, Tag/Nacht-Zyklus (12 min), Position wird gemerkt. Kill-Switch `?noextras=1`
 - `next/world.js` — Buzzer-Tisch/Bildschirm fest im Kern, Tempo erhöht, Modulstatus unten rechts, dauerhafte Fehlerzeile; `next/clicker.js` — mehr Upgrade-Grafiken
+- NEXT Grafik-Update: abgerundete Kanten (Extrude-Fase) für alle kleinen Quader, feinere Zylinder/Kugeln, Luefter mit Fluegeln, Kabel (Tube), Wanduhr, Rohre/Lueftung, Schreibtisch- und Theken-Details, detailreichere Fassaden/Daecher, Autos mit Reifen/Felgen/Spiegeln, Baeume, Laternen, Fahrrad, Ampel, Briefkasten, Pflanzkuebel; Buzzer als Kuppel, Spitzhacken mit gebogenem Kopf. Niedrig-Qualitaet (Neustart) nutzt wieder glatte Quader
+- NEXT Ton: Schritte neu (Tiefton + dumpfes Schleifen), Kunden-"Blabla" (Silbenton je 2 Buchstaben, eigene Stimme), Dialogtext wird getippt (Antippen ueberspringt), Kunde nickt beim Reden; Minikarte entfernt
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

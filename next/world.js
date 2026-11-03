@@ -21,9 +21,31 @@
   /* ---------- Grafik-Helfer ---------- */
   function mat(c, o) { var p = { color: c, roughness: 0.8, metalness: 0.1 }; if (o) for (var k in o) p[k] = o[k]; return new THREE.MeshStandardMaterial(p); }
   function glow(c) { return new THREE.MeshBasicMaterial({ color: c }); }
-  function box(w, h, d, m, x, y, z) { var o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x || 0, y || 0, z || 0); return o; }
-  function cyl(rt, rb, h, m, x, y, z, seg) { var o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 12), m); o.position.set(x || 0, y || 0, z || 0); return o; }
-  function sph(r, m, x, y, z, ws, hs) { var o = new THREE.Mesh(new THREE.SphereGeometry(r, ws || 12, hs || 9), m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  var GEO = {}, LOWQ = false; try { LOWQ = localStorage.getItem("hashpool-next-quality") === "lo"; } catch (e) {}
+  function rgeo(w, h, d, r) {                  // abgerundeter Quader (Extrude mit Fase) - gecacht je Abmessung
+    r = Math.min(r, Math.min(w, h, d) * 0.3); var k = [w, h, d, r].map(function (v) { return v.toFixed(3); }).join("|"); if (GEO[k]) return GEO[k];
+    var g; try {
+      var hw = (w - 2 * r) / 2, hh = (h - 2 * r) / 2, c = Math.max(0.001, Math.min(r * 0.9, hw * 0.9, hh * 0.9)), sh = new THREE.Shape();
+      sh.moveTo(-hw + c, -hh); sh.lineTo(hw - c, -hh); sh.quadraticCurveTo(hw, -hh, hw, -hh + c); sh.lineTo(hw, hh - c); sh.quadraticCurveTo(hw, hh, hw - c, hh); sh.lineTo(-hw + c, hh); sh.quadraticCurveTo(-hw, hh, -hw, hh - c); sh.lineTo(-hw, -hh + c); sh.quadraticCurveTo(-hw, -hh, -hw + c, -hh);
+      g = new THREE.ExtrudeGeometry(sh, { depth: d - 2 * r, bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelOffset: 0, bevelSegments: 2, curveSegments: 3, steps: 1 }); g.translate(0, 0, -(d - 2 * r) / 2);
+    } catch (e) { g = new THREE.BoxGeometry(w, h, d); }
+    GEO[k] = g; return g;
+  }
+  function box(w, h, d, m, x, y, z) {
+    var mn = Math.min(w, h, d), mxx = Math.max(w, h, d), g = (!LOWQ && mn >= 0.05 && mxx < 3.2 && !(m && m.map)) ? rgeo(w, h, d, Math.max(0.012, Math.min(0.04, mn * 0.2))) : new THREE.BoxGeometry(w, h, d);
+    var o = new THREE.Mesh(g, m); o.position.set(x || 0, y || 0, z || 0); return o;
+  }
+  function rbox(w, h, d, r, m, x, y, z) { var o = new THREE.Mesh(LOWQ ? new THREE.BoxGeometry(w, h, d) : rgeo(w, h, d, r), m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  function cyl(rt, rb, h, m, x, y, z, seg) { var o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 20), m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  function sph(r, m, x, y, z, ws, hs) { var o = new THREE.Mesh(new THREE.SphereGeometry(r, ws || 16, hs || 12), m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  function tube(pts, r, m, seg) { try { var c = new THREE.CatmullRomCurve3(pts.map(function (p) { return new THREE.Vector3(p[0], p[1], p[2]); })); return new THREE.Mesh(new THREE.TubeGeometry(c, seg || 24, r, 6, false), m); } catch (e) { return new THREE.Group(); } }
+  function fan(r, col, blades) {                // Luefter: Ring + Nabe + Fluegel (Gruppe, um z drehen)
+    var g = new THREE.Group(), n = blades || 7, bm = mat(col || 0x0b0d11, { roughness: 0.5, metalness: 0.3 });
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(r, r * 0.07, 8, 28), mat(0x1a1d24, { metalness: 0.6, roughness: 0.4 })); g.add(ring);
+    var spin = new THREE.Group(); g.add(spin); spin.add(cyl(r * 0.22, r * 0.22, r * 0.12, mat(0x2a2f3a, { metalness: 0.7 }), 0, 0, 0, 16)).children[0].rotation.x = Math.PI / 2;
+    for (var i = 0; i < n; i++) { var b = new THREE.Mesh(new THREE.BoxGeometry(r * 0.46, r * 0.82, r * 0.025), bm); var a = i * 6.2832 / n; b.position.set(Math.cos(a) * r * 0.55, Math.sin(a) * r * 0.55, 0); b.rotation.z = a - Math.PI / 2; b.rotation.y = 0.45; spin.add(b); }
+    g.userData.spin = spin; return g;
+  }
   function plane(w, h, m, x, y, z, ry) { var o = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); o.position.set(x || 0, y || 0, z || 0); if (ry) o.rotation.y = ry; return o; }
   function textTex(txt, w, h, bg, fg, font) {
     var c = document.createElement("canvas"); c.width = w; c.height = h; var g = c.getContext("2d");
@@ -92,7 +114,7 @@
             // Raeume fuer den Auto-Lauf: id, Tueren (Verbindung a<->b mit je einem Wegpunkt davor/dahinter)
             doors: [{ a: "A", b: "B", pa: [0, -0.4], pb: [0, -2.2] }, { a: "A", b: "E", pa: [0, 2.5], pb: [0, 4.6] }],
             roomOf: function (x, z) { if (z < DIV) return "B"; if (z < 3.47 && Math.abs(x) <= 4.35) return "A"; return "E"; } };
-  S.G = { M: mat, glow: glow, box: box, cyl: cyl, sph: sph, plane: plane, ctex: ctex, rep: rep, tex: tex, textTex: textTex, speckle: speckle, rnd: rnd, rr: rr, T: T, de: de, fmt: fmt, posterTex: posterTex };
+  S.G = { M: mat, glow: glow, box: box, rbox: rbox, tube: tube, fan: fan,  cyl: cyl, sph: sph, plane: plane, ctex: ctex, rep: rep, tex: tex, textTex: textTex, speckle: speckle, rnd: rnd, rr: rr, T: T, de: de, fmt: fmt, posterTex: posterTex };
   function inRegion(x, z) {
     for (var i = 0; i < S.rects.length; i++) { var r = S.rects[i]; if (x > r[0] + R && x < r[1] - R && z > r[2] + R && z < r[3] - R) return true; }
     return false;
@@ -132,7 +154,7 @@
       "#nx-dlg,#nx-inv{position:absolute;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);background:#12161c;border:1px solid #f7931a;border-radius:16px;padding:12px 14px;color:#e7e9ec;font:13px sans-serif;display:none;z-index:5;max-height:66%;overflow:auto;box-shadow:0 8px 30px #000a}#nx-dlg.show,#nx-inv.show{display:block}" +
       "#nx-dlg h4,#nx-inv h4{margin:0 0 4px;font-size:15px}#nx-dlg h4 i{font-weight:400;color:#aeb6c2;font-size:12px}#nx-dlg p{margin:6px 0}#nx-dlg ul{margin:6px 0 6px 18px;padding:0}.nx-rw{color:#f7931a;font-weight:700}" +
       ".nx-bt{display:flex;gap:8px;margin-top:10px}.nx-bt button{flex:1;font:700 13px sans-serif;padding:11px;border-radius:10px;border:1px solid #2c3646;background:#161c24;color:#e7e9ec}.nx-bt button.pri{background:#f7931a;border-color:#f7931a;color:#1a1206}" +
-      ".nx-row{display:flex;justify-content:space-between;border-bottom:1px solid #222a36;padding:5px 0}.nx-note{color:#aeb6c2;font-size:12px;margin:4px 0}" +
+      ".nx-row{display:flex;justify-content:space-between;border-bottom:1px solid #222a36;padding:5px 0}.nx-note{color:#aeb6c2;font-size:12px;margin:4px 0}#nx-say{display:inline;margin:6px 0}#nx-caret{display:inline;color:#f7931a;animation:nxc .6s infinite alternate}@keyframes nxc{from{opacity:1}to{opacity:.1}}" +
       "#nx-back{position:fixed;left:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);z-index:99990;font:700 12px monospace;padding:10px 12px;border-radius:12px;border:1px solid #f7931a;background:#12161c;color:#f7931a;display:none}";
     document.head.appendChild(s);
   }
@@ -175,16 +197,53 @@
   S.addStation = addStation;
 
   function plant(sc, x, z, h) {
-    var pot = cyl(0.2, 0.15, 0.4, mat(0x6a4a3a, { roughness: 0.9 }), x, 0.32, z, 12); sc.add(pot);
-    var lm = mat(0x2e8b4a, { roughness: 0.9 }), lm2 = mat(0x3fa85a, { roughness: 0.9 });
-    sc.add(sph(0.3 * h, lm, x, 0.8 * h + 0.15, z, 10, 8)); sc.add(sph(0.22 * h, lm2, x + 0.14, 1.0 * h + 0.2, z + 0.05, 10, 8)); sc.add(sph(0.2 * h, lm2, x - 0.12, 0.95 * h + 0.1, z - 0.08, 10, 8));
+    var pm = mat(0x6a4a3a, { roughness: 0.9 }); sc.add(cyl(0.2, 0.15, 0.4, pm, x, 0.32, z, 20)); sc.add(cyl(0.17, 0.17, 0.03, mat(0x2a1d14, { roughness: 1 }), x, 0.52, z, 16)); sc.add(cyl(0.22, 0.22, 0.03, pm, x, 0.14, z, 20));
+    var lm = [mat(0x2e8b4a, { roughness: 0.8 }), mat(0x3fa85a, { roughness: 0.8 }), mat(0x246f3b, { roughness: 0.8 })];
+    for (var i = 0; i < 14; i++) { var a = i * 0.9, r = 0.05 + (i % 3) * 0.045, lf = sph(0.13 * h, lm[i % 3], x + Math.cos(a) * r, (0.72 + (i % 4) * 0.13) * h + 0.1, z + Math.sin(a) * r, 8, 6); lf.scale.set(0.38, 1.6, 0.16); lf.rotation.y = -a; lf.rotation.z = -Math.cos(a) * 0.55; lf.rotation.x = Math.sin(a) * 0.55; sc.add(lf); }
+  }
+  function clockTex() {
+    var d = new Date(), hh = d.getHours() % 12 + d.getMinutes() / 60, mm = d.getMinutes();
+    return ctex(256, 256, function (g, w, h) {
+      g.fillStyle = "#f4f1ea"; g.beginPath(); g.arc(128, 128, 124, 0, 6.3); g.fill(); g.strokeStyle = "#1a1d24"; g.lineWidth = 4;
+      for (var i = 0; i < 12; i++) { var a = i * Math.PI / 6; g.beginPath(); g.moveTo(128 + Math.sin(a) * 104, 128 - Math.cos(a) * 104); g.lineTo(128 + Math.sin(a) * 118, 128 - Math.cos(a) * 118); g.stroke(); }
+      g.lineWidth = 8; g.beginPath(); g.moveTo(128, 128); g.lineTo(128 + Math.sin(hh * Math.PI / 6) * 62, 128 - Math.cos(hh * Math.PI / 6) * 62); g.stroke();
+      g.lineWidth = 5; g.beginPath(); g.moveTo(128, 128); g.lineTo(128 + Math.sin(mm * Math.PI / 30) * 94, 128 - Math.cos(mm * Math.PI / 30) * 94); g.stroke(); g.fillStyle = "#f7931a"; g.beginPath(); g.arc(128, 128, 7, 0, 6.3); g.fill();
+    });
+  }
+  function details(sc) {
+    var steel = mat(0xb0b8c4, { metalness: 0.9, roughness: 0.3 }), dark = mat(0x15181e, { metalness: 0.4 }), white = mat(0xe9edf2, { roughness: 0.5 }), cable = mat(0x0c0e12, { roughness: 0.7 });
+    // PC-Schreibtisch: Tastatur mit Tasten, Maus + Pad, Tasse, Schreibtischlampe, Kabel
+    var kt = ctex(256, 80, function (g, w, h) { g.fillStyle = "#1b1f27"; g.fillRect(0, 0, w, h); g.fillStyle = "#3d4553"; for (var r = 0; r < 4; r++) for (var c = 0; c < 14; c++) g.fillRect(6 + c * 17.5, 6 + r * 16, 14, 12); g.fillRect(50, 66, 150, 10); });
+    var kp = plane(0.46, 0.14, mat(0xffffff, { map: kt, roughness: 0.6 }), -2.9, 1.012, -5.85); kp.rotation.x = -Math.PI / 2; sc.add(kp);
+    sc.add(box(0.24, 0.01, 0.2, mat(0x252b38, { roughness: 1 }), -2.45, 1.0, -5.85)); sc.add(rbox(0.06, 0.03, 0.1, 0.014, white, -2.45, 1.025, -5.85));
+    sc.add(cyl(0.04, 0.035, 0.09, white, -2.1, 1.045, -5.7, 20)); var hd = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.008, 8, 14), white); hd.position.set(-2.065, 1.045, -5.7); sc.add(hd);
+    sc.add(cyl(0.07, 0.08, 0.025, dark, -3.55, 1.0, -5.7, 20)); var a1 = cyl(0.008, 0.008, 0.32, steel, -3.5, 1.17, -5.7, 8); a1.rotation.z = -0.4; sc.add(a1); var a2 = cyl(0.008, 0.008, 0.3, steel, -3.42, 1.38, -5.7, 8); a2.rotation.z = 1.0; sc.add(a2);
+    var shade = cyl(0.025, 0.075, 0.11, mat(0xf7931a, { metalness: 0.4, roughness: 0.4 }), -3.3, 1.46, -5.7, 20); shade.rotation.z = -0.3; sc.add(shade); sc.add(sph(0.025, glow(0xfff1c0), -3.3, 1.4, -5.7, 10, 8));
+    sc.add(tube([[-3.3, 1.0, -6.15], [-3.1, 1.0, -6.0], [-2.95, 1.02, -6.2], [-2.9, 1.1, -6.25]], 0.009, cable)); sc.add(tube([[-2.9, 1.005, -5.78], [-2.9, 1.0, -5.95], [-2.9, 1.02, -6.18]], 0.007, cable));
+    // Theke: Kaffeemaschine, Tasse, Klingel, Prospektstaender, Kabel
+    sc.add(rbox(0.28, 0.34, 0.26, 0.03, mat(0x20262f, { metalness: 0.5, roughness: 0.4 }), 3.45, 1.35, 0.3)); sc.add(box(0.12, 0.06, 0.012, glow(0x4fe38a), 3.45, 1.45, 0.435)); sc.add(box(0.2, 0.02, 0.12, steel, 3.45, 1.2, 0.36)); sc.add(cyl(0.035, 0.03, 0.06, white, 3.45, 1.25, 0.37, 16));
+    var bell = new THREE.Mesh(new THREE.SphereGeometry(0.06, 20, 8, 0, 6.2832, 0, 1.5708), mat(0xf0b429, { metalness: 0.9, roughness: 0.25 })); bell.position.set(2.2, 1.19, 0.45); sc.add(bell); sc.add(cyl(0.07, 0.07, 0.012, mat(0x20262f), 2.2, 1.19, 0.45, 16));
+    sc.add(rbox(0.22, 0.3, 0.07, 0.02, mat(0x20262f, { metalness: 0.4 }), 1.05, 1.32, 0.2)); [0xf7931a, 0x3a8bff, 0x78d505].forEach(function (c, i) { sc.add(box(0.18, 0.07, 0.005, mat(c, { roughness: 0.8 }), 1.05, 1.22 + i * 0.09, 0.245)); });
+    sc.add(tube([[1.6, 1.15, 0.0], [1.6, 0.9, -0.1], [1.2, 0.2, -0.3], [0.6, 0.15, -0.6]], 0.009, cable));
+    // Wanduhr (rechte Wand)
+    var cm = new THREE.Mesh(new THREE.CircleGeometry(0.22, 40), new THREE.MeshBasicMaterial({ map: clockTex() })); cm.position.set(4.29, 2.9, 0.6); cm.rotation.y = -Math.PI / 2; sc.add(cm);
+    var cr = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.02, 10, 40), mat(0x15181e, { metalness: 0.6 })); cr.position.set(4.285, 2.9, 0.6); cr.rotation.y = -Math.PI / 2; sc.add(cr); S.clockMesh = cm;
+    var ct = 0; S.ticks.push(function (dt) { ct += dt; if (ct > 30) { ct = 0; try { cm.material.map = clockTex(); cm.material.needsUpdate = true; } catch (e) {} } });
+    // Deckenrohre + Lueftung im Hinterraum, Schienenstrahler im Laden
+    var pm = mat(0x7d8696, { metalness: 0.8, roughness: 0.35 }); [-1.6, -4.7].forEach(function (z) { var pp = cyl(0.07, 0.07, 8.4, pm, 0, 3.33, z, 16); pp.rotation.z = Math.PI / 2; sc.add(pp); [-3.2, -1, 1.2, 3.4].forEach(function (x) { sc.add(box(0.06, 0.2, 0.1, dark, x, 3.42, z)); }); });
+    var grille = ctex(128, 64, function (g, w, h) { g.fillStyle = "#2b3140"; g.fillRect(0, 0, w, h); g.fillStyle = "#0c0e12"; for (var i = 0; i < 9; i++) g.fillRect(8, 6 + i * 6, 112, 3); });
+    sc.add(rbox(1.8, 0.3, 0.7, 0.03, mat(0x9aa3b2, { metalness: 0.6, roughness: 0.5 }), -2.0, 3.25, -3.3)); var vg = plane(0.9, 0.22, mat(0xffffff, { map: grille }), -2.0, 3.098, -3.3); vg.rotation.x = Math.PI / 2; sc.add(vg);
+    sc.add(box(2.4, 0.04, 0.06, dark, 2.65, 3.42, 1.9)); [1.8, 2.4, 3.0].forEach(function (x, i) { var sp = cyl(0.045, 0.06, 0.14, dark, x - 0.2 + i * 0.0, 3.32, 1.9, 16); sp.rotation.x = 0.5; sc.add(sp); sc.add(sph(0.035, glow(0xfff4dc), x - 0.2, 3.25, 1.97, 8, 6)); });
+    // Sicherheitsmarkierung + Bodenablauf im Hinterraum
+    var hz = ctex(128, 32, function (g, w, h) { for (var i = -2; i < 12; i++) { g.fillStyle = i % 2 ? "#14161b" : "#f0b429"; g.beginPath(); g.moveTo(i * 16, h); g.lineTo(i * 16 + 16, h); g.lineTo(i * 16 + 32, 0); g.lineTo(i * 16 + 16, 0); g.fill(); } });
+    var hp = plane(2.4, 0.18, mat(0xffffff, { map: hz, roughness: 0.9 }), 3.0, 0.13, -2.55); hp.rotation.x = -Math.PI / 2; sc.add(hp); sc.add(cyl(0.13, 0.13, 0.01, mat(0x20242b, { metalness: 0.6 }), -0.6, 0.125, -3.5, 20));
   }
   function pcTower(sc, x, y, z, col, ry) {
     var g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry || 0;
     g.add(box(0.26, 0.5, 0.5, mat(0x1a1d24, { metalness: 0.6, roughness: 0.4 }), 0, 0.25, 0));
     g.add(box(0.012, 0.42, 0.42, new THREE.MeshBasicMaterial({ color: 0x9fc4e8, transparent: true, opacity: 0.32 }), 0.135, 0.25, 0));
     g.add(box(0.014, 0.4, 0.04, glow(col), 0.14, 0.25, 0.12)); g.add(box(0.014, 0.4, 0.04, glow(col), 0.14, 0.25, -0.12));
-    for (var i = 0; i < 3; i++) { var fn = cyl(0.05, 0.05, 0.014, glow(col), 0.14, 0.12 + i * 0.13, 0.0, 14); fn.rotation.z = Math.PI / 2; g.add(fn); }
+    for (var i = 0; i < 3; i++) { var fn = fan(0.055, col, 6); fn.rotation.y = Math.PI / 2; fn.position.set(0.14, 0.12 + i * 0.13, 0.0); g.add(fn); }
     sc.add(g);
   }
   function build3d(stage) {
@@ -289,6 +348,7 @@
     // Wartebank (vorne links am Fenster)
     sc.add(box(1.2, 0.12, 0.45, mat(0x20262f, { roughness: 0.6 }), -1.9, 0.5, 2.95)); sc.add(box(1.2, 0.5, 0.1, mat(0x20262f, { roughness: 0.6 }), -1.9, 0.8, 3.15)); [-2.4, -1.4].forEach(function (x) { sc.add(box(0.06, 0.4, 0.4, steel, x, 0.28, 2.95)); });
     S.obst.push([-2.5, -1.3, 2.7, 3.2]);
+    details(sc);
     S.grp = new THREE.Group(); sc.add(S.grp);
     S.cam = cam; S.rd = rd; S.stage = stage; S.ray = new THREE.Raycaster(); S.v = new THREE.Vector3(); S.ready = true;
     Object.keys(S.stations).forEach(function (id) { mkLabel(S.stations[id]); });
@@ -438,7 +498,7 @@
     if (!sp) { sp = D.randomSpec(order ? LOOK[order.id] : null); if (order && kind === "order") saveSpec(order.id, sp, name); }
     var a = makeActor(sp), side = Math.random() < 0.5 ? -1 : 1; a.g.position.set(side * 13, 0.12, 4.9); a.speed = rr(1.5, 1.9);
     var hb = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.2, 0.9), new THREE.MeshBasicMaterial({ visible: false })); hb.position.set(0, 1.1, 0); a.g.add(hb); a.hit = hb;
-    a.kind = kind; a.order = order; a.name = name; a.side = side; a.state = "in"; a.wait = 0; S.grp.add(a.g); S.cust = a;
+    a.voice = { f: (sp && sp.fem) ? rr(250, 340) : rr(120, 200), w: (sp && sp.fem) ? "triangle" : "square", v: rr(0.85, 1.15) }; a.kind = kind; a.order = order; a.name = name; a.side = side; a.state = "in"; a.wait = 0; S.grp.add(a.g); S.cust = a;
     a.path = [[0, 4.9], [0, 3.0], [0.7, 2.0]].concat(kind === "browse" ? [[rr(-3, -1), rr(1.4, 2.6)], [rr(-3, 3), rr(1.0, 2.0)], [0, 3.0]] : []); a.pi = 0;
     a.done = function (x) { if (x.kind === "browse") leave(x); else { x.state = "wait"; x.wait = 0; } };
   }
@@ -446,18 +506,33 @@
     if (S.dlg === c) closeDlg(); c.state = "out"; c.path = [[0, 3.0], [0, 4.9], [c.side * 13, 4.9]]; c.pi = 0;
     c.done = function (x) { try { S.grp.remove(x.g); } catch (e) {} if (S.cust === x) { S.cust = null; S.nextCust = rr(8, 16); } };
   }
+  var typeIv = null;
+  function stopType() { if (typeIv) { clearInterval(typeIv); typeIv = null; } if (S.cust) S.cust.talking = false; }
+  function finishType() {
+    var say = document.getElementById("nx-say"), rest = document.getElementById("nx-rest"); if (!say) return;
+    stopType(); say.textContent = say.getAttribute("data-full") || ""; var cr = document.getElementById("nx-caret"); if (cr) cr.style.display = "none"; if (rest) rest.style.display = "block";
+  }
   function talk(c) {
     var O = ORD(), dlg = document.getElementById("nx-dlg"); if (!O || !dlg || c.state !== "wait") return;
-    var tg = (TAG[c.order && c.order.id] || ["Kunde", "Customer"])[de() ? 0 : 1], h = "<h4>" + c.name + " <i>· " + tg + "</i></h4>";
-    if (c.kind === "pickup") h += "<p>" + T("Ist mein PC fertig? Ich habe gesehen, dass da was in deiner Farm steht!", "Is my PC ready? I saw something in your farm!") + '</p><div class="nx-bt"><button class="pri" data-a="deliver">' + T("Zeigen & abgeben", "Show & hand over") + '</button><button data-a="later">' + T("Später", "Later") + "</button></div>";
+    var tg = (TAG[c.order && c.order.id] || ["Kunde", "Customer"])[de() ? 0 : 1], h = "<h4>" + c.name + " <i>· " + tg + "</i></h4>", say = "", rest = "";
+    if (c.kind === "pickup") { say = T("Ist mein PC fertig? Ich habe gesehen, dass da was in deiner Farm steht!", "Is my PC ready? I saw something in your farm!"); rest = '<div class="nx-bt"><button class="pri" data-a="deliver">' + T("Zeigen & abgeben", "Show & hand over") + '</button><button data-a="later">' + T("Später", "Later") + "</button></div>"; }
     else {
       var t = de() ? c.order.de : c.order.en, rw = Math.round(c.order.mult * Math.min(2, 1 + 0.25 * (O.state().cycle || 0)) * 100);
-      h += "<p>" + rnd(OPEN[de() ? "de" : "en"]) + " <b>" + t[0] + ".</b> " + t[1] + "</p><ul>" + c.order.req.map(function (q) { return "<li>" + reqText(q) + "</li>"; }).join("") + "</ul>";
-      h += '<div class="nx-rw">' + T("Belohnung: ", "Reward: ") + rw + "% " + T("der Teilekosten (zusätzlich zum Verkauf)", "of parts cost (on top of the sale)") + '</div><div class="nx-bt"><button class="pri" data-a="accept">' + T("Annehmen", "Accept") + '</button><button data-a="decline">' + T("Ablehnen", "Decline") + "</button></div>";
+      say = rnd(OPEN[de() ? "de" : "en"]) + " " + t[0] + ". " + t[1];
+      rest = "<ul>" + c.order.req.map(function (q) { return "<li>" + reqText(q) + "</li>"; }).join("") + "</ul>" +
+        '<div class="nx-rw">' + T("Belohnung: ", "Reward: ") + rw + "% " + T("der Teilekosten (zusätzlich zum Verkauf)", "of parts cost (on top of the sale)") + '</div><div class="nx-bt"><button class="pri" data-a="accept">' + T("Annehmen", "Accept") + '</button><button data-a="decline">' + T("Ablehnen", "Decline") + "</button></div>";
     }
+    h += '<p id="nx-say" data-full="' + say.replace(/"/g, "&quot;") + '"></p><span id="nx-caret">▍</span><div id="nx-rest" style="display:none">' + rest + "</div>";
     dlg.innerHTML = h; dlg.classList.add("show"); S.dlg = c; S.auto = null; S.joy.x = 0; S.joy.y = 0;
+    // Text wird getippt, dazu "Blabla"-Toene (S.onSpeak setzt extras.js); Antippen ueberspringt
+    var el = document.getElementById("nx-say"), i = 0; c.talking = true; stopType(); c.talking = true; var sp = Math.max(18, Math.min(34, 2600 / Math.max(20, say.length)));
+    typeIv = setInterval(function () {
+      if (!document.getElementById("nx-say")) { stopType(); return; }
+      var ch = say.charAt(i); i++; el.textContent = say.slice(0, i); if (S.onSpeak && /\S/.test(ch) && i % 2 === 0) { try { S.onSpeak(ch, c.voice, i); } catch (e) {} }
+      if (i >= say.length) finishType();
+    }, sp);
   }
-  function closeDlg() { var d = document.getElementById("nx-dlg"); if (d) d.classList.remove("show"); S.dlg = null; }
+  function closeDlg() { stopType(); var d = document.getElementById("nx-dlg"); if (d) d.classList.remove("show"); S.dlg = null; }
   function dlgAction(a) {
     var c = S.dlg, O = ORD(); if (!c) return;
     if (a === "accept") { O.open(); var b = document.querySelector('#ord-ov [data-accept="' + c.order.id + '"]'); if (b) b.click(); O.close(); toast(T("Auftrag angenommen: ", "Order accepted: ") + (de() ? c.order.de[0] : c.order.en[0])); leave(c); }
@@ -507,7 +582,7 @@
       var c = S.cust;
       if (!c) { S.nextCust -= dt; if (S.nextCust <= 0) { S.nextCust = 6; spawnCustomer(); } }
       else {
-        stepActor(c, dt);
+        stepActor(c, dt); try { if (c.ch && c.ch.head && c.state === "wait") c.ch.head.rotation.x = c.talking ? Math.sin(S.t * 17) * 0.09 : 0; } catch (e) {}
         if (c.state === "wait") { c.wait += dt; var fy = Math.atan2(S.px - c.g.position.x, S.pz - c.g.position.z), dd = fy - c.g.rotation.y; while (dd > Math.PI) dd -= 2 * Math.PI; while (dd < -Math.PI) dd += 2 * Math.PI; c.g.rotation.y += dd * Math.min(1, dt * 5); if (c.wait > 90 && !S.dlg) leave(c); }
         if (S.pendLeave === c && !visible("ord-ov", "show")) { S.pendLeave = null; leave(c); }
       }
@@ -542,7 +617,7 @@
     document.getElementById("nx-cls").addEventListener("click", function () { show(false); });
     document.getElementById("nx-ord").addEventListener("click", function () { var O = ORD(); if (O) O.open(); });
     cbub.addEventListener("click", function () { if (S.cust) useStation("counter"); });
-    document.getElementById("nx-dlg").addEventListener("click", function (e) { var a = e.target && e.target.getAttribute && e.target.getAttribute("data-a"); if (a) dlgAction(a); });
+    document.getElementById("nx-dlg").addEventListener("click", function (e) { var a = e.target && e.target.getAttribute && e.target.getAttribute("data-a"); if (a) dlgAction(a); else if (typeIv) finishType(); });
     document.getElementById("nx-inv").addEventListener("click", function (e) {
       var a = e.target && e.target.getAttribute && e.target.getAttribute("data-a"); if (!a) return;
       if (S.invActions[a]) { try { S.invActions[a](e.target); } catch (x) { showErr(a + ": " + x.message); } return; }

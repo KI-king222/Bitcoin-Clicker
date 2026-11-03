@@ -47,8 +47,16 @@
   var RACK = [-4.4, -3.7, 0.5, 2.5];
   function mat(c, o) { var p = { color: c, roughness: 0.7, metalness: 0.2 }; if (o) for (var k in o) p[k] = o[k]; return new THREE.MeshStandardMaterial(p); }
   function glow(c) { return new THREE.MeshBasicMaterial({ color: c }); }
-  function box(w, h, d, m, x, y, z) { var o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x || 0, y || 0, z || 0); return o; }
-  function cyl(rt, rb, h, m, x, y, z, seg) { var o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 16), m); o.position.set(x || 0, y || 0, z || 0); return o; }
+  function box(w, h, d, m, x, y, z) { try { return S.G.box(w, h, d, m, x, y, z); } catch (e) { var o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x || 0, y || 0, z || 0); return o; } }
+  function fanAt(r, x, y, z, rx, ry, spd, col, n) { var f = S.G.fan(r, col || 0x0b0d11, n || 7); f.position.set(x, y, z); f.rotation.x = rx || 0; f.rotation.y = ry || 0; grp.add(f); S2.spin.push({ m: f.userData.spin, ax: "z", s: spd }); return f; }
+  function pickGroup(hm, x, y, z, rz) {
+    var g = new THREE.Group(); g.position.set(x, y, z); g.rotation.z = rz; var wd = mat(0x7a5230, { roughness: 0.8 });
+    g.add(cyl(0.024, 0.03, 1.1, wd, 0, 0.55, 0, 12)); for (var k = 0; k < 4; k++) g.add(cyl(0.032, 0.032, 0.03, mat(0x3a2a1a), 0, 0.12 + k * 0.1, 0, 12));
+    var head = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.028, 8, 18, Math.PI * 0.7), hm); head.position.set(0, 0.9, 0); head.rotation.z = Math.PI * 0.15; g.add(head);
+    [0.15, 0.85].forEach(function (f, i) { var a = f * Math.PI, tip = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.09, 10), hm); tip.position.set(Math.cos(a) * 0.2, 0.9 + Math.sin(a) * 0.2, 0); tip.rotation.z = a + (i ? Math.PI / 2 : -Math.PI / 2) + (i ? 0 : Math.PI); g.add(tip); });
+    g.add(cyl(0.045, 0.045, 0.07, hm, 0, 1.08, 0, 12)); return g;
+  }
+  function cyl(rt, rb, h, m, x, y, z, seg) { var o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 24), m); o.position.set(x || 0, y || 0, z || 0); return o; }
   function sph(r, m, x, y, z, a, b) { var o = new THREE.Mesh(new THREE.SphereGeometry(r, a || 12, b || 8), m); o.position.set(x || 0, y || 0, z || 0); return o; }
   function plate(lines, w, h, x, y, z, ry) {
     var c = document.createElement("canvas"); c.width = 512; c.height = Math.round(512 * h / w); var g = c.getContext("2d");
@@ -78,7 +86,8 @@
     var wood = mat(0x4a3526, { roughness: 0.6, metalness: 0.05 }), steel = mat(0xb0b8c4, { metalness: 0.9, roughness: 0.3 }), gold = mat(0xffc107, { metalness: 1, roughness: 0.25, emissive: 0x442b00, emissiveIntensity: 0.5 });
     var nPick = cown("pick"), nCool = cown("cool"), nPen = cown("asicpen"), nQ = cown("quantum"), tier = tierOf(), t = TIERS[tier];
     /* ----- Buzzer + Tisch-Look waechst mit der Anzahl verschiedener Klick-Upgrades ----- */
-    var sc = 1 + 0.08 * tier; S.buzz.material = mat(t.c, { metalness: t.m, roughness: 0.35, emissive: t.e, emissiveIntensity: 0.9 }); S.buzz.scale.set(sc, 1, sc); S.buzzOwned = true; buzMesh = S.buzz;
+    var sc = 1 + 0.08 * tier; S.buzz.material = mat(t.c, { metalness: t.m, roughness: 0.25, emissive: t.e, emissiveIntensity: 0.9 }); S.buzz.geometry = new THREE.SphereGeometry(0.19, 32, 14, 0, 6.2832, 0, 1.5708); S.buzz.scale.set(sc, 0.55, sc); S2.by = 1.1; S.buzz.position.y = S2.by; S.buzzOwned = true; buzMesh = S.buzz;
+    var crm = new THREE.Mesh(new THREE.TorusGeometry(0.21 * sc, 0.018, 10, 36), mat(0xd8dde6, { metalness: 1, roughness: 0.18 })); crm.rotation.x = Math.PI / 2; crm.position.set(-2.3, 1.1, -0.55); grp.add(crm);
     if (tier >= 2) { var ring = new THREE.Mesh(new THREE.TorusGeometry(0.235 * sc, 0.02, 8, 28), mat(t.c, { metalness: 0.95, roughness: 0.2 })); ring.rotation.x = Math.PI / 2; ring.position.set(-2.3, 1.1, -0.55); grp.add(ring); }
     if (tier >= 1) {       // LED-Streifen unter der Tischkante + Rahmen um den Bildschirm
       var lm = glow(t.led); grp.add(box(1.96, 0.025, 0.025, lm, -2.3, 0.9, -0.08)); grp.add(box(0.025, 0.025, 0.86, lm, -3.28, 0.9, -0.55)); grp.add(box(0.025, 0.025, 0.86, lm, -1.32, 0.9, -0.55));
@@ -89,16 +98,16 @@
     /* ----- Spitzhacke: Hacken am Tisch, Erz-Haufen, Wand-Hacken ----- */
     if (nPick > 0) {
       var pc = nPick >= 15 ? 3 : nPick >= 5 ? 2 : 1, hm = nPick >= 15 ? gold : steel;
-      for (var i = 0; i < pc; i++) { var hx = -3.5 - i * 0.18, h = cyl(0.025, 0.025, 1.1, mat(0x7a5230), hx, 0.62, -0.1 + i * 0.1, 8); h.rotation.z = 0.18; grp.add(h); var hd = box(0.42, 0.06, 0.06, hm, hx + 0.1, 1.17, -0.1 + i * 0.1); hd.rotation.z = 0.18; grp.add(hd); }
+      for (var i = 0; i < pc; i++) grp.add(pickGroup(hm, -3.5 - i * 0.18, 0.12, -0.1 + i * 0.1, 0.18));
       var ores = Math.min(3 + nPick, 12), om = mat(0xb4530a, { roughness: 0.6, emissive: 0x2a1000, emissiveIntensity: 0.6 }), om2 = mat(0x6b6f78, { roughness: 0.9 });
       for (var o = 0; o < ores; o++) { var ox = -3.12 + (o % 4) * 0.09 + (Math.random() - 0.5) * 0.04, oz = -0.85 + Math.floor(o / 4) * 0.1 + (Math.random() - 0.5) * 0.04, os = 0.035 + Math.random() * 0.025; var rock = sph(os, o % 3 ? om : om2, ox, 1.0 + os, oz, 6, 5); grp.add(rock); }
-      if (nPick >= 5) { [0.6, -0.6].forEach(function (a) { var sh = cyl(0.02, 0.02, 0.9, mat(0x7a5230), -2.3, 3.4 - 0.0, -1.18, 8); sh.position.y = 3.1; sh.rotation.z = a; grp.add(sh); var hd2 = box(0.4, 0.06, 0.05, hm, -2.3 + Math.sin(-a) * 0.45, 3.1 + Math.cos(a) * 0.45, -1.18); hd2.rotation.z = a + Math.PI / 2; grp.add(hd2); }); }
+      if (nPick >= 5) { [0.6, -0.6].forEach(function (a) { var pg = pickGroup(hm, -2.3 - Math.sin(a) * 0.0, 2.7, -1.18, a); pg.scale.set(0.8, 0.8, 0.8); grp.add(pg); }); }
     }
     /* ----- Wasserkuehlung: Radiator + Luefter, Kuehlturm mit Blasen, Schlaeuche ----- */
     if (nCool > 0) {
       var cc = nCool >= 15 ? 3 : nCool >= 5 ? 2 : 1, bl = mat(0x40a0ff, { emissive: 0x1060c0, emissiveIntensity: 0.9, transparent: true, opacity: 0.85 });
       grp.add(box(0.55, 0.34, 0.05, mat(0x20262f, { metalness: 0.7 }), -1.55, 1.3, -1.12)); for (var k = 0; k < 6; k++) grp.add(box(0.5, 0.012, 0.02, glow(0x40a0ff), -1.55, 1.16 + k * 0.05, -1.08));
-      var rf = cyl(0.12, 0.12, 0.02, mat(0x0b0d11), -1.55, 1.3, -1.07, 16); rf.rotation.x = Math.PI / 2; grp.add(rf); S2.spin.push({ m: rf, ax: "y", s: 12 });
+      fanAt(0.13, -1.55, 1.3, -1.07, 0, 0, 12, 0x0b0d11, 7);
       for (var j = 0; j < cc; j++) grp.add(cyl(0.06, 0.06, 0.26, bl, -1.2 - j * 0.16, 1.18, -0.88, 12));
       var tube = cyl(0.015, 0.015, 1.6, bl, -2.35, 1.1, -0.92, 8); tube.rotation.z = Math.PI / 2; grp.add(tube);
       grp.add(cyl(0.1, 0.1, 0.5, new THREE.MeshStandardMaterial({ color: 0x9fd0ff, transparent: true, opacity: 0.28, roughness: 0.1 }), -3.15, 1.27, -0.88, 14)); grp.add(cyl(0.085, 0.085, 0.3, bl, -3.15, 1.15, -0.88, 12)); grp.add(cyl(0.11, 0.11, 0.04, steel, -3.15, 1.03, -0.88, 14)); grp.add(cyl(0.11, 0.11, 0.04, steel, -3.15, 1.53, -0.88, 14));
@@ -107,7 +116,7 @@
     /* ----- ASIC-Stift: Halter, leuchtender Stift, rotierender Hologramm-Chip ----- */
     if (nPen > 0) {
       var pn = nPen >= 15 ? 3 : nPen >= 5 ? 2 : 1;
-      for (var q = 0; q < pn; q++) { var px = -3.0 + q * 0.12; grp.add(box(0.1, 0.03, 0.1, mat(0x20262f), px, 1.01, -0.3 - q * 0.0)); var pen = cyl(0.012, 0.012, 0.32, mat(0x111418, { metalness: 0.6 }), px, 1.18, -0.3, 8); pen.rotation.z = 0.25; grp.add(pen); var tip = sph(0.018, glow(0x40ff90), px + 0.04, 1.34, -0.3, 8, 6); grp.add(tip); S2.leds.push(tip); }
+      for (var q = 0; q < pn; q++) { var px = -3.0 + q * 0.12; grp.add(box(0.1, 0.03, 0.1, mat(0x20262f), px, 1.01, -0.3 - q * 0.0)); var pen = cyl(0.012, 0.012, 0.32, mat(0x111418, { metalness: 0.6 }), px, 1.18, -0.3, 8); pen.rotation.z = 0.25; grp.add(pen); var cone = new THREE.Mesh(new THREE.ConeGeometry(0.014, 0.05, 12), mat(0xb0b8c4, { metalness: 0.9 })); cone.position.set(px - 0.046, 1.359, -0.3); cone.rotation.z = 0.25; grp.add(cone); var tip = sph(0.014, glow(0x40ff90), px - 0.052, 1.386, -0.3, 10, 8); grp.add(tip); S2.leds.push(tip); var clip = box(0.012, 0.12, 0.012, steel, px - 0.025, 1.27, -0.285); clip.rotation.z = 0.25; grp.add(clip); grp.add(box(0.012, 0.12, 0.012, steel, px + 0.01, 1.28, -0.285)); }
       var chip = new THREE.Group(); chip.position.set(-2.95, 1.62, -0.3); chip.add(box(0.14, 0.02, 0.14, glow(0x40ff90), 0, 0, 0)); chip.add(box(0.08, 0.025, 0.08, mat(0x10301c, { metalness: 0.6 }), 0, 0.012, 0)); for (var pin = -2; pin <= 2; pin++) { chip.add(box(0.012, 0.01, 0.03, steel, pin * 0.03, 0, 0.085)); chip.add(box(0.012, 0.01, 0.03, steel, pin * 0.03, 0, -0.085)); } grp.add(chip); S2.spin.push({ m: chip, ax: "y", s: 1.4 }); S2.pulse.push({ m: chip, base: 1.62, amp: 0.03 });
     }
     /* ----- Quanten-Tap: Orb, Ringe, Funken, Lichtsaeule ----- */
@@ -125,9 +134,9 @@
     grp.add(box(0.3, 0.05, 1.9, mat(0x20242b), -3.55, 0.15, 1.5));                                             // Steckerleiste am Boden
     var nU = own("usb"), nG = own("gpu"), nF = own("fpga"), nA = own("asic"), nFarm = own("farm"), nPl = own("plant");
     for (var u = 0; u < Math.min(nU, 12); u++) { var row = Math.floor(u / 6), cz = 0.65 + (u % 6) * 0.14; grp.add(box(0.2, 0.03, 0.05, mat(0x2a2f3a), -4.0 + row * 0.2 - 0.05, 0.23, cz)); var l = box(0.03, 0.02, 0.04, glow(0x78d505), -3.9 + row * 0.2 - 0.05, 0.25, cz); grp.add(l); S2.leds.push(l); grp.add(box(0.012, 0.012, 0.15, mat(0x111418), -3.85 + row * 0.2, 0.2, cz + 0.03)); }
-    for (var g = 0; g < Math.min(nG, 4); g++) { var gz = 0.68 + g * 0.2; grp.add(box(0.34, 0.4, 0.17, mat(0x23282f, { metalness: 0.5 }), -4.02, 0.9, gz)); var fan = cyl(0.07, 0.07, 0.02, mat(0x0b0d11), -3.84, 0.92, gz, 14); fan.rotation.z = Math.PI / 2; grp.add(fan); S2.spin.push({ m: fan, ax: "x", s: 9 }); grp.add(box(0.01, 0.03, 0.14, glow(0x78d505), -3.84, 0.74, gz)); grp.add(box(0.012, 0.05, 0.1, mat(0xc0c4cc, { metalness: 0.9 }), -3.84, 1.08, gz)); }
+    for (var g = 0; g < Math.min(nG, 4); g++) { var gz = 0.68 + g * 0.2; grp.add(box(0.34, 0.4, 0.17, mat(0x23282f, { metalness: 0.5 }), -4.02, 0.9, gz)); fanAt(0.075, -3.84, 0.92, gz, 0, Math.PI / 2, 9, 0x0b0d11, 7); grp.add(box(0.01, 0.03, 0.14, glow(0x78d505), -3.84, 0.74, gz)); grp.add(box(0.012, 0.05, 0.1, mat(0xc0c4cc, { metalness: 0.9 }), -3.84, 1.08, gz)); }
     for (var f = 0; f < Math.min(nF, 6); f++) { var fz = 0.62 + f * 0.15; grp.add(box(0.2, 0.22, 0.02, mat(0x1f7a46), -4.0, 1.42, fz)); grp.add(box(0.07, 0.07, 0.03, mat(0xffc107, { metalness: 0.9 }), -4.0, 1.44, fz)); var fl = box(0.02, 0.02, 0.02, glow(0x40e0ff), -3.89, 1.52, fz); grp.add(fl); S2.leds.push(fl); grp.add(box(0.1, 0.02, 0.018, glow(0x40e0ff), -4.0, 1.34, fz)); }
-    for (var a = 0; a < Math.min(nA, 6); a++) { var arow = Math.floor(a / 2), az = 1.7 + (a % 2) * 0.42, ay = 0.3 + arow * 0.55; grp.add(box(0.36, 0.34, 0.38, mat(0x2b3140, { metalness: 0.6 }), -4.02, ay + 0.3, az)); var af = cyl(0.12, 0.12, 0.02, mat(0x0b0d11), -3.83, ay + 0.32, az, 18); af.rotation.z = Math.PI / 2; grp.add(af); S2.spin.push({ m: af, ax: "x", s: 14 }); grp.add(box(0.01, 0.04, 0.3, glow(0xff7a1a), -3.83, ay + 0.16, az)); grp.add(box(0.01, 0.1, 0.02, steel, -3.83, ay + 0.4, az + 0.15)); }
+    for (var a = 0; a < Math.min(nA, 6); a++) { var arow = Math.floor(a / 2), az = 1.7 + (a % 2) * 0.42, ay = 0.3 + arow * 0.55; grp.add(box(0.36, 0.34, 0.38, mat(0x2b3140, { metalness: 0.6 }), -4.02, ay + 0.3, az)); fanAt(0.13, -3.83, ay + 0.32, az, 0, Math.PI / 2, 14, 0x0b0d11, 9); grp.add(box(0.01, 0.04, 0.3, glow(0xff7a1a), -3.83, ay + 0.16, az)); grp.add(box(0.01, 0.1, 0.02, steel, -3.83, ay + 0.4, az + 0.15)); }
     grp.add(plate(["🔌 " + (de() ? UP[0].name.de : UP[0].name.en) + " ×" + nU, "🖥️ GPU ×" + nG + "   🧩 FPGA ×" + nF], 1.0, 0.34, -4.28, 2.3, 1.0, Math.PI / 2));
     grp.add(plate(["📦 " + (de() ? UP[3].name.de : UP[3].name.en) + " ×" + nA], 0.9, 0.24, -4.28, 2.3, 2.0, Math.PI / 2));
     if (nA > 0) grp.add(plate(["⚠ HOT ⚠"], 0.5, 0.16, -4.28, 2.05, 2.45, Math.PI / 2));
@@ -142,10 +151,10 @@
         var cx = -10.5 - (ci === 2 ? 3.6 : 0), cz2 = 1.3, cy = gy0 + 0.75 + (ci === 1 ? 1.5 : 0); grp.add(box(3.4, 1.5, 1.3, mat(0x2a6bd1, { roughness: 0.6 }), cx, cy, cz2));
         for (var r = 0; r < 12; r++) grp.add(box(0.05, 1.4, 1.34, mat(0x1f55ab), cx - 1.55 + r * 0.28, cy, cz2));
         grp.add(box(3.4, 0.06, 1.32, mat(0xf0b429), cx, cy - 0.7, cz2)); grp.add(box(0.05, 1.4, 0.04, steel, cx + 1.6, cy, cz2 + 0.66)); grp.add(box(0.05, 1.4, 0.04, steel, cx + 1.4, cy, cz2 + 0.66));
-        var vf = cyl(0.3, 0.3, 0.05, mat(0x0b0d11), cx + 1.72, cy + 0.05, cz2, 18); vf.rotation.z = Math.PI / 2; grp.add(vf); S2.spin.push({ m: vf, ax: "x", s: 10 });
+        fanAt(0.3, cx + 1.72, cy + 0.05, cz2, 0, Math.PI / 2, 10, 0x0b0d11, 9);
       }
       for (var v = 0; v < Math.min(nFarm, 10); v++) { var vl = box(0.18, 0.1, 0.03, glow(0xff7a1a), -10.5 - 1.4 + v * 0.3, gy0 + 1.2, 1.3 + 0.68); grp.add(vl); S2.leds.push(vl); }
-      grp.add(box(0.8, 0.4, 0.6, mat(0xd0d4da, { metalness: 0.3 }), -9.4, gy0 + 1.7 + (nc > 1 ? 1.5 : 0), 1.3)); var acf = cyl(0.15, 0.15, 0.02, mat(0x0b0d11), -9.4, gy0 + 1.92 + (nc > 1 ? 1.5 : 0), 1.3, 14); grp.add(acf); S2.spin.push({ m: acf, ax: "y", s: 14 });
+      grp.add(box(0.8, 0.4, 0.6, mat(0xd0d4da, { metalness: 0.3 }), -9.4, gy0 + 1.7 + (nc > 1 ? 1.5 : 0), 1.3)); fanAt(0.17, -9.4, gy0 + 1.92 + (nc > 1 ? 1.5 : 0), 1.3, -Math.PI / 2, 0, 14, 0x0b0d11, 6);
       grp.add(cyl(0.015, 0.015, 1.2, steel, -12.0, gy0 + 2.3, 1.3, 6)); grp.add(box(0.06, 1.0, 0.06, mat(0x333840), -10.5, gy0 + 2.0, 2.1)); grp.add(plate(["🏭 " + (de() ? UP[4].name.de : UP[4].name.en) + " ×" + nFarm], 2.0, 0.34, -10.5, gy0 + 2.2, 2.14, 0));
     }
     if (nPl > 0) {
@@ -221,7 +230,7 @@
     document.head.appendChild(s);
   }
   function loop(dt) {
-    if (buzMesh) { S2.pressT = Math.max(0, S2.pressT - dt); buzMesh.position.y = 1.16 - (S2.pressT > 0 ? 0.045 : 0); }
+    if (buzMesh) { S2.pressT = Math.max(0, S2.pressT - dt); buzMesh.position.y = (S2.by || 1.16) - (S2.pressT > 0 ? 0.04 : 0); }
     var now = Date.now() / 1000; S2.leds.forEach(function (l, i) { l.visible = Math.sin(now * 5 + i * 1.7) > -0.3; });
     S2.spin.forEach(function (s) { s.m.rotation[s.ax] += dt * s.s; }); S2.orb.forEach(function (o) { o.position.y = 1.85 + Math.sin(now * 2) * 0.04; });
     S2.bub.forEach(function (b) { b.y += dt * 0.18; if (b.y > 1.45) b.y = 1.12; b.m.position.set(b.x, b.y, b.z); });
