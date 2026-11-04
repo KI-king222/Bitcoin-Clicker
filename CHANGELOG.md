@@ -22,6 +22,7 @@
 - NEXT sim.js: Regen (zufaellig, Nebel dichter, mehr Kundschaft), Lieferwagen faehrt am Abholladen vor wenn eine Bestellung abholbereit wird, Zufalls-Ereignisse (Stammkunde, Zeitung, Express-Zustellung). Statistik-Tafel auf freie linke Wand verschoben (hing vor den Postern). Kill-Switch ?nosim
 - NEXT sim2.js: Chef-Büro-Terminal im Laden (rechts bei der Theke): Lagerhilfe (Figur hinter der Kasse, räumt abholbereite Lieferungen automatisch ein), Einrichtung (Teppich, LED-Band, Neon, Pflanzen, je +4 ⭐), Werbung (15 Min mehr Kundschaft). Einmalkosten vom echten Kontostand, keine laufenden Kosten. Kill-Switch ?nosim2
 - NEXT Lade-Fix (wichtigste Ursache fuer "kein Ton / Dreh-Bug / Tisch fehlt"): Das Spiel schreibt sein Dokument asynchron neu; danach zeigten relative Pfade "next/xyz.js" auf /next/next/ (404) und die Module nach world.js/env.js wurden still nicht geladen. next.js nutzt jetzt einen festen Basis-Pfad, wartet bis das Spiel steht und haengt verlorene Skript-Tags neu an.
+- NEXT: Statistik-Tafel an die rechte Wand (links verdeckten Miner-Racks sie), LAGER-Schild ueber das Regal (Regalbrett verdeckte es), Regal-Label darueber.
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

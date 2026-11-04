@@ -301,8 +301,8 @@
     for (var lv = 0; lv < 4; lv++) sc.add(box(3.4, 0.05, 0.6, sm, 1.4, 0.2 + lv * 0.85, -6.3));
     [-0.28, 1.4, 3.08].forEach(function (x) { sc.add(box(0.06, 2.6, 0.6, sm, x, 1.3, -6.3)); });
     S.invGroup = new THREE.Group(); sc.add(S.invGroup);
-    sc.add(plane(1.6, 0.3, new THREE.MeshBasicMaterial({ map: textTex("LAGER", 256, 56, "#10151f", "#f7931a", "bold 40px sans-serif") }), 1.4, 2.78, -6.0));
-    addStation("shelf", 1.4, 1.3, -6.2, 3.4, 2.5, 0.8, "📦 " + T("Regal", "Shelf"), 1.4, -5.3, function () { openShelf(); });
+    sc.add(plane(1.6, 0.3, new THREE.MeshBasicMaterial({ map: textTex("LAGER", 256, 56, "#10151f", "#f7931a", "bold 40px sans-serif") }), 1.4, 3.12, -6.56));
+    addStation("shelf", 1.4, 1.3, -6.2, 3.4, 2.5, 0.8, "📦 " + T("Regal", "Shelf"), 1.4, -5.3, function () { openShelf(); }); S.stations.shelf.ly = 3.55;
     // Bautisch
     sc.add(box(2.2, 0.1, 1.3, deskTop, 3.0, 0.95, -3.6)); [[-1, -0.5], [1, -0.5], [-1, 0.5], [1, 0.5]].forEach(function (p) { sc.add(box(0.08, 0.95, 0.08, wood, 3.0 + p[0] * 0.95, 0.47, -3.6 + p[1] * 0.55)); });
     sc.add(box(1.0, 0.012, 0.7, mat(0x1f6f3f, { roughness: 0.6 }), 3.0, 1.005, -3.6)); sc.add(box(0.5, 0.45, 0.35, mat(0x202833, { metalness: 0.5 }), 3.1, 1.25, -3.6)); sc.add(box(0.015, 0.38, 0.26, glow(0x78d505), 3.34, 1.25, -3.6));
@@ -329,7 +329,7 @@
     var scc = document.createElement("canvas"); scc.width = 768; scc.height = 432; S.scr = { ctx: scc.getContext("2d"), tex: new THREE.CanvasTexture(scc), owned: false };
     sc.add(box(2.5, 1.45, 0.05, mat(0x0b0f16, { metalness: 0.6 }), -2.3, 2.0, -1.17)); sc.add(plane(2.4, 1.35, new THREE.MeshBasicMaterial({ map: S.scr.tex }), -2.3, 2.0, -1.14));
     var bc = document.createElement("canvas"); bc.width = 512; bc.height = 320; S.board = { ctx: bc.getContext("2d"), tex: new THREE.CanvasTexture(bc) }; S.boardDirty = true;
-    sc.add(box(0.05, 0.86, 1.34, mat(0x3a2a1c, { roughness: 0.7 }), -4.27, 1.75, 0.9)); sc.add(plane(1.24, 0.76, new THREE.MeshBasicMaterial({ map: S.board.tex }), -4.24, 1.75, 0.9, Math.PI / 2));
+    sc.add(box(0.05, 0.86, 1.34, mat(0x3a2a1c, { roughness: 0.7 }), 4.27, 2.3, 2.5)); sc.add(plane(1.24, 0.76, new THREE.MeshBasicMaterial({ map: S.board.tex }), 4.24, 2.3, 2.5, -Math.PI / 2));
     drawScreenBase();
     S.obst.push([-3.3, -1.3, -1.0, -0.1]);
     addStation("buzzer", -2.3, 1.15, -0.55, 0.9, 0.5, 0.9, "🔴 Buzzer", -2.3, 0.5, function () { buzzDefault(); });
