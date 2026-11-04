@@ -192,7 +192,7 @@
   var peds = [];
   function spawnPeds() {
     var D = W.Parts3D && Parts3D.shop && Parts3D.shop._dbg; if (!D || !D.randomSpec || !S.makeActor) return;
-    [[5.3, 1], [13.7, -1], [5.6, -1]].forEach(function (p, i) {
+    [[5.3, 1], [13.7, -1], [5.6, -1], [4.4, 1], [13.2, 1], [5.0, -1], [14.2, -1], [4.8, 1]].forEach(function (p, i) {
       try {
         var a = S.makeActor(D.randomSpec(null)); a.speed = rr(1.0, 1.4); var x0 = rr(-12, 12); a.g.position.set(x0, 0.12, p[0]); sc.add(a.g);
         function go(a2) { var tx = a2.g.position.x > 0 ? -14.5 : 14.5; a2.path = [[tx, p[0] + rr(-0.3, 0.3)]]; a2.pi = 0; a2.done = go; }

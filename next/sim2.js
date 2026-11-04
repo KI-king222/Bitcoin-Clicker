@@ -4,8 +4,8 @@
   var W = window, KEY = "hashpool-next-mgmt-v1";
   function init() {
     var S = W.Parts3D.nextWorld.S, G = S.G, sc = S.scene, T = G.T, M = G.M, box = G.box, glow = G.glow, plane = G.plane;
-    var D = { helper: false, decor: {}, adUntil: 0 };
-    try { var j = JSON.parse(localStorage.getItem(KEY) || "null"); if (j) { D.helper = !!j.helper; D.decor = j.decor || {}; D.adUntil = j.adUntil || 0; } } catch (e) {}
+    var D = { helper: false, decor: {}, adUntil: 0, day: "", base: null, claimed: {} };
+    try { var j = JSON.parse(localStorage.getItem(KEY) || "null"); if (j) { D.helper = !!j.helper; D.decor = j.decor || {}; D.adUntil = j.adUntil || 0; D.day = j.day || ""; D.base = j.base || null; D.claimed = j.claimed || {}; } } catch (e) {}
     function save() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) {} S.adUntil = D.adUntil; }
     S.adUntil = D.adUntil;
     function bal() { try { return Number(W.state.balance) || 0; } catch (e) { return 0; } }
@@ -39,12 +39,23 @@
       if (ready) { try { Lg.take(); setTimeout(function () { try { if (!S.invOpen) Lg.stock(); } catch (e) {} }, 1500); S.toast(T("👷 Lagerhilfe räumt neue Lieferung ins Regal", "👷 Stock helper puts the new delivery on the shelf")); } catch (e) {} }
     }
     S.ticks.push(work);
+    /* ---------- Tagesziele ---------- */
+    var GOALS = [
+      { id: "serve", n: 3, r: 2000, t: ["3 Aufträge annehmen", "Accept 3 orders"], v: function () { return S.stats.accepted - D.base.accepted; } },
+      { id: "deliver", n: 1, r: 3000, t: ["1 Bestellung ausliefern", "Deliver 1 order"], v: function () { return S.stats.delivered - D.base.delivered; } },
+      { id: "calm", n: 8, r: 2500, t: ["8 Kunden besuchen den Laden, keiner geht verärgert", "8 visitors, none leaves angry"], v: function () { return S.stats.angry - D.base.angry > 0 ? 0 : S.stats.visitors - D.base.visitors; } }
+    ];
+    function today() { var d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+    function rollDay() { if (D.day !== today() || !D.base) { D.day = today(); D.base = { accepted: S.stats.accepted, delivered: S.stats.delivered, angry: S.stats.angry, visitors: S.stats.visitors }; D.claimed = {}; save(); } }
     /* ---------- Panel ---------- */
     function panel() {
+      rollDay();
       var h = "<h4>🧾 " + T("Chef-Büro", "Office") + "</h4><p class=\"nx-note\">💰 " + Math.floor(bal()) + " sats</p>";
       h += '<div class="nx-row"><span>👷 ' + T("Lagerhilfe (räumt Lieferungen automatisch ein)", "Stock helper (shelves deliveries automatically)") + "</span><b>" + (D.helper ? "✓" : HC) + "</b></div>";
       if (!D.helper) h += '<div class="nx-bt"><button class="pri" data-a="m_helper">👷 ' + T("Einstellen", "Hire") + "</button></div>";
       DEC.forEach(function (d) { h += '<div class="nx-row"><span>' + (de() ? d.n[0] : d.n[1]) + "</span><b>" + (D.decor[d.id] ? "✓" : d.c) + "</b></div>" + (D.decor[d.id] ? "" : '<div class="nx-bt"><button data-a="m_dec_' + d.id + '">' + T("Kaufen (+4 ⭐)", "Buy (+4 ⭐)") + "</button></div>"); });
+      h += "<h4>🎯 " + T("Tagesziele", "Daily goals") + "</h4>";
+      GOALS.forEach(function (g) { var v = Math.min(g.n, Math.max(0, g.v())), done = v >= g.n; h += '<div class="nx-row"><span>' + (de() ? g.t[0] : g.t[1]) + " (" + v + "/" + g.n + ")</span><b>" + (D.claimed[g.id] ? "✓" : g.r) + "</b></div>" + (done && !D.claimed[g.id] ? '<div class="nx-bt"><button class="pri" data-a="m_goal_' + g.id + '">' + T("Belohnung holen", "Claim reward") + "</button></div>" : ""); });
       var left = Math.max(0, Math.ceil((D.adUntil - Date.now()) / 60000));
       h += '<div class="nx-row"><span>📣 ' + T("Werbung (15 Min mehr Kundschaft)", "Ads (15 min more customers)") + "</span><b>" + (left ? left + " min" : 2000) + '</b></div><div class="nx-bt"><button data-a="m_ad">' + T("Werbung schalten", "Run ads") + '</button><button data-a="close">' + T("Schließen", "Close") + "</button></div>";
       S.invShow(h);
@@ -53,6 +64,7 @@
     S.invActions.m_helper = function () { if (D.helper || !pay(HC)) return; D.helper = true; save(); spawnHelper(); S.toast(T("👷 Lagerhilfe eingestellt", "👷 Stock helper hired")); panel(); };
     S.invActions.m_ad = function () { if (!pay(2000)) return; D.adUntil = Math.max(Date.now(), D.adUntil) + 15 * 60000; save(); S.toast(T("📣 Werbung läuft", "📣 Ads running")); panel(); };
     DEC.forEach(function (d) { S.invActions["m_dec_" + d.id] = function () { if (D.decor[d.id] || !pay(d.c)) return; D.decor[d.id] = 1; save(); d.build(); S.addRep && S.addRep(4); S.toast("✨ " + (de() ? d.n[0] : d.n[1]) + " +4 ⭐"); panel(); }; });
+    GOALS.forEach(function (g) { S.invActions["m_goal_" + g.id] = function () { rollDay(); if (D.claimed[g.id] || g.v() < g.n) return; D.claimed[g.id] = 1; try { W.state.balance += g.r; if (typeof W.save === "function") W.save(); } catch (e) {} save(); S.toast("🎯 +" + g.r + " sats"); panel(); }; });
     W.Parts3D.nextMgmt = { state: function () { return D; }, panel: panel };
     console.log("[HASHPOOL NEXT] sim2 bereit (Chef-Büro)");
   }
