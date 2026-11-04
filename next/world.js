@@ -626,7 +626,7 @@
       S.scT = (S.scT || 0) + dt; if (S.scT > 0.4) { S.scT = 0; if (S.scr && !S.scr.owned) drawScreenBase(); }
       if (S.buzz && !S.buzzOwned) { S.pressT = Math.max(0, (S.pressT || 0) - dt); S.buzz.position.y = 1.16 - (S.pressT > 0 ? 0.045 : 0); }
       for (var ti = 0; ti < S.ticks.length; ti++) { try { S.ticks[ti](dt, S.t); } catch (e) { showErr("tick: " + e.message); S.ticks.splice(ti, 1); ti--; } }
-      Object.keys(S.stations).forEach(function (id) { var st = S.stations[id]; if (!st.el) return; var q = project(st.lx, st.ly, st.lz), dist = Math.hypot(st.lx - S.px, st.lz - S.pz); st.el.style.display = (q[2] < 1 && dist < 9 && !st.hide) ? "block" : "none"; st.el.style.left = q[0] + "px"; st.el.style.top = q[1] + "px"; });
+      Object.keys(S.stations).forEach(function (id) { var st = S.stations[id]; if (!st.el) return; var q = project(st.lx, st.ly, st.lz), dist = Math.hypot(st.lx - S.px, st.lz - S.pz); var sameRoom = S.roomOf(st.sx, st.sz) === S.roomOf(S.px, S.pz) || dist < 2.2; st.el.style.display = (q[2] < 1 && dist < 9 && !st.hide && sameRoom) ? "block" : "none"; st.el.style.left = q[0] + "px"; st.el.style.top = q[1] + "px"; });
       if (cbub) { if (c && c.state === "wait" && !S.dlg) { var q2 = project(c.g.position.x, 2.5, c.g.position.z); cbub.style.display = q2[2] < 1 ? "block" : "none"; cbub.style.left = q2[0] + "px"; cbub.style.top = q2[1] + "px"; cbub.textContent = c.wait > 60 ? "😠" : c.kind === "pickup" ? "📦 ?" : "💬"; } else cbub.style.display = "none"; }
       S.invT = (S.invT || 0) + dt; if (S.invT > 1) { S.invT = 0; rebuildShelf(); updHud(); }
       S.rd.render(S.scene, S.cam);

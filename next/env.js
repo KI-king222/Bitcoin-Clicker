@@ -24,6 +24,16 @@
       var mg = g.createRadialGradient(380, 120, 4, 380, 120, 46); mg.addColorStop(0, "rgba(255,248,225,1)"); mg.addColorStop(0.25, "rgba(255,248,225,.95)"); mg.addColorStop(0.3, "rgba(200,210,255,.25)"); mg.addColorStop(1, "rgba(200,210,255,0)"); g.fillStyle = mg; g.fillRect(300, 40, 160, 160);
     });
   }
+  function shopWinTex(col) {
+    var r = (col >> 16) & 255, gg = (col >> 8) & 255, b = col & 255;
+    return G.ctex(512, 172, function (g, w, h) {
+      var gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgb(" + (r * 0.55 | 0) + "," + (gg * 0.5 | 0) + "," + (b * 0.45 | 0) + ")"); gr.addColorStop(1, "rgb(" + (r * 0.95 | 0) + "," + (gg * 0.9 | 0) + "," + (b * 0.8 | 0) + ")"); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      for (var i = 0; i < 4; i++) { g.fillStyle = "rgba(40,25,15,.5)"; g.fillRect(20 + i * 125, 92 + (i % 2) * 10, 100, 6); g.fillStyle = "rgba(30,20,12," + (0.45 + (i % 3) * 0.1) + ")"; var k; for (k = 0; k < 4; k++) g.fillRect(28 + i * 125 + k * 24, 60 + (i % 2) * 10 - k * 4 % 12, 16, 32 + k * 4 % 12); }
+      g.fillStyle = "rgba(20,14,10,.55)"; g.fillRect(0, h - 38, w, 38);
+      g.fillStyle = "#171a20"; g.fillRect(0, 0, w, 8); g.fillRect(0, h - 8, w, 8); g.fillRect(0, 0, 8, h); g.fillRect(w - 8, 0, 8, h); g.fillRect(w / 2 - 4, 0, 8, h); g.fillRect(w / 4 - 2, 0, 4, h); g.fillRect(w * 0.75 - 2, 0, 4, h);
+      var rf = g.createLinearGradient(0, 0, w, h); rf.addColorStop(0, "rgba(255,255,255,.18)"); rf.addColorStop(0.35, "rgba(255,255,255,0)"); g.fillStyle = rf; g.fillRect(0, 0, w, h);
+    });
+  }
   function haloTex() { return G.ctex(64, 64, function (g, w, h) { var r = g.createRadialGradient(32, 32, 2, 32, 32, 32); r.addColorStop(0, "rgba(255,225,150,.95)"); r.addColorStop(0.3, "rgba(255,200,110,.35)"); r.addColorStop(1, "rgba(255,200,110,0)"); g.fillStyle = r; g.fillRect(0, 0, w, h); }); }
   function facadeTex(kind) {
     return G.ctex(512, 512, function (g, w, h) {
@@ -82,7 +92,7 @@
     }
     // Ladenfronten gegenueber (auf der Strassenseite sichtbar): Leuchtstreifen
     [[-12, "KIOSK", "#10201a", "#78d505", 0xcfe9d8], [-1, "PIZZA", "#2a1010", "#ff6a4a", 0xffd2b0], [9, "BANK", "#10182a", "#6aa8ff", 0xdce8ff]].forEach(function (p) {
-      sc.add(plane(5, 1.7, new THREE.MeshBasicMaterial({ color: p[4] }), p[0], 1.6, 15.45, Math.PI)); sc.add(plane(3.4, 0.7, new THREE.MeshBasicMaterial({ map: signTex(p[1], p[2], p[3]) }), p[0], 3.1, 15.44, Math.PI));
+      sc.add(plane(5, 1.7, new THREE.MeshBasicMaterial({ map: shopWinTex(p[4]) }), p[0], 1.6, 15.45, Math.PI)); sc.add(plane(3.4, 0.7, new THREE.MeshBasicMaterial({ map: signTex(p[1], p[2], p[3]) }), p[0], 3.1, 15.44, Math.PI));
     });
     // ferne Skyline
     for (var i = 0; i < 14; i++) { var sx = -80 + i * 12 + rr(-3, 3), sh = rr(18, 46); sc.add(box(rr(6, 10), sh, 6, M(0x0d1120, { roughness: 1 }), sx, sh / 2, 48)); for (var k2 = 0; k2 < 14; k2++) sc.add(box(0.5, 0.7, 0.05, new THREE.MeshBasicMaterial({ color: rnd([0xffd27a, 0xffe9b0, 0x9fd3ff]) }), sx + rr(-3, 3), rr(3, sh - 2), 44.95)); }
