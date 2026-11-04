@@ -144,7 +144,7 @@
       "#nx-world{position:fixed;inset:0;z-index:800;background:#0a0d14;display:none;touch-action:none;-webkit-user-select:none;user-select:none}#nx-world.show{display:block}" +
       "#nx-world canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}" +
       ".nx-hud{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 26px) 10px 8px;color:#e7e9ec;font:700 13px monospace;pointer-events:none;background:linear-gradient(#0009,#0000);z-index:3}" +
-      ".nx-hud b{flex:1}.nx-hud button{pointer-events:auto;font:700 12px monospace;padding:8px 10px;border-radius:9px;border:1px solid #2c3646;background:#12161ccc;color:#e7e9ec}" +
+      ".nx-hud b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.nx-hud button{pointer-events:auto;font:700 11px monospace;padding:7px 7px;border-radius:9px;border:1px solid #2c3646;background:#12161ccc;color:#e7e9ec}" +
       "#nx-sub{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 66px);color:#ffd9a0;font:700 12px monospace;text-shadow:0 1px 3px #000;pointer-events:none;z-index:3}#nx-err{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 86px);color:#ff7a7a;font:11px monospace;text-shadow:0 1px 3px #000;pointer-events:none;z-index:3}" +
       ".nx-lbl{position:absolute;transform:translate(-50%,-100%);background:#12161ce6;color:#f7931a;border:1px solid #f7931a;border-radius:10px;padding:5px 9px;font:700 12px monospace;white-space:nowrap;cursor:pointer;z-index:2}" +
       ".nx-lbl.cust{background:#fff;color:#111;border-color:#fff;font-size:16px}" +
@@ -643,7 +643,7 @@
   function updHud() {
     if (S.boardDirty) drawBoard();
     var b = document.getElementById("nx-bal"); if (!b) return; var v = 0; try { v = W.state.balance || 0; } catch (e) {}
-    var t = txtOf("balance"); b.textContent = "💰 " + (t || ((typeof W.fmtSats === "function" ? W.fmtSats(v) : fmt(v)) + " sats")) + "  ⭐" + Math.round(S.rep) + (S.queue.length ? "  👥" + (S.queue.length + 1) : "");
+    var t = txtOf("balance").replace(/\s*sats\s*$/i, ""); b.textContent = "💰" + (t || ((typeof W.fmtSats === "function" ? W.fmtSats(v) : fmt(v)) + " sats")) + " ⭐" + Math.round(S.rep) + (S.queue.length ? " 👥" + (S.queue.length + 1) : "");
     var sub = document.getElementById("nx-sub"); if (sub) sub.textContent = (S.subText ? S.subText() : ""); var mod = document.getElementById("nx-mod"); if (mod) mod.textContent = "W" + "✓ " + (W.Parts3D.nextEnv ? "E✓ " : "E– ") + (W.Parts3D.nextLogi ? "L✓ " : "L– ") + (W.Parts3D.clicker ? "C✓" : "C–");
   }
   function txtOf(id) { var e = document.getElementById(id); return e ? (e.textContent || "").replace(/\s+/g, " ").trim() : ""; }
