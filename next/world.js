@@ -269,7 +269,8 @@
     sc.add(box(3.2, 0.125, 2.2, mat(0xffffff, { map: rep(tex("carpet"), 3, 2), roughness: 1 }), 2.6, 0.065, 1.9));   // Teppich vorm Podest
     // Waende (innen verputzt, Fuss-/Sockelleisten)
     var wp = mat(0xffffff, { map: rep(tex("plaster"), 5, 2), roughness: 0.95 }), wpb = mat(0xffffff, { map: rep(tex("plasterWarm"), 5, 2), roughness: 0.95 });
-    sc.add(box(8.8, 3.6, 0.18, wp, 0, 1.8, -6.7)); sc.add(box(0.18, 3.6, 10.34, wpb, -4.4, 1.8, -1.62)); sc.add(box(0.18, 3.6, 10.34, wpb, 4.4, 1.8, -1.62));
+    var trim0 = mat(0x161a22, { roughness: 0.6 }); sc.add(box(8.8, 3.6, 0.18, wp, 0, 1.8, -6.7)); sc.add(box(0.18, 3.6, 10.34, wpb, -4.4, 1.8, -1.62)); sc.add(box(0.18, 3.6, 4.14, wpb, 4.4, 1.8, -4.72)); sc.add(box(0.18, 1.2, 1.2, wpb, 4.4, 3.0, -2.05)); sc.add(box(0.18, 3.6, 5.0, wpb, 4.4, 1.8, 1.05));   // rechte Wand mit Tuer (z -2.65..-1.45) zur Montagehalle
+    sc.add(box(0.22, 2.4, 0.1, trim0, 4.4, 1.2, -2.7)); sc.add(box(0.22, 2.4, 0.1, trim0, 4.4, 1.2, -1.4));
     sc.add(box(3.5, 3.6, 0.16, wp, -2.65, 1.8, DIV)); sc.add(box(3.5, 3.6, 0.16, wp, 2.65, 1.8, DIV)); sc.add(box(1.8, 1.1, 0.16, wp, 0, 3.05, DIV));
     var trim = mat(0x161a22, { roughness: 0.6 });
     [-6.6, -1.38].forEach(function (z) { sc.add(box(8.6, 0.14, 0.04, trim, 0, 0.19, z + (z < -3 ? 0.0 : 0.0))); });

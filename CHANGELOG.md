@@ -24,6 +24,7 @@
 - NEXT Lade-Fix (wichtigste Ursache fuer "kein Ton / Dreh-Bug / Tisch fehlt"): Das Spiel schreibt sein Dokument asynchron neu; danach zeigten relative Pfade "next/xyz.js" auf /next/next/ (404) und die Module nach world.js/env.js wurden still nicht geladen. next.js nutzt jetzt einen festen Basis-Pfad, wartet bis das Spiel steht und haengt verlorene Skript-Tags neu an.
 - NEXT: Statistik-Tafel an die rechte Wand (links verdeckten Miner-Racks sie), LAGER-Schild ueber das Regal (Regalbrett verdeckte es), Regal-Label darueber.
 - NEXT: Tagesziele im Chef-Buero (3 Auftraege annehmen, 1 ausliefern, 8 Besucher ohne Aergerei; Belohnung 2000/3000/2500 sats, taeglich neu), 8 statt 3 Passanten auf der Strasse.
+- NEXT factory.js: Montagehalle (neuer Raum, Tuer in der rechten Wand des Hinterraums, Terminal "Fabrik"): 5 Ausbaustufen (Fliessband+Presse, Roboterarm, Teststation, zweites Band, KI-Leitstand), Arbeiter, produziert sats/min (auch offline bis 2 h), Abholung am Terminal. Kosten 8K/25K/80K/250K/800K, Ertrag 600/2.4K/8K/25K/80K pro Minute. Kill-Switch ?nofactory.
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

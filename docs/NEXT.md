@@ -32,3 +32,4 @@ Erweiterungen hängen sich an `Parts3D.nextWorld.S` (`rects`, `obst`, `ticks`, `
 
 - `next/sim.js` — Regen, Lieferwagen am Abholladen, Zufalls-Ereignisse (`?nosim` schaltet ab); Ruf/Warteschlange/Statistik liegen in `world.js`.
 - `next/sim2.js` — Chef-Büro (Lagerhilfe, Einrichtung, Werbung), `?nosim2`.
+- `next/factory.js` — Montagehalle/Fabrik (`?nofactory`).
