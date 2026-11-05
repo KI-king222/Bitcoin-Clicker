@@ -128,3 +128,4 @@ Siehe Git-Historie / docs/CHANGELOG.md
 - env: rundere Baumkronen (16x12 Segmente, Blätterbüschel), Autos mit Radkästen und Fensterholmen.
 - farmhall: LED-Deckenpanels und hellere Beleuchtung (vorher zu dunkel).
 - factory: graue Ostwand mit Rippen und Warnbaendern, Oberlichter, Deckentraeger.
+- furniture: Regal-Beschriftungsschilder entfernt (Teile werden nicht nach Typ sortiert).

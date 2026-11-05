@@ -15,7 +15,6 @@
     });
     for (var lv = 0; lv < 4; lv++) {
       var y = 0.2 + lv * 0.85; sc.add(box(3.4, 0.1, 0.03, org, 1.4, y + 0.06, -5.995)); sc.add(box(3.4, 0.03, 0.06, dk, 1.4, y + 0.03, -6.02));
-      ["CPU/RAM", "GPU", "SSD/PSU"].forEach(function (lt, li) { sc.add(box(0.5, 0.07, 0.01, new THREE.MeshBasicMaterial({ map: G.textTex(lt, 192, 48, "#e8e4d8", "#10151f", "bold 30px sans-serif") }), 0.3 + li * 1.1, y + 0.065, -5.975)); });
     }
     /* ---------- Bautisch: Mitte (3.0, -3.6), Platte y 0.95, 2.2 x 1.3 ---------- */
     var bz = -3.6, bx = 3.0;
