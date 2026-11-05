@@ -110,7 +110,7 @@
             // begehbare Rechtecke [x1,x2,z1,z2] (Wandflaeche zu Wandflaeche, Koerperradius wird abgezogen); Tueren sind eigene Rechtecke, die in beide Raeume ragen
             rects: [[-4.31, 4.31, -1.22, 3.47], [-4.31, 4.31, -6.61, -1.38], [-0.85, 0.85, -2.0, -0.5], [-0.85, 0.85, 2.8, 4.3]],
             // Hindernisse (Rechtecke, Abstand < R wird blockiert): Theke, Computer-Tisch, Regal, Bautisch, Laden-Regal, Schaufenster-Podest
-            obst: [[0.8, 3.8, -0.25, 0.65], [-3.9, -1.9, -6.5, -5.5], [-0.4, 3.2, -7.0, -6.0], [1.9, 4.1, -4.3, -2.9], [-4.3, -2.5, 2.7, 3.1], [1.6, 3.7, 2.3, 3.1], [-1.5, -0.8, -6.5, -5.8]],
+            obst: [[0.8, 3.8, -0.25, 0.65], [-3.9, -1.9, -6.5, -5.5], [-0.4, 3.2, -7.0, -6.0], [1.9, 4.1, -4.3, -2.9], [-4.3, -2.5, 2.7, 3.1], [1.6, 3.7, 2.3, 3.1]],
             // Raeume fuer den Auto-Lauf: id, Tueren (Verbindung a<->b mit je einem Wegpunkt davor/dahinter)
             doors: [{ a: "A", b: "B", pa: [0, -0.4], pb: [0, -2.2] }, { a: "A", b: "E", pa: [0, 2.5], pb: [0, 4.6] }],
             roomOf: function (x, z) { if (z < DIV) return "B"; if (z < 3.47 && Math.abs(x) <= 4.35) return "A"; return "E"; } };
@@ -269,7 +269,8 @@
     sc.add(box(3.2, 0.125, 2.2, mat(0xffffff, { map: rep(tex("carpet"), 3, 2), roughness: 1 }), 2.6, 0.065, 1.9));   // Teppich vorm Podest
     // Waende (innen verputzt, Fuss-/Sockelleisten)
     var wp = mat(0xffffff, { map: rep(tex("plaster"), 5, 2), roughness: 0.95 }), wpb = mat(0xffffff, { map: rep(tex("plasterWarm"), 5, 2), roughness: 0.95 });
-    var trim0 = mat(0x161a22, { roughness: 0.6 }); sc.add(box(8.8, 3.6, 0.18, wp, 0, 1.8, -6.7)); sc.add(box(0.18, 3.6, 10.34, wpb, -4.4, 1.8, -1.62)); sc.add(box(0.18, 3.6, 4.14, wpb, 4.4, 1.8, -4.72)); sc.add(box(0.18, 1.2, 1.2, wpb, 4.4, 3.0, -2.05)); sc.add(box(0.18, 3.6, 5.0, wpb, 4.4, 1.8, 1.05));   // rechte Wand mit Tuer (z -2.65..-1.45) zur Montagehalle
+    var trim0 = mat(0x161a22, { roughness: 0.6 }); sc.add(box(2.65, 3.6, 0.18, wp, -3.075, 1.8, -6.7)); sc.add(box(4.95, 3.6, 0.18, wp, 1.925, 1.8, -6.7)); sc.add(box(1.2, 1.2, 0.18, wp, -1.15, 3.0, -6.7)); sc.add(box(0.1, 2.4, 0.22, trim0, -1.77, 1.2, -6.7)); sc.add(box(0.1, 2.4, 0.22, trim0, -0.53, 1.2, -6.7));   // Tuer zur Farm-Halle (x -1.75..-0.55)
+     sc.add(box(0.18, 3.6, 10.34, wpb, -4.4, 1.8, -1.62)); sc.add(box(0.18, 3.6, 4.14, wpb, 4.4, 1.8, -4.72)); sc.add(box(0.18, 1.2, 1.2, wpb, 4.4, 3.0, -2.05)); sc.add(box(0.18, 3.6, 5.0, wpb, 4.4, 1.8, 1.05));   // rechte Wand mit Tuer (z -2.65..-1.45) zur Montagehalle
     sc.add(box(0.22, 2.4, 0.1, trim0, 4.4, 1.2, -2.7)); sc.add(box(0.22, 2.4, 0.1, trim0, 4.4, 1.2, -1.4));
     sc.add(box(3.5, 3.6, 0.16, wp, -2.65, 1.8, DIV)); sc.add(box(3.5, 3.6, 0.16, wp, 2.65, 1.8, DIV)); sc.add(box(1.8, 1.1, 0.16, wp, 0, 3.05, DIV));
     var trim = mat(0x161a22, { roughness: 0.6 });
@@ -316,11 +317,7 @@
     var wbt = ctex(256, 128, function (g, w, h) { g.fillStyle = "#e9edf2"; g.fillRect(0, 0, w, h); g.fillStyle = "#c33"; g.font = "bold 22px sans-serif"; g.fillText("TODO:", 14, 28); g.fillStyle = "#223"; g.font = "18px sans-serif"; g.fillText("• Teile abholen", 14, 56); g.fillText("• Regal einräumen", 14, 80); g.fillText("• PC bauen", 14, 104); });
     sc.add(plane(1.8, 0.9, new THREE.MeshBasicMaterial({ map: wbt }), -2.9, 2.55, -6.6)); sc.add(box(1.86, 0.96, 0.03, frame, -2.9, 2.55, -6.62));
     // Kisten + Paletten im Hinterraum
-    var crate = mat(0xb8905c, { roughness: 0.9 }); sc.add(box(0.6, 0.5, 0.6, crate, -1.15, 0.37, -6.2)); sc.add(box(0.55, 0.45, 0.55, crate, -1.15, 0.85, -6.2)); sc.add(box(0.5, 0.4, 0.5, crate, -3.9, 0.32, -1.8)); sc.add(box(0.5, 0.35, 0.5, crate, -3.3, 0.3, -1.65));
-    // Farm-Tuer
-    sc.add(box(0.12, 2.3, 1.3, mat(0x14181f, { metalness: 0.5 }), -4.3, 1.15, -3.2)); sc.add(box(0.14, 0.1, 1.5, mat(0xf7931a), -4.3, 2.35, -3.2));
-    sc.add(plane(1.2, 0.3, new THREE.MeshBasicMaterial({ map: textTex("FARM ▼", 256, 64, "#10151f", "#78d505", "bold 40px sans-serif") }), -4.2, 2.6, -3.2, Math.PI / 2));
-    addStation("farm", -4.2, 1.15, -3.2, 0.6, 2.3, 1.4, "🏭 " + T("Farm", "Farm"), -3.3, -3.2, function () { openMenu("farm"); });
+    var crate = mat(0xb8905c, { roughness: 0.9 }); sc.add(box(0.5, 0.4, 0.5, crate, -3.9, 0.32, -1.8)); sc.add(box(0.5, 0.35, 0.5, crate, -3.3, 0.3, -1.65));
     // Buzzer-Tisch (Grundgeruest; clicker.js setzt Aussehen/Upgrades/Aktion darauf)
     sc.add(box(2.0, 0.1, 0.9, deskTop, -2.3, 0.95, -0.55)); [[-3.25, -0.95], [-1.35, -0.95], [-3.25, -0.15], [-1.35, -0.15]].forEach(function (p) { sc.add(box(0.08, 0.95, 0.08, wood, p[0] + 0.05, 0.47, p[1] + 0.05)); });
     sc.add(cyl(0.24, 0.26, 0.09, mat(0x1d2230, { metalness: 0.6 }), -2.3, 1.05, -0.55, 24));
