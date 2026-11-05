@@ -26,6 +26,7 @@
 - NEXT: Tagesziele im Chef-Buero (3 Auftraege annehmen, 1 ausliefern, 8 Besucher ohne Aergerei; Belohnung 2000/3000/2500 sats, taeglich neu), 8 statt 3 Passanten auf der Strasse.
 - NEXT factory.js: Montagehalle (neuer Raum, Tuer in der rechten Wand des Hinterraums, Terminal "Fabrik"): 5 Ausbaustufen (Fliessband+Presse, Roboterarm, Teststation, zweites Band, KI-Leitstand), Arbeiter, produziert sats/min (auch offline bis 2 h), Abholung am Terminal. Kosten 8K/25K/80K/250K/800K, Ertrag 600/2.4K/8K/25K/80K pro Minute. Kill-Switch ?nofactory.
 - NEXT farmhall.js: echte Server-Farm-Halle (Tuer in der Rueckwand des Hinterraums, ersetzt die "Farm-Theke"): Racks mit Server-Fronten/Luefterrueckseiten, Kabeltrassen, Lueftungsrohre, Klimageraete mit Luefter, Leitstand mit Live-Anzeige + Wandbildschirm; Rackzahl waechst mit den Minern; Station "Farm" oeffnet die Farm-Ansicht. Kill-Switch ?nofarmhall.
+- NEXT polish.js: weiche Kontaktschatten unter Moebeln + Boden-AO an Waenden (gemergte Geometrie, 2 Draw-Calls), runde Haengelampen (Lathe) und Wandlampen. Kill-Switch ?nopolish.
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

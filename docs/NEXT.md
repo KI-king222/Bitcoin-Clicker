@@ -34,3 +34,4 @@ Erweiterungen hängen sich an `Parts3D.nextWorld.S` (`rects`, `obst`, `ticks`, `
 - `next/sim2.js` — Chef-Büro (Lagerhilfe, Einrichtung, Werbung), `?nosim2`.
 - `next/factory.js` — Montagehalle/Fabrik (`?nofactory`).
 - `next/farmhall.js` — Server-Halle (`?nofarmhall`).
+- `next/polish.js` — Schatten/AO, Lampen (`?nopolish`).
