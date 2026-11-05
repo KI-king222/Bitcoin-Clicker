@@ -333,7 +333,14 @@
     addStation("buzzer", -2.3, 1.15, -0.55, 0.9, 0.5, 0.9, "🔴 Buzzer", -2.3, 0.5, function () { buzzDefault(); });
     addStation("upg", -1.55, 1.1, -0.4, 0.6, 0.3, 0.45, "⬆️ Upgrades", -1.5, 0.5, function () { toast(T("Upgrade-Modul nicht geladen", "Upgrade module not loaded")); });
     // Theke + Kasse (Laden)
-    sc.add(box(3.0, 1.0, 0.8, mat(0x3a2a1f, { roughness: 0.6 }), 2.3, 0.62, 0.2)); sc.add(box(3.1, 0.06, 0.9, deskTop, 2.3, 1.15, 0.2)); sc.add(box(0.5, 0.34, 0.03, dark, 1.6, 1.38, 0.1)); sc.add(box(0.46, 0.3, 0.01, glow(0x2a8cff), 1.6, 1.38, 0.12));
+    var wd = mat(0x3a2a1f, { roughness: 0.6 }), wd2 = mat(0x5a4230, { roughness: 0.55 }), br = mat(0xc9a24a, { metalness: 0.85, roughness: 0.3 });
+    sc.add(box(2.2, 1.0, 0.8, wd, 2.3, 0.62, 0.2)); sc.add(box(2.2, 0.06, 0.9, deskTop, 2.3, 1.15, 0.2));
+    [1.2, 3.4].forEach(function (ex) { sc.add(cyl(0.4, 0.4, 1.0, wd, ex, 0.62, 0.2, 28)); sc.add(cyl(0.45, 0.45, 0.06, deskTop, ex, 1.15, 0.2, 28)); sc.add(cyl(0.42, 0.42, 0.14, mat(0x1b1410, { roughness: 0.8 }), ex, 0.19, 0.2, 28)); });
+    sc.add(box(2.2, 0.14, 0.76, mat(0x1b1410, { roughness: 0.8 }), 2.3, 0.19, 0.2));   // Sockel
+    [1.55, 2.3, 3.05].forEach(function (px) { sc.add(box(0.66, 0.62, 0.025, wd2, px, 0.66, 0.61)); sc.add(box(0.5, 0.46, 0.03, wd, px, 0.66, 0.612)); });   // Fuellungen
+    var rail = cyl(0.028, 0.028, 3.0, br, 2.3, 0.22, 0.72, 12); rail.rotation.z = Math.PI / 2; sc.add(rail);   // Messing-Fussleiste
+    [0.9, 1.7, 2.3, 2.9, 3.7].forEach(function (rx) { sc.add(cyl(0.015, 0.015, 0.12, br, rx, 0.22, 0.66, 8)); });
+    var lip = cyl(0.02, 0.02, 2.2, br, 2.3, 1.19, 0.66, 10); lip.rotation.z = Math.PI / 2; sc.add(lip); sc.add(box(0.5, 0.34, 0.03, dark, 1.6, 1.38, 0.1)); sc.add(box(0.46, 0.3, 0.01, glow(0x2a8cff), 1.6, 1.38, 0.12));
     sc.add(box(0.4, 0.08, 0.3, dark, 1.6, 1.22, 0.25)); sc.add(box(0.12, 0.05, 0.08, mat(0xc0c4cc, { metalness: 0.7 }), 2.6, 1.21, 0.3)); sc.add(cyl(0.05, 0.05, 0.03, mat(0xf0b429, { metalness: 0.8 }), 3.3, 1.2, 0.35, 12));
     sc.add(plane(1.0, 0.2, new THREE.MeshBasicMaterial({ map: textTex("KASSE", 256, 50, "#10151f", "#f7931a", "bold 34px sans-serif") }), 2.3, 1.0, 0.62));
     addStation("counter", 2.3, 1.2, 0.2, 3.0, 1.2, 0.9, "🧾 " + T("Theke", "Counter"), 0.3, 1.0, function () { counterAction(); });

@@ -28,6 +28,7 @@
 - NEXT farmhall.js: echte Server-Farm-Halle (Tuer in der Rueckwand des Hinterraums, ersetzt die "Farm-Theke"): Racks mit Server-Fronten/Luefterrueckseiten, Kabeltrassen, Lueftungsrohre, Klimageraete mit Luefter, Leitstand mit Live-Anzeige + Wandbildschirm; Rackzahl waechst mit den Minern; Station "Farm" oeffnet die Farm-Ansicht. Kill-Switch ?nofarmhall.
 - NEXT polish.js: weiche Kontaktschatten unter Moebeln + Boden-AO an Waenden (gemergte Geometrie, 2 Draw-Calls), runde Haengelampen (Lathe) und Wandlampen. Kill-Switch ?nopolish.
 - NEXT Performance: Server-Halle und Montagehalle sind eigene Gruppen und werden ausgeblendet, wenn man nicht im Hinterraum/der Halle ist (~400 Draw-Calls weniger im Laden). tools/render: Screenshot-Harness.
+- NEXT: Theke mit runden Enden, Fuellungen, Sockel und Messingleisten; Sockel-, Stuck- und Handlaufleisten in allen Raeumen (polish.js).
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix

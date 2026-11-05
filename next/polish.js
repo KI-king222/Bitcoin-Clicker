@@ -46,6 +46,23 @@
     }
     setTimeout(function () { try { scan(); } catch (e) { S.err("polish/schatten: " + e.message); } }, 7000);
     setTimeout(function () { try { scan(); } catch (e) {} }, 25000);
+    /* ---------- Sockelleisten, Stuckleisten, Handlauf-Leiste (mit Tuerluecken) ---------- */
+    var trimM = M(0xe9e4d8, { roughness: 0.6 }), railM = M(0xb48a52, { roughness: 0.5 });
+    function strip(axis, fixed, a0, a1, gaps, y, h, th, mat) {   // axis "x": Leiste entlang x bei z=fixed
+      var segs = [[a0, a1]]; (gaps || []).forEach(function (g) { var n = []; segs.forEach(function (sg) { if (g[1] <= sg[0] || g[0] >= sg[1]) { n.push(sg); return; } if (g[0] > sg[0]) n.push([sg[0], g[0]]); if (g[1] < sg[1]) n.push([g[1], sg[1]]); }); segs = n; });
+      segs.forEach(function (sg) { var len = sg[1] - sg[0]; if (len < 0.05) return; var m = axis === "x" ? G.box(len, h, th, mat, (sg[0] + sg[1]) / 2, y, fixed) : G.box(th, h, len, mat, fixed, y, (sg[0] + sg[1]) / 2); m.userData.noShadow = true; sc.add(m); });
+    }
+    function room(x0, x1, z0, z1, g, wain) {
+      var t = 0.03, I = 0.015;
+      [[0.2, 0.14, t, trimM], [3.5, 0.12, 0.05, trimM]].concat(wain ? [[1.0, 0.05, 0.025, railM]] : []).forEach(function (L) {
+        strip("x", z0 + I + L[2] / 2, x0 + I, x1 - I, g.zmin, L[0], L[1], L[2], L[3]); strip("x", z1 - I - L[2] / 2, x0 + I, x1 - I, g.zmax, L[0], L[1], L[2], L[3]);
+        strip("z", x0 + I + L[2] / 2, z0 + I, z1 - I, g.xmin, L[0], L[1], L[2], L[3]); strip("z", x1 - I - L[2] / 2, z0 + I, z1 - I, g.xmax, L[0], L[1], L[2], L[3]);
+      });
+    }
+    room(-4.31, 4.31, -1.22, 3.47, { zmin: [[-0.95, 0.95]], zmax: [[-0.95, 0.95]], xmin: [], xmax: [] }, true);
+    room(-4.31, 4.31, -6.61, -1.38, { zmax: [[-0.95, 0.95]], zmin: [[-1.8, -0.5]], xmin: [], xmax: [[-2.7, -1.4]] }, true);
+    room(4.31, 10.3, -6.6, -1.45, { zmax: [], zmin: [], xmin: [[-2.7, -1.4]], xmax: [] }, false);
+    room(-4.31, 4.31, -13.6, -6.8, { zmax: [[-1.8, -0.5]], zmin: [], xmin: [], xmax: [] }, false);
     /* ---------- Runde Deko: Haengelampen + Wandlampen ---------- */
     function lamp(x, y, z, cord, col) {
       var g = new THREE.Group(); g.position.set(x, y, z);
