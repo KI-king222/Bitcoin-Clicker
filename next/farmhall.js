@@ -4,7 +4,8 @@
 (function () {
   var W = window;
   function init() {
-    var S = W.Parts3D.nextWorld.S, G = S.G, sc = S.scene, T = G.T, M = G.M, box = G.box, cyl = G.cyl, glow = G.glow, plane = G.plane, rr = G.rr, rnd = G.rnd;
+    var S = W.Parts3D.nextWorld.S, G = S.G, scn = S.scene, sc = new THREE.Group(), T = G.T, M = G.M, box = G.box, cyl = G.cyl, glow = G.glow, plane = G.plane, rr = G.rr, rnd = G.rnd;
+    scn.add(sc);   // eigene Gruppe: wird ausgeblendet, wenn der Spieler weit weg ist (spart Draw-Calls)
     var Z0 = -13.6, Z1 = -6.8, XW = 4.31, CZ = (Z0 + Z1) / 2;
     S.rects.push([-XW, XW, Z0, Z1]); S.rects.push([-1.75, -0.55, -7.6, -5.6]);
     S.doors.push({ a: "B", b: "I", pa: [-1.15, -5.7], pb: [-1.15, -7.5] });
@@ -114,7 +115,7 @@
     // Handlauf-Rohre an der Seitenwand
     var pp = cyl(0.05, 0.05, DL - 0.6, M(0x5d6b86, { roughness: 0.4, metalness: 0.7 }), -4.25, 2.2, CZ, 12); pp.rotation.x = Math.PI / 2; sc.add(pp);
     var pp2 = cyl(0.035, 0.035, DL - 0.6, M(0xf7931a, { roughness: 0.4, metalness: 0.5 }), -4.25, 2.0, CZ, 12); pp2.rotation.x = Math.PI / 2; sc.add(pp2);
-    try { var pl = new THREE.PointLight(0xdfeaff, 0.8, 12); pl.position.set(0, 3.0, -10.8); sc.add(pl); var pl2 = new THREE.PointLight(0x6aa8ff, 0.5, 8); pl2.position.set(0, 1.5, -10.8); sc.add(pl2); } catch (e) {}
+    try { var pl = new THREE.PointLight(0xdfeaff, 0.9, 13); pl.position.set(0, 3.0, -10.8); scn.add(pl); } catch (e) {}
     /* ---------- Live ---------- */
     function txt(id) { var e = document.getElementById(id); return e ? (e.textContent || "").replace(/\s+/g, " ").trim() : ""; }
     var t5 = 0;
@@ -127,6 +128,7 @@
       wg.fillStyle = "#f7931a"; wg.font = "bold 28px monospace"; wg.fillText("HASHRATE", 12, 32); wt.needsUpdate = true;
     }
     S.ticks.push(function (dt, t) {
+      var rm = S.roomOf(S.px, S.pz); sc.visible = rm === "I" || rm === "B"; if (!sc.visible) return;
       leds.forEach(function (l) { l.m.visible = Math.sin(t * l.f + l.p) > -0.35; }); fans.forEach(function (f) { f.rotation.z += dt * 9; });
       t5 += dt; if (t5 > 2) { t5 = 0; rebuild(); paint(); }
     });

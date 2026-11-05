@@ -4,7 +4,8 @@
 (function () {
   var W = window, KEY = "hashpool-next-factory-v1";
   function init() {
-    var S = W.Parts3D.nextWorld.S, G = S.G, sc = S.scene, T = G.T, M = G.M, box = G.box, cyl = G.cyl, glow = G.glow, plane = G.plane;
+    var S = W.Parts3D.nextWorld.S, G = S.G, scn = S.scene, sc = new THREE.Group(), T = G.T, M = G.M, box = G.box, cyl = G.cyl, glow = G.glow, plane = G.plane;
+    scn.add(sc);
     var F = { lv: 0, last: Date.now(), stock: 0, made: 0 };
     try { var j = JSON.parse(localStorage.getItem(KEY) || "null"); if (j) { F.lv = j.lv | 0; F.last = j.last || Date.now(); F.stock = j.stock || 0; F.made = j.made || 0; } } catch (e) {}
     function save() { try { localStorage.setItem(KEY, JSON.stringify(F)); } catch (e) {} }
@@ -22,7 +23,7 @@
     sc.add(box(0.05, 3.6, d, yel, X1 - 0.02, 1.8, cz));
     for (var h = 0; h < 2; h++) sc.add(box(w, 0.4, 0.04, h ? yel : dk, cx, 0.32 + h * 0.4, Z0 + 0.03));   // Warnstreifen hinten
     [6.0, 8.2].forEach(function (x) { sc.add(box(0.3, 0.05, 4.4, glow(0xe8f2ff), x, 3.48, cz)); });
-    try { var pl = new THREE.PointLight(0xfff0d8, 0.85, 12); pl.position.set(cx, 3.0, cz); sc.add(pl); } catch (e) {}
+    try { var pl = new THREE.PointLight(0xfff0d8, 0.85, 12); pl.position.set(cx, 3.0, cz); scn.add(pl); } catch (e) {}
     sc.add(plane(3.6, 0.5, new THREE.MeshBasicMaterial({ map: G.textTex("MONTAGEHALLE", 512, 72, "#10151f", "#f7931a", "bold 46px sans-serif") }), 7.3, 3.0, Z0 + 0.02));
     // Tuerrahmen innen (gelb)
     sc.add(box(0.1, 2.4, 0.08, yel, X0 + 0.15, 1.2, -2.7)); sc.add(box(0.1, 2.4, 0.08, yel, X0 + 0.15, 1.2, -1.4)); sc.add(box(0.1, 0.1, 1.38, yel, X0 + 0.15, 2.45, -2.05));
@@ -84,6 +85,7 @@
     /* ---------- Animation ---------- */
     var acc = 0;
     S.ticks.push(function (dt, t) {
+      var rm = S.roomOf(S.px, S.pz); sc.visible = rm === "H" || rm === "B"; if (!sc.visible) { acc += dt; if (acc > 1) { acc = 0; accrue(); } return; }
       var sp = F.lv ? 0.35 + 0.12 * F.lv : 0;
       cases.forEach(function (cs) { cs.position.x += sp * dt * 3; if (cs.position.x > 9.8) cs.position.x = 5.1; });
       belt2cases.forEach(function (cs) { cs.position.x -= sp * dt * 3; if (cs.position.x < 5.1) cs.position.x = 9.8; });
