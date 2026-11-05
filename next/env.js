@@ -131,7 +131,8 @@
     var bark = M(0x4a3626, { roughness: 1 }); sc.add(cyl(0.09, 0.15, 2.3, bark, x, 1.5, z, 12));
     [[0.5, 0.5], [-0.5, 0.35], [0.1, -0.55]].forEach(function (p, i) { var br = cyl(0.03, 0.05, 0.9, bark, x + p[0] * 0.4, 2.7, z + p[1] * 0.4, 6); br.rotation.z = -p[0] * 0.9; br.rotation.x = p[1] * 0.9; sc.add(br); });
     var cols = [M(0x1f6a3a, { roughness: 1 }), M(0x2a8048, { roughness: 1 }), M(0x35965a, { roughness: 1 })];
-    for (var i = 0; i < 12; i++) { var a = i * 2.4, r = 0.35 + (i % 3) * 0.28, y = 2.9 + (i % 4) * 0.38; sc.add(G.sph(0.5 + (i % 3) * 0.1, cols[i % 3], x + Math.cos(a) * r, y, z + Math.sin(a) * r, 10, 8)); }
+    for (var i = 0; i < 12; i++) { var a = i * 2.4, r = 0.35 + (i % 3) * 0.28, y = 2.9 + (i % 4) * 0.38; sc.add(G.sph(0.5 + (i % 3) * 0.1, cols[i % 3], x + Math.cos(a) * r, y, z + Math.sin(a) * r, 16, 12)); }
+    for (var j = 0; j < 8; j++) { var a2 = j * 0.785 + 0.3; sc.add(G.sph(0.3, cols[(j + 1) % 3], x + Math.cos(a2) * 0.85, 2.75 + (j % 3) * 0.35, z + Math.sin(a2) * 0.85, 12, 9)); }
     S.obst.push([x - 0.45, x + 0.45, z - 0.45, z + 0.45]);
   }
   function bench(x, z) {
@@ -166,6 +167,8 @@
       var rim = cyl(0.2, 0.2, 0.18, chrome, p[0], 0.38, p[1], 16); rim.rotation.x = Math.PI / 2; g.add(rim); var hub = cyl(0.06, 0.06, 0.2, M(0x333840, { metalness: 0.8 }), p[0], 0.38, p[1], 10); hub.rotation.x = Math.PI / 2; g.add(hub);
       for (var sp = 0; sp < 5; sp++) { var spk = box(0.03, 0.16, 0.03, chrome, p[0] + Math.cos(sp * 1.2566) * 0.1, 0.38 + Math.sin(sp * 1.2566) * 0.1, p[1] + (p[1] > 0 ? 0.095 : -0.095)); spk.rotation.z = sp * 1.2566 - 1.57; g.add(spk); }
     });
+    [[1.3, 0.93], [-1.3, 0.93], [1.3, -0.93], [-1.3, -0.93]].forEach(function (p) { var ar = cyl(0.42, 0.42, 0.06, M(0x08090c, { roughness: 1 }), p[0], 0.4, p[1] * 0.97, 20); ar.rotation.x = Math.PI / 2; g.add(ar); });   // Radkaesten
+    [[0.85, 0.86], [0.85, -0.86], [-1.35, 0.86], [-1.35, -0.86]].forEach(function (p) { g.add(box(0.07, 0.4, 0.05, body, p[0], 1.12, p[1])); });   // Saeulen
     var hl = new THREE.MeshBasicMaterial({ color: 0xfff4d0 }), tl = new THREE.MeshBasicMaterial({ color: 0xff2a2a });
     [0.6, -0.6].forEach(function (z) { var h1 = cyl(0.09, 0.09, 0.05, hl, 2.12, 0.72, z, 14); h1.rotation.z = Math.PI / 2; g.add(h1); g.add(G.rbox(0.05, 0.12, 0.4, 0.02, tl, -2.12, 0.72, z)); g.add(G.rbox(0.18, 0.1, 0.08, 0.03, body, -0.7, 1.0, z > 0 ? 0.95 : -0.95)); });          // Scheinwerfer, Ruecklichter, Spiegel
     g.add(box(0.04, 0.12, 0.5, M(0xf2f2f2, { roughness: 0.5 }), 2.14, 0.45, 0)); g.add(box(0.04, 0.1, 0.4, M(0xf2f2f2, { roughness: 0.5 }), -2.14, 0.45, 0));    // Kennzeichen

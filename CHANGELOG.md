@@ -124,3 +124,5 @@
 
 ## Frühere Einträge
 Siehe Git-Historie / docs/CHANGELOG.md
+
+- env: rundere Baumkronen (16x12 Segmente, Blätterbüschel), Autos mit Radkästen und Fensterholmen.
