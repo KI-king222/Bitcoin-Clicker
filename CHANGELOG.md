@@ -126,3 +126,4 @@
 Siehe Git-Historie / docs/CHANGELOG.md
 
 - env: rundere Baumkronen (16x12 Segmente, Blätterbüschel), Autos mit Radkästen und Fensterholmen.
+- farmhall: LED-Deckenpanels und hellere Beleuchtung (vorher zu dunkel).

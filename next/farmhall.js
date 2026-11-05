@@ -115,7 +115,10 @@
     // Handlauf-Rohre an der Seitenwand
     var pp = cyl(0.05, 0.05, DL - 0.6, M(0x5d6b86, { roughness: 0.4, metalness: 0.7 }), -4.25, 2.2, CZ, 12); pp.rotation.x = Math.PI / 2; sc.add(pp);
     var pp2 = cyl(0.035, 0.035, DL - 0.6, M(0xf7931a, { roughness: 0.4, metalness: 0.5 }), -4.25, 2.0, CZ, 12); pp2.rotation.x = Math.PI / 2; sc.add(pp2);
-    try { var pl = new THREE.PointLight(0xdfeaff, 0.9, 13); pl.position.set(0, 3.0, -10.8); scn.add(pl); } catch (e) {}
+    // Deckenleuchten (LED-Panels) ueber beiden Gaengen
+    var lp = new THREE.MeshBasicMaterial({ color: 0xe8f2ff }), lf = M(0x20242c, { metalness: 0.6, roughness: 0.4 });
+    [-8.4, -11.0].forEach(function (lz) { [-2.7, 0, 2.7].forEach(function (lx) { sc.add(box(1.9, 0.04, 0.34, lf, lx, 3.44, lz)); sc.add(box(1.76, 0.03, 0.22, lp, lx, 3.41, lz)); }); });
+    try { var pl = new THREE.PointLight(0xdfeaff, 1.1, 15); pl.position.set(0, 3.0, -10.8); scn.add(pl); var pl2 = new THREE.PointLight(0xdfeaff, 0.8, 9); pl2.position.set(0, 3.0, -8.0); scn.add(pl2); } catch (e) {}
     /* ---------- Live ---------- */
     function txt(id) { var e = document.getElementById(id); return e ? (e.textContent || "").replace(/\s+/g, " ").trim() : ""; }
     var t5 = 0;
