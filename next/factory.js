@@ -20,7 +20,15 @@
     var cx = (X0 + X1) / 2, w = X1 - X0, d = Z1 - Z0, cz = (Z0 + Z1) / 2;
     sc.add(box(w, 0.12, d, conc, cx, 0.06, cz)); sc.add(box(w, 0.1, d, M(0x2a2f3a, { roughness: 1 }), cx, 3.55, cz));
     sc.add(box(w + 0.3, 3.6, 0.18, wallm, cx, 1.8, Z0 - 0.09)); sc.add(box(0.18, 3.6, d + 0.2, wallm, X1 + 0.09, 1.8, cz)); sc.add(box(w, 3.6, 0.18, wallm, cx, 1.8, Z1 + 0.09));
-    sc.add(box(0.05, 3.6, d, yel, X1 - 0.02, 1.8, cz));
+    sc.add(box(0.05, 3.6, d, M(0x8f949c, { roughness: 0.9 }), X1 - 0.02, 1.8, cz));   // Wand grau statt grellgelb
+    // Wandrippen + gelbes Warnband an der Ostwand
+    for (var ri = 0; ri <= 8; ri++) sc.add(box(0.08, 3.5, 0.1, dk, X1 - 0.08, 1.8, Z0 + 0.3 + ri * (d - 0.6) / 8));
+    sc.add(box(0.06, 0.18, d - 0.2, yel, X1 - 0.07, 0.9, cz)); sc.add(box(0.06, 0.18, d - 0.2, yel, X1 - 0.07, 2.6, cz));
+    // Fensterband an der Rueckwand (Oberlichter)
+    for (var wi = 0; wi < 5; wi++) { sc.add(box(0.9, 0.5, 0.05, dk, X0 + 0.9 + wi * 1.25, 2.9, Z0 + 0.03)); sc.add(box(0.8, 0.4, 0.04, new THREE.MeshBasicMaterial({ color: 0x9fc4e8 }), X0 + 0.9 + wi * 1.25, 2.9, Z0 + 0.06)); }
+    // Deckentraeger
+    for (var ti = 0; ti < 5; ti++) { sc.add(box(0.14, 0.22, d, dk, X0 + 0.7 + ti * 1.3, 3.45, cz)); }
+    [Z0 + 1.0, cz, Z1 - 1.0].forEach(function (tz) { sc.add(box(w, 0.14, 0.12, steel, cx, 3.3, tz)); });
     for (var h = 0; h < 2; h++) sc.add(box(w, 0.4, 0.04, h ? yel : dk, cx, 0.32 + h * 0.4, Z0 + 0.03));   // Warnstreifen hinten
     [6.0, 8.2].forEach(function (x) { sc.add(box(0.3, 0.05, 4.4, glow(0xe8f2ff), x, 3.48, cz)); });
     try { var pl = new THREE.PointLight(0xfff0d8, 0.85, 12); pl.position.set(cx, 3.0, cz); scn.add(pl); } catch (e) {}
