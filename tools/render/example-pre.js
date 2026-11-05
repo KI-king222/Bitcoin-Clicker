@@ -1,0 +1,1 @@
+(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));for(let i=0;i<150&&!(Parts3D.nextFarmHall);i++)await w(1000);if(!Parts3D.nextFarmHall)return "hall missing";const S=Parts3D.nextWorld.S;state.owned={usb:9,gpu:6,fpga:3,asic:4,farm:3,plant:2};Parts3D.nextFarmHall.rebuild();await w(2500);return "ok err="+document.getElementById("nx-err").textContent})()
