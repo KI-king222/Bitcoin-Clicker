@@ -29,6 +29,7 @@
 - NEXT polish.js: weiche Kontaktschatten unter Moebeln + Boden-AO an Waenden (gemergte Geometrie, 2 Draw-Calls), runde Haengelampen (Lathe) und Wandlampen. Kill-Switch ?nopolish.
 - NEXT Performance: Server-Halle und Montagehalle sind eigene Gruppen und werden ausgeblendet, wenn man nicht im Hinterraum/der Halle ist (~400 Draw-Calls weniger im Laden). tools/render: Screenshot-Harness.
 - NEXT: Theke mit runden Enden, Fuellungen, Sockel und Messingleisten; Sockel-, Stuck- und Handlaufleisten in allen Raeumen (polish.js).
+- NEXT furniture.js: Regal mit runden Staendern, Lochblech-Rueckwand, Diagonalstreben, orangen Vorderkanten + Beschriftungen; Bautisch mit Zarge, Schubladen (Messingknoepfe), Ablage unten, abgerundeter Platte, Schraubstock (Vorschau im Three.js-Viewer-Connector). ?nofurniture
 - Einstieg: Code `OPEN-SHOP` (farmFix v5) oder direkt `/next/`
 
 ### Fix
