@@ -131,3 +131,4 @@ Siehe Git-Historie / docs/CHANGELOG.md
 - furniture: Regal-Beschriftungsschilder entfernt (Teile werden nicht nach Typ sortiert).
 - shopdeco.js (neu, ?noshopdeco): Podest mit Glaskuppel + PC, Wanduhr (echte Zeit), rotierender Deckenventilator, Fussmatte.
 - clicker: Container-Farm mit Eckpfosten, Dachrippen, Tuerriegeln, Standfuessen; Solarpanels mit Alu-Rahmen.
+- Schrift: alle Schild-Texturen 3x aufgeloest, Anisotropie 8, Text passt sich automatisch ins Schild ein; Auto-Qualitaet senkt Aufloesung nur noch auf 1.5x (statt 1x = verschwommen).

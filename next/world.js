@@ -48,9 +48,14 @@
   }
   function plane(w, h, m, x, y, z, ry) { var o = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); o.position.set(x || 0, y || 0, z || 0); if (ry) o.rotation.y = ry; return o; }
   function textTex(txt, w, h, bg, fg, font) {
-    var c = document.createElement("canvas"); c.width = w; c.height = h; var g = c.getContext("2d");
-    g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = fg; g.font = font; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(txt, w / 2, h / 2 + 2);
-    return new THREE.CanvasTexture(c);
+    /* scharfer Text: 3x Aufloesung, Schrift passt sich automatisch in das Schild ein (nichts ragt mehr heraus) */
+    var K = Math.min(3, Math.max(1, Math.floor(2048 / w))), c = document.createElement("canvas"); c.width = w * K; c.height = h * K; var g = c.getContext("2d");
+    g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height); g.fillStyle = fg; g.textAlign = "center"; g.textBaseline = "middle";
+    var m = /(\d+(?:\.\d+)?)px/.exec(font), px = m ? parseFloat(m[1]) * K : 32 * K, mk = function (q) { return m ? font.replace(m[0], q + "px") : q + "px " + font; };
+    px = Math.min(px, h * K * 0.7); g.font = mk(px);
+    try { var tw = g.measureText(txt).width, maxw = c.width * 0.9; if (tw > maxw) { px = Math.floor(px * maxw / tw); g.font = mk(px); } } catch (e) {}
+    g.fillText(txt, c.width / 2, c.height / 2 + px * 0.04);
+    var t = new THREE.CanvasTexture(c); try { t.anisotropy = 8; } catch (e) {} return t;
   }
   function ctex(w, h, draw) { var c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h); var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; try { t.anisotropy = 4; } catch (e) {} return t; }
   function rep(t, rx, ry) { var c = t.clone(); c.wrapS = c.wrapT = THREE.RepeatWrapping; c.repeat.set(rx, ry); c.needsUpdate = true; return c; }

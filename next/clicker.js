@@ -59,11 +59,12 @@
   function cyl(rt, rb, h, m, x, y, z, seg) { var o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 24), m); o.position.set(x || 0, y || 0, z || 0); return o; }
   function sph(r, m, x, y, z, a, b) { var o = new THREE.Mesh(new THREE.SphereGeometry(r, a || 12, b || 8), m); o.position.set(x || 0, y || 0, z || 0); return o; }
   function plate(lines, w, h, x, y, z, ry) {
-    var c = document.createElement("canvas"); c.width = 512; c.height = Math.round(512 * h / w); var g = c.getContext("2d");
-    g.fillStyle = "#0b1018"; g.fillRect(0, 0, c.width, c.height); g.strokeStyle = "#f7931a"; g.lineWidth = 6; g.strokeRect(3, 3, c.width - 6, c.height - 6);
+    var c = document.createElement("canvas"); c.width = 1024; c.height = Math.round(1024 * h / w); var g = c.getContext("2d");
+    g.fillStyle = "#0b1018"; g.fillRect(0, 0, c.width, c.height); g.strokeStyle = "#f7931a"; g.lineWidth = 10; g.strokeRect(5, 5, c.width - 10, c.height - 10);
     g.fillStyle = "#f7931a"; g.textAlign = "center"; g.textBaseline = "middle"; var lh = c.height / lines.length;
-    lines.forEach(function (l, i) { g.font = "bold " + Math.floor(lh * 0.62) + "px sans-serif"; g.fillText(l, c.width / 2, lh * (i + 0.5)); });
-    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) })); m.position.set(x, y, z); m.rotation.y = ry || 0; return m;
+    lines.forEach(function (l, i) { var px = Math.floor(lh * 0.58); g.font = "bold " + px + "px sans-serif"; var tw = g.measureText(l).width; if (tw > c.width * 0.9) { px = Math.floor(px * c.width * 0.9 / tw); g.font = "bold " + px + "px sans-serif"; } g.fillText(l, c.width / 2, lh * (i + 0.5)); });
+    var tx = new THREE.CanvasTexture(c); try { tx.anisotropy = 8; } catch (e) {}
+    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tx })); m.position.set(x, y, z); m.rotation.y = ry || 0; return m;
   }
   var TIERS = [{ c: 0xd32f2f, e: 0x000000, m: 0.1, led: 0 }, { c: 0xff7a1a, e: 0x331100, m: 0.2, led: 0xff7a1a }, { c: 0xcfd8dc, e: 0x000000, m: 0.9, led: 0xcfe9ff }, { c: 0xffc107, e: 0x553a00, m: 0.9, led: 0xffc107 }, { c: 0x40e0ff, e: 0x0a6a88, m: 0.5, led: 0x40e0ff }];
   function drawScreen() {

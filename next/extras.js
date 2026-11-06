@@ -76,7 +76,7 @@
   /* ---------- Qualitaet ---------- */
   var qMode = ls("hashpool-next-quality") || "auto", qLow = false, fSum = 0, fN = 0;
   function applyQuality(low) {
-    qLow = low; try { S.rd.setPixelRatio(low ? 1 : Math.min(W.devicePixelRatio || 1, 2)); S.rd.setSize(S.stage.clientWidth || 360, S.stage.clientHeight || 600, true); } catch (e) {}
+    qLow = low; try { S.rd.setPixelRatio(low ? Math.min(W.devicePixelRatio || 1, 1.5) : Math.min(W.devicePixelRatio || 1, 2)); S.rd.setSize(S.stage.clientWidth || 360, S.stage.clientHeight || 600, true); } catch (e) {}
     try { var E = W.Parts3D.nextEnv; if (E) E.cars.forEach(function (c) { c.g.visible = !low; }); S.scene.fog.far = low ? 45 : 70; } catch (e) {}
     var b = document.getElementById("nx-q"); if (b) b.textContent = "⚙ " + (qMode === "auto" ? "Auto" : qMode === "hi" ? T("Hoch", "High") : T("Niedrig", "Low"));
   }
