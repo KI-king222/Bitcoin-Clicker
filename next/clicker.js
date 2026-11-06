@@ -152,6 +152,11 @@
         for (var r = 0; r < 12; r++) grp.add(box(0.05, 1.4, 1.34, mat(0x1f55ab), cx - 1.55 + r * 0.28, cy, cz2));
         grp.add(box(3.4, 0.06, 1.32, mat(0xf0b429), cx, cy - 0.7, cz2)); grp.add(box(0.05, 1.4, 0.04, steel, cx + 1.6, cy, cz2 + 0.66)); grp.add(box(0.05, 1.4, 0.04, steel, cx + 1.4, cy, cz2 + 0.66));
         fanAt(0.3, cx + 1.72, cy + 0.05, cz2, 0, Math.PI / 2, 10, 0x0b0d11, 9);
+        // Details: Eckpfosten, Dachrippen, Tuerriegel, Standfuesse
+        [[-1.7, -0.65], [-1.7, 0.65], [1.7, -0.65], [1.7, 0.65]].forEach(function (q) { grp.add(box(0.12, 1.56, 0.12, steel, cx + q[0], cy, cz2 + q[1])); });
+        for (var rb = 0; rb < 6; rb++) grp.add(box(0.07, 0.05, 1.36, steel, cx - 1.4 + rb * 0.56, cy + 0.77, cz2));
+        for (var lk = 0; lk < 2; lk++) { grp.add(cyl(0.025, 0.025, 1.3, steel, cx - 1.72 + lk * 0.1, cy, cz2 - 0.0, 8)); grp.add(box(0.06, 0.1, 0.06, mat(0xf0b429), cx - 1.72 + lk * 0.1, cy - 0.1, cz2 + 0.06)); }
+        if (ci === 0) [[-1.5, -0.5], [1.5, -0.5], [-1.5, 0.5], [1.5, 0.5]].forEach(function (q) { grp.add(box(0.2, 0.12, 0.2, mat(0x333840), cx + q[0], gy0 + 0.06, cz2 + q[1])); });
       }
       for (var v = 0; v < Math.min(nFarm, 10); v++) { var vl = box(0.18, 0.1, 0.03, glow(0xff7a1a), -10.5 - 1.4 + v * 0.3, gy0 + 1.2, 1.3 + 0.68); grp.add(vl); S2.leds.push(vl); }
       grp.add(box(0.8, 0.4, 0.6, mat(0xd0d4da, { metalness: 0.3 }), -9.4, gy0 + 1.7 + (nc > 1 ? 1.5 : 0), 1.3)); fanAt(0.17, -9.4, gy0 + 1.92 + (nc > 1 ? 1.5 : 0), 1.3, -Math.PI / 2, 0, 14, 0x0b0d11, 6);
@@ -159,7 +164,7 @@
     }
     if (nPl > 0) {
       var np = Math.min(2 + nPl * 2, 12);
-      for (var s = 0; s < np; s++) { var sx = -14.2 + (s % 4) * 1.25, sz = -5.6 + Math.floor(s / 4) * 1.2, pn2 = box(1.05, 0.04, 0.8, mat(0x123a7a, { metalness: 0.7, roughness: 0.25 }), sx, 0.95, sz); pn2.rotation.x = -0.5; grp.add(pn2); grp.add(box(0.06, 0.85, 0.06, mat(0x4a4f58), sx, 0.55, sz + 0.2)); for (var gl2 = 0; gl2 < 3; gl2++) { var gline = box(1.05, 0.045, 0.01, mat(0x6aa0ff), sx, 0.95, sz); gline.rotation.x = -0.5; gline.position.z += (gl2 - 1) * 0.22; gline.position.y += (gl2 - 1) * -0.11; grp.add(gline); } }
+      for (var s = 0; s < np; s++) { var sx = -14.2 + (s % 4) * 1.25, sz = -5.6 + Math.floor(s / 4) * 1.2, pn2 = box(1.05, 0.04, 0.8, mat(0x123a7a, { metalness: 0.7, roughness: 0.25 }), sx, 0.95, sz); pn2.rotation.x = -0.5; grp.add(pn2); var fr2 = box(1.12, 0.03, 0.87, steel, sx, 0.945, sz - 0.002); fr2.rotation.x = -0.5; grp.add(fr2); var vl2 = box(0.5, 0.1, 0.05, mat(0x4a4f58), sx, 0.62, sz + 0.3); grp.add(vl2); grp.add(box(0.06, 0.85, 0.06, mat(0x4a4f58), sx, 0.55, sz + 0.2)); for (var gl2 = 0; gl2 < 3; gl2++) { var gline = box(1.05, 0.045, 0.01, mat(0x6aa0ff), sx, 0.95, sz); gline.rotation.x = -0.5; gline.position.z += (gl2 - 1) * 0.22; gline.position.y += (gl2 - 1) * -0.11; grp.add(gline); } }
       grp.add(box(0.6, 0.8, 0.3, mat(0xd0d4da, { metalness: 0.3 }), -6.4, 0.55, -4.2)); grp.add(box(0.5, 0.12, 0.02, glow(0x78d505), -6.4, 0.75, -4.04)); grp.add(box(7.6, 0.03, 0.03, mat(0x111418), -10.3, 0.15, -4.0));
       grp.add(box(0.06, 1.0, 0.06, mat(0x333840), -10.3, 0.62, -1.6)); grp.add(plate(["☀️ " + (de() ? UP[5].name.de : UP[5].name.en) + " ×" + nPl], 2.4, 0.34, -10.3, 1.3, -1.55, 0));
     }

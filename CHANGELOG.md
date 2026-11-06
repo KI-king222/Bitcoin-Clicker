@@ -130,3 +130,4 @@ Siehe Git-Historie / docs/CHANGELOG.md
 - factory: graue Ostwand mit Rippen und Warnbaendern, Oberlichter, Deckentraeger.
 - furniture: Regal-Beschriftungsschilder entfernt (Teile werden nicht nach Typ sortiert).
 - shopdeco.js (neu, ?noshopdeco): Podest mit Glaskuppel + PC, Wanduhr (echte Zeit), rotierender Deckenventilator, Fussmatte.
+- clicker: Container-Farm mit Eckpfosten, Dachrippen, Tuerriegeln, Standfuessen; Solarpanels mit Alu-Rahmen.
