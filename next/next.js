@@ -2,7 +2,7 @@
  * Phase 0: Kennzeichnung, Rueckweg zur stabilen Version.
  * Ladereihenfolge (alles lokal aus next/): world.js (Laden, Erste Person) -> env.js (Strasse) -> logistics.js (Abholladen/Lieferung)
  *   -> clicker.js (Buzzer-Tisch, Original-Upgrades im Raum) -> clickfix.js.
- * Kill-Switches: ?noworld ?noenv ?nologi ?noclicker ?noextras ?nosim ?nosim2 ?nofactory ?nofarmhall ?nopolish ?nofurniture (world aus = 1:1 Kopie des Spiels).
+ * Kill-Switches: ?noworld ?noenv ?nologi ?noclicker ?noextras ?nosim ?nosim2 ?nofactory ?nofarmhall ?nopolish ?nofurniture ?noshopdeco (world aus = 1:1 Kopie des Spiels).
  */
 (function () {
   var W = window;
@@ -56,6 +56,7 @@
     if (!off("nofarmhall")) chain.push("farmhall.js");
     if (!off("nopolish")) chain.push("polish.js");
     if (!off("nofurniture")) chain.push("furniture.js");
+    if (!off("noshopdeco")) chain.push("shopdeco.js");
   }
   function nextLoad() { var f = chain.shift(); if (f) load(BASE + f, nextLoad); }
   (function waitGame(n) { if (gameReady() || n > 120) nextLoad(); else setTimeout(function () { waitGame(n + 1); }, 250); })(0);
