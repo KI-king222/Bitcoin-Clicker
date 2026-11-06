@@ -129,4 +129,4 @@ Siehe Git-Historie / docs/CHANGELOG.md
 - farmhall: LED-Deckenpanels und hellere Beleuchtung (vorher zu dunkel).
 - factory: graue Ostwand mit Rippen und Warnbaendern, Oberlichter, Deckentraeger.
 - furniture: Regal-Beschriftungsschilder entfernt (Teile werden nicht nach Typ sortiert).
-- shopdeco.js (neu, ?noshopdeco): Podest mit Glaskuppel + PC, Getraenkeautomat, Wanduhr (echte Zeit), rotierender Deckenventilator, Fussmatte.
+- shopdeco.js (neu, ?noshopdeco): Podest mit Glaskuppel + PC, Wanduhr (echte Zeit), rotierender Deckenventilator, Fussmatte.

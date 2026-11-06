@@ -1,4 +1,4 @@
-/* shopdeco.js — mehr Leben im Verkaufsraum: Podest mit Glaskuppel, Getraenkeautomat, Wanduhr, Deckenventilator, Fussmatte, Schaufenster-Aufsteller.
+/* shopdeco.js — mehr Leben im Verkaufsraum: Podest mit Glaskuppel, Wanduhr, Deckenventilator, Fussmatte, Schaufenster-Aufsteller.
  * Nur Dekoration (+ 2 Hindernisse). Kill-Switch ?noshopdeco. */
 (function () {
   function init() {
@@ -11,12 +11,6 @@
     sc.add(box(0.02, 0.4, 0.3, new THREE.MeshBasicMaterial({ color: 0x6aa8ff }), px + 0.16, 1.27, pz));
     var dome = new THREE.Mesh(new THREE.SphereGeometry(0.5, 24, 14, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xcfe6ff, transparent: true, opacity: 0.18, roughness: 0.05, metalness: 0.2, depthWrite: false })); dome.scale.y = 1.4; dome.position.set(px, 0.99, pz); sc.add(dome);
     S.obst.push([px - 0.6, px + 0.6, pz - 0.6, pz + 0.6]);
-    // Getraenkeautomat an der linken Wand vorn
-    var vx = -4.0, vz = 3.0;
-    sc.add(G.rbox(0.8, 1.9, 0.7, 0.05, M(0xc0392b, { roughness: 0.4, metalness: 0.3 }), vx, 1.07, vz));
-    var face = box(0.02, 1.2, 0.5, new THREE.MeshBasicMaterial({ map: G.textTex("COLA", 128, 192, "#10151f", "#78d505", "bold 26px sans-serif") }), vx + 0.36, 1.25, vz); sc.add(face);
-    sc.add(box(0.02, 0.2, 0.4, dk, vx + 0.36, 0.35, vz));
-    S.obst.push([vx - 0.45, vx + 0.45, vz - 0.4, vz + 0.4]);
     // Wanduhr ueber dem Eingang (Innenseite der Frontwand)
     var cx = -2.4, cy = 2.75, cz = 3.4;
     var face2 = cyl(0.3, 0.3, 0.04, M(0xf2f2f2, { roughness: 0.5 }), cx, cy, cz, 32); face2.rotation.x = Math.PI / 2; sc.add(face2);
@@ -33,7 +27,7 @@
       fan.rotation.y += dt * 2.2;
       if (!S._clk || t - S._clk > 1) { S._clk = t; var d = new Date(), m = d.getMinutes() + d.getSeconds() / 60, h = (d.getHours() % 12) + m / 60; gm.rotation.z = -m / 60 * Math.PI * 2; gh.rotation.z = -h / 12 * Math.PI * 2; }
     });
-    console.log("[HASHPOOL NEXT] shopdeco bereit (Podest, Automat, Uhr, Ventilator)");
+    console.log("[HASHPOOL NEXT] shopdeco bereit (Podest, Uhr, Ventilator)");
   }
   var n = 0, iv = setInterval(function () { n++; try { if (window.Parts3D && window.Parts3D.nextWorld && window.Parts3D.nextWorld.S.ready && typeof THREE !== "undefined") { clearInterval(iv); init(); } } catch (e) { clearInterval(iv); console.warn("shopdeco", e); try { window.Parts3D.nextWorld.S.err("shopdeco", e); } catch (x) {} } if (n > 240) clearInterval(iv); }, 500);
 })();
