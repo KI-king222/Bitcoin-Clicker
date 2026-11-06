@@ -318,7 +318,7 @@
     addStation("bench", 3.0, 1.2, -3.6, 2.3, 1.0, 1.4, "🔧 " + T("Bautisch", "Workbench"), 1.45, -3.6, function () { openMenu("build"); });
     // Werkstatt-Wand: Lochwand + Whiteboard
     var peg = ctex(256, 160, function (g, w, h) { g.fillStyle = "#3a3f49"; g.fillRect(0, 0, w, h); g.fillStyle = "#222"; for (var x = 8; x < w; x += 16) for (var y = 8; y < h; y += 16) g.fillRect(x, y, 3, 3); g.strokeStyle = "#f7931a"; g.lineWidth = 5; g.strokeRect(40, 30, 70, 14); g.strokeStyle = "#78d505"; g.strokeRect(130, 50, 14, 70); g.strokeStyle = "#6aa8ff"; g.beginPath(); g.arc(190, 80, 24, 0, 6.3); g.stroke(); });
-    sc.add(plane(2.4, 1.5, new THREE.MeshBasicMaterial({ map: peg }), 4.3, 2.0, -3.6, -Math.PI / 2));
+    sc.add(plane(2.4, 1.5, new THREE.MeshBasicMaterial({ map: peg }), 4.26, 1.9, -4.0, -Math.PI / 2));
     var wbt = ctex(256, 128, function (g, w, h) { g.fillStyle = "#e9edf2"; g.fillRect(0, 0, w, h); g.fillStyle = "#c33"; g.font = "bold 22px sans-serif"; g.fillText("TODO:", 14, 28); g.fillStyle = "#223"; g.font = "18px sans-serif"; g.fillText("• Teile abholen", 14, 56); g.fillText("• Regal einräumen", 14, 80); g.fillText("• PC bauen", 14, 104); });
     sc.add(plane(1.8, 0.9, new THREE.MeshBasicMaterial({ map: wbt }), -2.9, 2.55, -6.6)); sc.add(box(1.86, 0.96, 0.03, frame, -2.9, 2.55, -6.62));
     // Kisten + Paletten im Hinterraum

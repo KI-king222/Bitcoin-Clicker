@@ -57,6 +57,7 @@
     if (!off("nopolish")) chain.push("polish.js");
     if (!off("nofurniture")) chain.push("furniture.js");
     if (!off("noshopdeco")) chain.push("shopdeco.js");
+    if (!off("nodetail")) chain.push("detail.js");
   }
   function nextLoad() { var f = chain.shift(); if (f) load(BASE + f, nextLoad); }
   (function waitGame(n) { if (gameReady() || n > 120) nextLoad(); else setTimeout(function () { waitGame(n + 1); }, 250); })(0);
