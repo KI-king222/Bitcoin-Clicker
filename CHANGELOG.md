@@ -134,3 +134,4 @@ Siehe Git-Historie / docs/CHANGELOG.md
 - Schrift: alle Schild-Texturen 3x aufgeloest, Anisotropie 8, Text passt sich automatisch ins Schild ein; Auto-Qualitaet senkt Aufloesung nur noch auf 1.5x (statt 1x = verschwommen).
 - detail.js (neu, ?nodetail): feines Relief auf grossen Flaechen, Tasse/Papiere/Stifte auf Tresen und Bautisch, Steckdosen, Schalter, Deckenrohr, Bodenkabel, Muelleimer.
 - world: Werkzeugwand verschoben (ragte in die Fabrik-Tuer).
+- Flackern (Z-Fighting) reduziert: Kamera near 0.05->0.14, far 160->110; Decals (Poster/Schatten/Schilder) per polygonOffset. Bump-Relief wieder entfernt (zu scharf).

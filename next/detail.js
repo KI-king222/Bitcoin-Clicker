@@ -14,14 +14,13 @@
       var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); try { t.anisotropy = 4; } catch (e) {} return t;
     }
     var done = new WeakSet(), nb = 0;
-    function bump() {
-      if (low) return; grain = grain || mkGrain();
+    function bump() {   // Relief entfernt (zu scharf). Stattdessen: Decals (Poster, Schatten, Schilder) per polygonOffset vor die Wand ziehen = kein Flackern
+      var seen = new WeakSet();
       sc.traverse(function (o) {
-        if (!o.isMesh || !o.material || Array.isArray(o.material)) return; var m = o.material;
-        if (!m.isMeshStandardMaterial || m.bumpMap || done.has(m) || m.transparent) return;
-        try { if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); var b = o.geometry.boundingBox, s = Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z) * Math.max(o.scale.x, o.scale.y, o.scale.z); if (s < 0.8) return; } catch (e) { return; }
-        if (!o.geometry.attributes.uv) return;
-        done.add(m); m.bumpMap = grain; m.bumpScale = 0.04; m.needsUpdate = true; nb++;
+        if (!o.isMesh || !o.material || Array.isArray(o.material) || !o.geometry || o.geometry.type !== "PlaneGeometry") return;
+        var m = o.material; if (seen.has(m)) return; seen.add(m);
+        var p = o.geometry.parameters || {}; if ((p.width || 0) > 6 || (p.height || 0) > 6) return;
+        if (m.polygonOffset) return; m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -2; m.needsUpdate = true; nb++;
       });
     }
     // --- 2. Kleinteile, auf Oberflaechen abgesetzt (Raycast nach unten) ---
@@ -55,7 +54,7 @@
     var bn = new THREE.Group(); bn.position.set(-1.8, 0.12, 3.2); bn.add(cyl(0.17, 0.14, 0.45, M(0x3a4048, { roughness: 0.5, metalness: 0.6 }), 0, 0.225, 0, 24)); bn.add(cyl(0.18, 0.18, 0.03, M(0x2a2f36, { metalness: 0.7, roughness: 0.4 }), 0, 0.46, 0, 24)); sc.add(bn);
     S.obst.push([-2.0, -1.6, 3.0, 3.4]);
     bump(); setTimeout(bump, 15000); setTimeout(bump, 40000);
-    console.log("[HASHPOOL NEXT] detail bereit (Relief auf " + nb + " Materialien)");
+    console.log("[HASHPOOL NEXT] detail bereit (Decal-Offset auf " + nb + " Materialien)");
   }
   var n = 0, iv = setInterval(function () { n++; try { if (window.Parts3D && window.Parts3D.nextWorld && window.Parts3D.nextWorld.S.ready && window.Parts3D.nextPolish && typeof THREE !== "undefined") { clearInterval(iv); setTimeout(function () { try { init(); } catch (e) { console.warn("detail", e); try { window.Parts3D.nextWorld.S.err("detail " + (e && e.message) + " " + String(e && e.stack).split("\n")[1], e); } catch (x) {} } }, 3000); } } catch (e) { clearInterval(iv); } if (n > 240) clearInterval(iv); }, 500);
 })();
