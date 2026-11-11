@@ -39,6 +39,20 @@
     function mon(x, z) { }
     mug(2.9, 0.1, 0xf7931a); papers(1.7, 0.15, 6); pen(1.95, 0.05, 0.4, 0x2a6bd1); pen(1.98, 0.1, -0.3, 0xd32f2f);
     mug(3.5, -3.3, 0xeeeeee); papers(2.4, -3.9, 4); pen(2.7, -3.35, 1.2, 0x78d505);
+    // --- Rechner-Ecke: Tastatur, Maus, Mauspad, Haftnotizen ---
+    try {
+      var ky = drop(-2.9, -5.6, 2.2);
+      if (ky != null) {
+        var kc = document.createElement("canvas"); kc.width = 512; kc.height = 160; var kg = kc.getContext("2d"); kg.fillStyle = "#14171d"; kg.fillRect(0, 0, 512, 160);
+        for (var r = 0; r < 5; r++) for (var q = 0; q < 15; q++) { kg.fillStyle = (r === 4 && q > 2 && q < 10) ? "#3a4150" : "#262b35"; kg.fillRect(8 + q * 33.4, 8 + r * 30, 29, 26); }
+        var kt = new THREE.CanvasTexture(kc); try { kt.anisotropy = 4; } catch (e) {}
+        var pad = box(0.9, 0.006, 0.4, M(0x20252e, { roughness: 1 }), -2.85, ky + 0.003, -5.55); sc.add(pad);
+        var kb = G.rbox(0.44, 0.022, 0.15, 0.008, M(0x1a1e26, { roughness: 0.5, metalness: 0.3 }), -2.98, ky + 0.017, -5.6); sc.add(kb);
+        var kp = new THREE.Mesh(new THREE.PlaneGeometry(0.41, 0.125), new THREE.MeshBasicMaterial({ map: kt })); kp.rotation.x = -Math.PI / 2; kp.position.set(-2.98, ky + 0.0295, -5.6); sc.add(kp);
+        var ms = G.rbox(0.06, 0.03, 0.1, 0.014, M(0x1a1e26, { roughness: 0.4 }), -2.55, ky + 0.021, -5.58); sc.add(ms);
+        [[-3.45, -5.9, 0xffd23f], [-3.38, -5.88, 0x7ee0a0]].forEach(function (n) { var sn = box(0.07, 0.07, 0.003, M(n[2], { roughness: 1 }), n[0], ky + 0.45, n[1]); sn.rotation.z = (Math.random() - 0.5) * 0.3; sc.add(sn); });
+      }
+    } catch (e) {}
     // --- 3. Steckdosen / Schalter / Rohre / Kabel ---
     function outlet(x, y, z, ry) { var g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.add(box(0.09, 0.09, 0.015, white, 0, 0, 0)); g.add(cyl(0.022, 0.022, 0.012, M(0x2a2a2a, { roughness: 0.7 }), 0, 0, 0.01, 14)).children[1].rotation.x = Math.PI / 2; sc.add(g); }
     function sw(x, y, z, ry) { var g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.add(box(0.08, 0.12, 0.015, white, 0, 0, 0)); g.add(box(0.04, 0.06, 0.012, M(0xdcd8cc), 0, 0, 0.01)); sc.add(g); }
