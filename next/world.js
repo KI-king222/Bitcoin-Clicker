@@ -285,6 +285,7 @@
     // Frontwand mit Schaufenstern und Tuer
     var fw = mat(0x1b2233, { roughness: 0.8 }), glass = new THREE.MeshStandardMaterial({ color: 0x9fc4e8, transparent: true, opacity: 0.13, roughness: 0.05, metalness: 0.2 }), frame = mat(0x0f1218, { metalness: 0.7, roughness: 0.4 });
     sc.add(box(0.5, 3.6, 0.16, fw, -4.15, 1.8, 3.55)); sc.add(box(0.5, 3.6, 0.16, fw, 4.15, 1.8, 3.55)); sc.add(box(0.7, 3.6, 0.16, fw, -1.1, 1.8, 3.55)); sc.add(box(0.7, 3.6, 0.16, fw, 1.1, 1.8, 3.55));
+    [-1.575, 1.575].forEach(function (px) { sc.add(box(0.3, 3.6, 0.16, fw, px, 1.8, 3.55)); }); [-3.8, 3.8].forEach(function (px) { sc.add(box(0.26, 3.6, 0.16, fw, px, 1.8, 3.55)); });   // Luecken zwischen Fenstern und Pfeilern schliessen
     [-2.7, 2.7].forEach(function (px) { sc.add(box(2.0, 0.9, 0.16, fw, px, 0.45, 3.55)); sc.add(box(2.0, 1.1, 0.16, fw, px, 3.05, 3.55)); sc.add(plane(2.0, 1.6, glass, px, 1.7, 3.55)); sc.add(box(2.04, 0.05, 0.1, frame, px, 2.5, 3.55)); sc.add(box(2.04, 0.05, 0.1, frame, px, 0.9, 3.55)); sc.add(box(0.04, 1.6, 0.1, frame, px, 1.7, 3.55)); });
     sc.add(box(1.8, 1.0, 0.16, fw, 0, 3.1, 3.55)); sc.add(box(1.9, 0.06, 0.12, frame, 0, 2.6, 3.55)); sc.add(box(0.06, 2.6, 0.12, frame, -0.92, 1.3, 3.55)); sc.add(box(0.06, 2.6, 0.12, frame, 0.92, 1.3, 3.55));
     var sign = plane(5.4, 0.8, new THREE.MeshBasicMaterial({ map: textTex("HASHPOOL  PC-SHOP", 1024, 160, "#10151f", "#f7931a", "bold 96px sans-serif") }), 0, 3.1, 3.7); sc.add(sign);

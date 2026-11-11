@@ -135,4 +135,5 @@ Siehe Git-Historie / docs/CHANGELOG.md
 - detail.js (neu, ?nodetail): feines Relief auf grossen Flaechen, Tasse/Papiere/Stifte auf Tresen und Bautisch, Steckdosen, Schalter, Deckenrohr, Bodenkabel, Muelleimer.
 - world: Werkzeugwand verschoben (ragte in die Fabrik-Tuer).
 - Flackern (Z-Fighting) reduziert: Kamera near 0.05->0.14, far 160->110; Decals (Poster/Schatten/Schilder) per polygonOffset. Bump-Relief wieder entfernt (zu scharf).
-- detail: Rechner-Ecke mit Tastatur, Maus, Mauspad, Haftnotizen.
+- detail: Rechner-Ecke: Haftnotizen.
+- world: Luecken in der Frontwand (zwischen Fenstern und Pfeilern) geschlossen; doppelte Tastatur entfernt.
